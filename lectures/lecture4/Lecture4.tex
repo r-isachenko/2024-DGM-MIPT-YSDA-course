@@ -1,0 +1,400 @@
+\input{../utils/preamble}
+\createdgmtitle{4}
+%--------------------------------------------------------------------------------
+\begin{document}
+%--------------------------------------------------------------------------------
+\begin{frame}[noframenumbering,plain]
+	%\thispagestyle{empty}
+	\titlepage
+\end{frame}
+%=======
+\begin{frame}{Recap of previous lecture}
+	Let split $\bx$ and $\bz$ in two parts: 
+	\[
+	\bx = [\bx_1, \bx_2] = [\bx_{1:d}, \bx_{d+1:m}]; \quad \bz = [\bz_1, \bz_2] = [\bz_{1:d}, \bz_{d+1:m}].
+	\]
+	\vspace{-0.5cm}
+	\begin{block}{Coupling layer}
+		\vspace{-0.5cm}
+		\[
+		\begin{cases} {\color{violet}\bx_1} = {\color{teal}\bz_1}; \\ {\color{violet}\bx_2} = {\color{teal}\bz_2} \odot \bsigma_{\btheta}({\color{teal}\bz_1}) + \bmu_{\btheta}({\color{teal}\bz_1}).\end{cases}  
+		\begin{cases} {\color{teal}\bz_1} ={\color{violet} \bx_1}; \\ {\color{teal}\bz_2} = \left({\color{violet}\bx_2} - \bmu_{\btheta}({\color{violet}\bx_1}) \right) \odot \frac{1}{\bsigma_{\btheta}({\color{violet}\bx_1})}.\end{cases}
+		\]
+		Estimating the density takes 1 pass, sampling takes 1 pass!
+	\end{block}
+	\begin{block}{Jacobian}
+		\vspace{-0.3cm}
+		\[
+		\det \left( \frac{\partial \bz}{\partial \bx} \right) = \det 
+		\begin{pmatrix}
+			\bI_d & 0_{d \times m - d} \\
+			\frac{\partial \bz_2}{\partial \bx_1} & \frac{\partial \bz_2}{\partial \bx_2}
+		\end{pmatrix} = \prod_{j=1}^{m - d} \frac{1}{\sigma_j(\bx_1)}.
+		\]
+	\end{block}
+	Coupling layer is a special case of autoregressive NF.
+	
+	\myfootnotewithlink{https://arxiv.org/abs/1605.08803}{Dinh L., Sohl-Dickstein J., Bengio S. Density estimation using Real NVP, 2016} 
+\end{frame}
+%=======
+\begin{frame}{Recap of previous lecture}
+	\begin{block}{Continuous-in-time dynamic (neural ODE)}
+		\vspace{-0.7cm}
+		\begin{align*}
+		   \frac{d \bz(t)}{dt} &= \bff_{\btheta}(\bz(t), t); \quad \text{with initial condition }\bz(t_0) = \bz_0. \\
+		   \bz(t_1) &= \int^{t_1}_{t_0} \bff_{\btheta}(\bz(t), t) d t  + \bz_0 \approx \text{ODESolve}(\bz(t_0), \bff_{\btheta}, t_0,t_1).
+		\end{align*}
+		\vspace{-0.7cm}
+	\end{block}	
+	\begin{block}{Euler update step}
+		\vspace{-0.6cm}
+		\[
+   \frac{\bz(t + \Delta t) - \bz(t)}{\Delta t} = \bff_{\btheta}(\bz(t), t) \,\, \Rightarrow \,\, \bz(t + \Delta t) = \bz(t) + \Delta t \cdot \bff_{\btheta}(\bz(t), t)
+		\]
+		\vspace{-0.7cm}
+	\end{block}	
+	\begin{block}{Theorem (Picard)}
+		If $\bff$ is uniformly Lipschitz continuous in $\bz$ and continuous in $t$, then the ODE has a \textbf{unique} solution.
+	\end{block}
+		\vspace{-0.7cm}
+		\begin{align*}
+			\bx &= \bz(t_1) = \bz(t_0) + \int_{t_0}^{t_1} \bff_{\btheta}(\bz(t), t) dt \\
+			\bz &= \bz(t_0) = \bz(t_1) + \int_{t_1}^{t_0} \bff_{\btheta}(\bz(t), t) dt
+		\end{align*}
+	\myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}   
+\end{frame}
+%=======
+\begin{frame}{Recap of previous lecture}
+	\begin{block}{Theorem (Kolmogorov-Fokker-Planck: special case)}
+		If $\bff$ is uniformly Lipschitz continuous in $\bz$ and continuous in $t$, then
+		\[
+			\frac{d \log p(\bz(t), t)}{d t} = - \text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right).
+		\]
+		\[
+			\log p(\bz(t_1), t_1) = \log p(\bz(t_0), t_0) - \int_{t_0}^{t_1} \text{tr}  \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) dt.
+		\]
+	\end{block}
+	\vspace{-0.3cm}
+	\begin{itemize}
+		\item \textbf{Discrete-in-time NF}: evaluation of determinant of the Jacobian costs $O(m^3)$ (we need invertible $\bff$).
+		\item \textbf{Continuous-in-time NF}: getting the trace of the Jacobian costs $O(m^2)$ (we need smooth $\bff$).
+	\end{itemize}
+	\begin{block}{Hutchinson's trace estimator}
+		\vspace{-0.3cm}
+		\[
+  \log p(\bz(t_1)) = \log p(\bz(t_0)) - \mathbb{E}_{p(\bepsilon)} \int_{t_0}^{t_1} \left[ {\color{violet}\bepsilon^T \frac{\partial \bff}{\partial \bz}} \bepsilon \right] dt.
+		\]
+	\end{block}
+	\myfootnotewithlink{https://arxiv.org/abs/1810.01367}{Grathwohl W. et al. FFJORD: Free-form Continuous Dynamics for Scalable Reversible Generative Models, 2018} 
+\end{frame}
+%=======
+\begin{frame}{Outline}
+	\tableofcontents
+\end{frame}
+%=======
+\section{Continuous-in-time NF: adjoint method}
+%=======
+\begin{frame}{Neural ODE}
+	\begin{block}{Continuous-in-time NF}
+		{\small
+		\begin{minipage}[t]{0.4\columnwidth}
+			\[
+	 			 \frac{d \bz(t)}{dt} = \bff_{\btheta}(\bz(t), t) 	 
+	 		\]
+	 		\[
+	 			 \bx = \bz + \int_{t_0}^{t_1} \bff_{\btheta}(\bz(t), t) dt 
+			\]
+		\end{minipage}% 
+		\begin{minipage}[t]{0.6\columnwidth}
+			\vspace{-0.4cm}
+			\[
+					\frac{d \log p(\bz(t), t)}{d t} = - \text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) 
+	 		\]
+	 		\[
+					\log p(\bx | \btheta) = \log p(\bz) - \int_{t_0}^{t_1} \text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) dt
+			\]
+		\end{minipage}
+		}
+	\end{block}
+	How to get optimal parameters of $\btheta$? \\
+	
+	For fitting parameters we need gradients. We need the analogue of the backpropagation.
+	\begin{block}{Forward pass (Loss function)}
+		\vspace{-0.3cm}
+		\[
+			\bz = \bx + \int_{t_1}^{t_0} \bff_{\btheta}(\bz(t), t) dt, \quad L(\bz) = - \log p(\bx | \btheta)
+		\]
+		\[
+			L(\bz) = - \log p(\bz) + \int_{t_0}^{t_1} \text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) dt
+		\]
+	\end{block}
+	\myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}     
+\end{frame}
+%=======
+\begin{frame}{Neural ODE}
+	\vspace{-0.2cm}
+	\begin{block}{Adjoint functions}
+		\vspace{-0.4cm}
+		\[
+			\ba_{\bz}(t) = \frac{\partial L}{\partial \bz(t)}; \quad \ba_{\btheta}(t) = \frac{\partial L}{\partial \btheta(t)}.
+		\]
+		These functions show how the gradient of the loss depends on the hidden state~$\bz(t)$ and parameters $\btheta$.
+		\vspace{-0.3cm}
+	\end{block}
+
+	\begin{block}{Theorem (Pontryagin)}
+		\vspace{-0.6cm}
+		\[
+		\frac{d \ba_{\bz}(t)}{dt} = - \ba_{\bz}(t)^T \cdot \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz}; \quad \frac{d \ba_{\btheta}(t)}{dt} = - \ba_{\bz}(t)^T \cdot \frac{\partial \bff_{\btheta}(\bz(t),  t)}{\partial \btheta}.
+		\]
+		\vspace{-0.7cm}
+	\end{block}
+	\begin{block}{Solution for adjoint function}
+		\vspace{-0.6cm}
+		{\small
+		\begin{align*}
+			\frac{\partial L}{\partial \btheta(t_1)} &= \ba_{\btheta}(t_1) =  - \int_{t_0}^{t_1} \ba_{\bz}(t)^T \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \btheta(t)} dt + 0\\
+			\frac{\partial L}{\partial \bz(t_1)} &= \ba_{\bz}(t_1) =  - \int_{t_0}^{t_1} \ba_{\bz}(t)^T \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} dt + \frac{\partial L}{\partial \bz(t_0)}\\
+		\end{align*}
+		}
+		\vspace{-1.3cm}
+	\end{block}
+	\textbf{Note:} These equations are solved in reverse time direction.
+	\myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}   
+\end{frame}
+%=======
+\begin{frame}{Adjoint method}
+	\begin{block}{Forward pass}
+		\vspace{-0.3cm}
+		\[
+		\bz = \bz(t_0) = \int^{t_1}_{t_0} \bff_{\btheta}(\bz(t), t) d t  + \bx \quad \Rightarrow \quad \text{ODE Solver}
+		\]
+		\vspace{-0.4cm}
+	\end{block}
+	\begin{block}{Backward pass}
+		\vspace{-0.5cm}
+		\begin{equation*}
+			\left.
+			{\footnotesize 
+				\begin{aligned}
+					\frac{\partial L}{\partial \btheta(t_1)} &= \ba_{\btheta}(t_1) =  - \int_{t_0}^{t_1} \ba_{\bz}(t)^T \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \btheta(t)} dt + 0 \\
+					\frac{\partial L}{\partial \bz(t_1)} &= \ba_{\bz}(t_1) =  - \int_{t_0}^{t_1} \ba_{\bz}(t)^T \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} dt + \frac{\partial L}{\partial \bz(t_0)} \\
+					\bz(t_1) &= - \int^{t_0}_{t_1} \bff_{\btheta}(\bz(t), t) d t  + \bz_0.
+				\end{aligned}
+			}
+			\right\rbrace
+			\Rightarrow
+			\text{ODE Solver}
+		\end{equation*}
+		\vspace{-0.4cm} 
+	\end{block}
+	\textbf{Note:} These scary formulas are the standard backprop in the discrete case.
+	\myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}   
+\end{frame}
+%=======
+\section{Latent variable models (LVM)}
+%=======
+\begin{frame}{Bayesian framework}
+	\begin{block}{Bayes theorem}
+		\[
+			p(\bt | \bx) = \frac{p(\bx | \bt) p(\bt)}{p(\bx)} = \frac{p(\bx | \bt) p(\bt)}{\int p(\bx | \bt) p(\bt) d \bt} 
+		\]
+		\begin{itemize}
+			\item $\bx$ -- observed variables, $\bt$ -- unobserved variables (latent variables/parameters);
+			\item $p(\bx | \bt)$ -- likelihood;
+			\item $p(\bx) = \int p(\bx | \bt) p(\bt) d \bt$ -- evidence;
+			\item $p(\bt)$ -- prior distribution, $p(\bt | \bx)$ -- posterior distribution.
+		\end{itemize}
+	\end{block}
+	\begin{block}{Meaning}
+		We have unobserved variables $\bt$ and some prior knowledge about them $p(\bt)$. Then, the data $\bx$ has been observed. 
+		Posterior distribution $p(\bt | \bx)$ summarizes the knowledge after the observations.
+	\end{block}
+\end{frame}
+%=======
+\begin{frame}{Bayesian framework}
+	Let consider the case, where the unobserved variables $\bt$ is our model parameters $\btheta$.
+	\begin{itemize}
+		\item $\bX = \{\bx_i\}_{i=1}^n$ -- observed samples;
+		\item $p(\btheta)$ -- prior parameters distribution (we treat model parameters $\btheta$ as random variables).
+	\end{itemize}
+	\begin{block}{Posterior distribution}
+		\[
+			p(\btheta | \bX) = \frac{p(\bX | \btheta) p(\btheta)}{p(\bX)} = \frac{p(\bX | \btheta) p(\btheta)}{\int p(\bX | \btheta) p(\btheta) d \btheta} 
+		\]
+		\vspace{-0.2cm}
+	\end{block}
+	If evidence $p(\bX)$ is intractable (due to multidimensional integration), we can't get posterior distribution and perform the exact inference.
+    \begin{block}{Maximum a posteriori (MAP) estimation}
+    \vspace{-0.2cm}
+    \[
+        \btheta^* = \argmax_{\btheta} p(\btheta | \bX) = \argmax_{\btheta} \bigl(\log p(\bX | \btheta) + \log p(\btheta) \bigr)
+    \]
+    \end{block}
+\end{frame}
+%=======
+\begin{frame}{Latent variable models (LVM)}
+	\begin{block}{MLE problem}
+		\vspace{-0.5cm}
+		\[
+		\btheta^* = \argmax_{\btheta} p(\bX | \btheta) = \argmax_{\btheta} \prod_{i=1}^n p(\bx_i | \btheta) = \argmax_{\btheta} \sum_{i=1}^n \log p(\bx_i | \btheta).
+		\]
+		\vspace{-0.5cm}
+	\end{block}
+	The distribution $p(\bx | \btheta)$ could be very complex and intractable (as well as real distribution $\pi(\bx)$).
+	\begin{block}{Extended probabilistic model}
+		Introduce latent variable $\bz$ for each sample $\bx$
+		\[
+		p(\bx, \bz | \btheta) = p(\bx | \bz, \btheta) p(\bz); \quad 
+		\log p(\bx, \bz | \btheta) = \log p(\bx | \bz, \btheta) + \log p(\bz).
+		\]
+		\[
+		p(\bx | \btheta) = \int p(\bx, \bz | \btheta) d\bz = \int p(\bx | \bz, \btheta) p(\bz) d\bz.
+		\]
+	\end{block}
+	\vspace{-0.3cm}
+	\begin{block}{Motivation}
+		The distributions $p(\bx | \bz, \btheta)$ and $p(\bz)$ could be quite simple.
+	\end{block}
+\end{frame}
+%=======
+\begin{frame}{Latent variable models (LVM)}
+	\[
+	\log p(\bx | \btheta) = \log \int p(\bx | \bz, \btheta) p(\bz) d\bz \rightarrow \max_{\btheta}
+	\]
+	\vspace{-0.6cm}
+	\begin{block}{Examples}
+		\begin{minipage}[t]{0.45\columnwidth}
+			\textit{Mixture of gaussians} \\
+			\vspace{-0.5cm}
+			\begin{figure}
+				\centering
+				\includegraphics[width=0.75\linewidth]{figs/mixture_of_gaussians}
+			\end{figure}
+			\vspace{-0.5cm}
+			\begin{itemize}
+				\item $p(\bx | z, \btheta) = \cN(\bmu_z, \bSigma_z)$
+				\item $p(z) = \text{Categorical}(\bpi)$
+			\end{itemize}
+		\end{minipage}%
+		\begin{minipage}[t]{0.53\columnwidth}
+			\textit{PCA model} \\
+			\vspace{-0.5cm}
+			\begin{figure}
+				\centering
+				\includegraphics[width=.7\linewidth]{figs/pca}
+			\end{figure}
+			\vspace{-0.3cm}
+			\begin{itemize}
+				\item $p(\bx | \bz, \btheta) = \cN(\bW \bz + \bmu, \sigma^2 \bI)$
+				\item $p(\bz) = \cN(0, \bI)$
+			\end{itemize}
+		\end{minipage}
+	\end{block}
+	\myfootnote{Bishop\,C. Pattern Recognition and Machine Learning, 2006}
+\end{frame}
+%=======
+\begin{frame}{Maximum likelihood estimation for LVM}
+	\begin{block}{MLE for extended problem}
+		\vspace{-0.7cm}
+		\begin{multline*}
+			\vspace{-0.5cm}
+			\btheta^* = \argmax_{\btheta} p(\bX, \bZ | \btheta) = \argmax_{\btheta} \prod_{i=1}^n p(\bx_i, \bz_i | \btheta) = \\ = \argmax_{\btheta} \sum_{i=1}^n \log p(\bx_i, \bz_i | \btheta).
+		\end{multline*}
+		\vspace{-0.5cm}
+	\end{block}
+	However, $\bZ$ is unknown.
+	\begin{block}{MLE for original problem}
+		\vspace{-0.7cm}
+		\begin{multline*}
+			\btheta^* = \argmax_{\btheta} \log p(\bX| \btheta) = \argmax_{\btheta} \sum_{i=1}^n \log p(\bx_i | \btheta) = \\ =  \argmax_{\btheta}  \sum_{i=1}^n \log \int p(\bx_i, \bz_i | \btheta) d \bz_i = \\ = \argmax_{\btheta} \sum_{i=1}^n \log \int p(\bx_i| \bz_i, \btheta) p(\bz_i) d\bz_i.
+		\end{multline*}
+	\end{block}
+	
+\end{frame}
+%=======
+\begin{frame}{Naive approach}
+	\begin{figure}
+		\includegraphics[width=.75\linewidth]{figs/lvm_diagram}
+	\end{figure}
+	\begin{block}{Monte-Carlo estimation}
+		\vspace{-0.7cm}
+		\[
+			p(\bx | \btheta) = \int p(\bx | \bz, \btheta) p(\bz) d\bz = \bbE_{p(\bz)} p(\bx | \bz, \btheta) \approx \frac{1}{K} \sum_{k=1}^{K} p(\bx | \bz_k, \btheta),
+		\]
+		\vspace{-0.5cm} \\
+		where $\bz_k \sim p(\bz)$. \\
+		\textbf{Challenge:} to cover the space properly, the number of samples grows exponentially with respect to dimensionality of $\bz$. 
+	\end{block}
+	\myfootnotewithlink{https://jmtomczak.github.io/blog/4/4\_VAE.html}{image credit: https://jmtomczak.github.io/blog/4/4\_VAE.html}
+\end{frame}
+%=======
+\section{Variational lower bound (ELBO)}
+%=======
+\begin{frame}{Variational lower bound (ELBO)}
+	\begin{block}{Derivation 1 (inequality)}
+		\vspace{-0.7cm}
+		\begin{multline*}
+			\log p(\bx| \btheta) 
+			= \log \int p(\bx, \bz | \btheta) d\bz = \log \int \frac{q(\bz)}{q(\bz)} p(\bx, \bz | \btheta) d\bz = \\
+			= \log \bbE_{q} \left[\frac{p(\bx, \bz| \btheta)}{q(\bz)} \right] \geq \bbE_{q} \log \frac{p(\bx, \bz| \btheta)}{q(\bz)} =  \cL(q, \btheta)
+		\end{multline*}
+		\vspace{-0.7cm}
+	\end{block}
+	\begin{block}{Derivation 2 (equality)}
+		\vspace{-0.7cm}
+		\begin{multline*}
+			\mathcal{L} (q, \btheta) = \int q(\bz) \log \frac{p(\bx, \bz | \btheta)}{q(\bz)}d\bz = 
+			\int q(\bz) \log \frac{p(\bz|\bx, \btheta)p(\bx| \btheta)}{q(\bz)}d\bz = \\
+			= \int q(\bz) \log p(\bx| \btheta) d\bz + \int q(\bz) \log \frac{p(\bz|\bx, \btheta)}{q(\bz)}d\bz = \\
+			= \log p(\bx| \btheta) - KL(q(\bz) || p(\bz|\bx, \btheta))
+		\end{multline*}
+	\end{block}
+	\vspace{-0.7cm}
+	\begin{block}{Variational decomposition}
+		\[
+			\log p(\bx| \btheta) = \mathcal{L} (q, \btheta) + KL(q(\bz) || p(\bz|\bx, \btheta)) \geq \mathcal{L} (q, \btheta).
+		\]
+	\end{block}
+\end{frame}
+%=======
+\begin{frame}{Variational lower bound (ELBO)}
+	\vspace{-0.3cm}
+	\begin{align*}
+		\mathcal{L} (q, \btheta) &= \int q(\bz) \log \frac{\color{violet}p(\bx, \bz | \btheta)}{\color{teal}q(\bz)}d\bz = \\ 
+		&= \int q(\bz) \log {\color{violet}p(\bx | \bz, \btheta)} d\bz + \int q(\bz) \log \frac{\color{violet}p(\bz)}{\color{teal}q(\bz)}d\bz \\ 
+		&= \mathbb{E}_{q} \log p(\bx | \bz, \btheta) - KL (q(\bz) || p(\bz))
+	\end{align*}
+	\vspace{-0.5cm}
+	\begin{block}{Log-likelihood decomposition}
+		\vspace{-0.8cm}
+		\begin{multline*}
+			\log p(\bx| \btheta) = {\color{olive}\mathcal{L} (q, \btheta)} + KL(q(\bz) || p(\bz|\bx, \btheta)) \\ = {\color{olive}\mathbb{E}_{q} \log p(\bx | \bz, \btheta) - KL (q(\bz) || p(\bz))} + KL(q(\bz) || p(\bz|\bx, \btheta)).
+		\end{multline*}
+		\vspace{-0.7cm}
+	\end{block}
+	\begin{itemize}
+		\item Instead of maximizing incomplete likelihood, maximize ELBO
+		\[
+		\max_{\btheta} p(\bx | \btheta) \quad \rightarrow \quad \max_{q, \btheta} \mathcal{L} (q, \btheta)
+		\]
+		\item Maximization of ELBO by \textbf{variational} distribution $q$ is equivalent to minimization of KL
+		\[
+		\argmax_q \mathcal{L} (q, \btheta) \equiv \argmin_q KL(q(\bz) || p(\bz|\bx, \btheta)).
+		\]
+	\end{itemize}
+\end{frame}
+%=======
+\begin{frame}{Summary}
+	\begin{itemize}
+		\item Adjoint method generalizes backpropagation procedure and allows to train Neural ODE solving ODE for adjoint function back in time.
+		\vfill
+		\item Bayesian framework is a generalization of most common machine learning tasks.
+		\vfill
+		\item LVM introduces latent representation of observed samples to make model more interpretative.
+		\vfill
+		\item LVM maximizes variational evidence lower bound (ELBO) to find MLE for the parameters.
+	\end{itemize}
+\end{frame}
+%=======
+\end{document} 

@@ -1,0 +1,73 @@
+\input{../utils/preamble}
+\createdgmtitle{14}
+
+\usepackage{tikz}
+
+\usetikzlibrary{arrows,shapes,positioning,shadows,trees}
+%--------------------------------------------------------------------------------
+\begin{document}
+%--------------------------------------------------------------------------------
+\begin{frame}[noframenumbering,plain]
+%\thispagestyle{empty}
+\titlepage
+\end{frame}
+%=======
+\begin{frame}{Recap of previous lecture}
+	\vspace{-0.2cm}
+	\begin{block}{SDE basics}
+		Let define stochastic process $\bx(t)$ with initial condition $\bx(0) \sim p_0(\bx)$:
+		\[
+			d\bx = \mathbf{f}(\bx, t) dt + g(t) d \bw, 
+		\]
+		where $\bw(t)$ is the standard Wiener process (Brownian motion)
+		\vspace{-0.2cm}
+		\[		
+			\bw(t) - \bw(s) \sim \cN(0, (t - s) \bI), \quad d \bw = \bepsilon \cdot \sqrt{dt}, \, \text{where } \bepsilon \sim \cN(0, \bI).
+		\]
+	\end{block}
+	\vspace{-0.5cm}
+	\begin{block}{Langevin dynamics}
+		Let $\bx_0$ be a random vector. Then under mild regularity conditions for small enough $\eta$ samples from the following dynamics
+		\vspace{-0.2cm}
+		\[
+			\bx_{t + 1} = \bx_t + \eta \frac{1}{2} \nabla_{\bx_t} \log p(\bx_t | \btheta) + \sqrt{\eta} \cdot \bepsilon, \quad \bepsilon \sim \cN(0, \bI).
+		\]
+		will comes from $p(\bx | \btheta)$.
+	\end{block}
+	The density $p(\bx | \btheta)$ is a \textbf{stationary} distribution for the Langevin SDE.
+	\myfootnotewithlink{https://www.stats.ox.ac.uk/~teh/research/compstats/WelTeh2011a.pdf}{Welling M. Bayesian Learning via Stochastic Gradient Langevin Dynamics, 2011}
+\end{frame}
+%=======
+\begin{frame}{Outline}
+	\tableofcontents
+\end{frame}
+%=======
+\section{The worst course overview}
+%=======
+\begin{frame}{The worst course overview :)}
+	\begin{figure}
+		\includegraphics[width=\linewidth]{figs/generative-overview}
+	\end{figure}
+	\myfootnotewithlink{https://lilianweng.github.io/posts/2021-07-11-diffusion-models/}{Weng L. What are Diffusion Models?, blog post, 2021}
+\end{frame}
+%=======
+\begin{frame}{The worst course overview :)}
+	\begin{figure}
+		\includegraphics[width=0.7\linewidth]{figs/trilemma}
+	\end{figure}
+	\myfootnotewithlink{https://arxiv.org/abs/2112.07804}{Xiao Z., Kreis K., Vahdat A. Tackling the generative learning trilemma with denoising diffusion GANs, 2021}
+\end{frame}
+%=======
+\begin{frame}{The worst course overview :)}
+	\begin{figure}
+		\includegraphics[width=\linewidth]{figs/gen_comp_table}
+	\end{figure}
+	\myfootnotewithlink{https://udlbook.github.io/udlbook/}{Simon J.D. Prince. Understanding Deep Learning, 2023}
+\end{frame}
+%=======
+\begin{frame}{Summary}
+	\begin{itemize}
+		\item 
+	\end{itemize}
+\end{frame}
+\end{document} 
