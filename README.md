@@ -1,4 +1,4 @@
-# Deep Generative Models course, AIMasters, 2024
+# Deep Generative Models course, MIPT, 2024
 
 ## Description
 The course is devoted to modern generative models (mostly in the application to computer vision).
@@ -8,7 +8,7 @@ We will study the following types of generative models:
 - latent variable models,
 - normalization flow models,
 - adversarial models,
-- diffusion models.
+- diffusion and score models.
 
 Special attention is paid to the properties of various classes of generative models, their interrelationships, theoretical prerequisites and methods of quality assessment.
 
@@ -25,6 +25,7 @@ The course is accompanied by practical tasks that allow you to understand the pr
 
 | # | Date | Description | Slides |
 |---|---|---|---|
+<!---
 | 1 | February, 7 | <b>Lecture 1:</b> Logistics. Generative models overview and motivation. Problem statement. Divergence minimization framework. Autoregressive models (PixelCNN). | [slides](lectures/lecture1/Lecture1.pdf) |
 |  |  | <b>Seminar 1:</b> Introduction. Maximum likelihood estimation. Histograms. Bayes theorem. | [slides](seminars/seminar1/seminar1.ipynb) |
 | 2 | February, 14 | <b>Lecture 2:</b> Normalizing Flow (NF) intuition and definition. Forward and reverse KL divergence for NF. Linear NF. Gaussian autoregressive NF. | [slides](lectures/lecture2/Lecture2.pdf) |
@@ -51,19 +52,18 @@ The course is accompanied by practical tasks that allow you to understand the pr
 |  |  | <b>Seminar 12:</b> Denoising diffusion probabilistic model (DDPM). Denoising Diffusion Implicit Models (DDIM). | [slides](seminars/seminar11/seminar11.ipynb) |
 | 13 | May, 15 | <b>Lecture 13:</b> SDE basics. Kolmogorov-Fokker-Planck equation. Probability flow ODF. Reverse SDE. Variance Preserving and Variance Exploding SDEs. | [slides](lectures/lecture13/Lecture13.pdf) |
 |  |  | <b>Seminar 13:</b> Guidance. CLIP, GLIDE, DALL-E 2, Imagen, Latent Diffusion Model. | [slides](seminars/seminar13/seminar13.ipynb) |
-<!---
 -->
 
 ## Homeworks
 | Homework | Date | Deadline | Description | Link |
 |---------|------|-------------|--------|-------|
+<!---
 | 1 | February, 14 | February, 28 | <ol><li>Theory (Kernel density estimation, alpha-divergences, curse of dimensionality).</li><li>PixelCNN (receptive field, autocomplete) on MNIST.</li><li>ImageGPT on MNIST.</li></ol> | [![Open In Github](https://img.shields.io/static/v1.svg?logo=github&label=Repo&message=Open%20in%20Github&color=lightgrey)](homeworks/hw1.ipynb)<br>[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/r-isachenko/2024-DGM-AIMasters-course/blob/main/homeworks/hw1.ipynb) |
 | 2 | February, 28 | March, 13 | <ol><li>Theory (Sylvester flows, NF expressivity, Neural ODE Pontryagin theorem).</li><li>RealNVP on 2D data.</li><li>RealNVP on CIFAR10.</li></ol> | [![Open In Github](https://img.shields.io/static/v1.svg?logo=github&label=Repo&message=Open%20in%20Github&color=lightgrey)](homeworks/hw2.ipynb)<br>[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/r-isachenko/2024-DGM-AIMasters-course/blob/main/homeworks/hw2.ipynb) |
 | 3 | March, 13 | March, 27 | <ol><li>Theory (IWAE theory, MI in ELBO surgery, Gumbel-Max trick).</li><li>ResNetVAE on CIFAR10.</li><li>VQ-VAE with PixelCNN prior.</li></ol> | [![Open In Github](https://img.shields.io/static/v1.svg?logo=github&label=Repo&message=Open%20in%20Github&color=lightgrey)](homeworks/hw3.ipynb)<br>[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/r-isachenko/2024-DGM-AIMasters-course/blob/main/homeworks/hw3.ipynb) |
 | 4 | March, 27 | April, 17 | <ol><li>Theory (Least Squares GAN, Conjugate functions, FID for Normal distributions).</li><li>WGAN/WGAN-GP on CIFAR10.</li><li>Inception Score and FID.</li></ol> | [![Open In Github](https://img.shields.io/static/v1.svg?logo=github&label=Repo&message=Open%20in%20Github&color=lightgrey)](homeworks/hw4.ipynb)<br>[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/r-isachenko/2024-DGM-AIMasters-course/blob/main/homeworks/hw4.ipynb) |
 | 5 | April, 17 | May, 8 | <ol><li>Theory (Gaussian diffusion, Implicit score matching).</li><li>Denoising score matching on 2D data.</li><li>NCSN on MNIST.</li></ol> | [![Open In Github](https://img.shields.io/static/v1.svg?logo=github&label=Repo&message=Open%20in%20Github&color=lightgrey)](homeworks/hw5.ipynb)<br>[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/r-isachenko/2024-DGM-AIMasters-course/blob/main/homeworks/hw5.ipynb) |
 | 6 | May, 8 | May, 22 | <ol><li>Theory (Classifier guidance, spaced diffusion, KFP theorem).</li><li>DDPM on 2d data.</li><li>DDPM on MNIST.</li></ol> |  [![Open In Github](https://img.shields.io/static/v1.svg?logo=github&label=Repo&message=Open%20in%20Github&color=lightgrey)](homeworks/hw6.ipynb)<br>[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/r-isachenko/2024-DGM-AIMasters-course/blob/main/homeworks/hw6.ipynb) |
-<!---
 -->
 
 ## Game rules
@@ -75,9 +75,10 @@ The course is accompanied by practical tasks that allow you to understand the pr
 ## Prerequisities
 - probability theory + statistics
 - machine learning + basics of deep learning
-- python + basics of one of DL frameworks (pytorch/tensorflow/etc)
+- python + pytorch
 
 ## Previous episodes
+- [2024, spring, AIMasters](https://github.com/r-isachenko/2024-DGM-AIMasters-course)
 - [2023, autumn, MIPT](https://github.com/r-isachenko/2023-DGM-MIPT-course)
 - [2022-2023, autumn-spring, MIPT](https://github.com/r-isachenko/2022-2023-DGM-MIPT-course)
 - [2022, autumn, AIMasters](https://github.com/r-isachenko/2022-2023-DGM-AIMasters-course)
