@@ -26,7 +26,7 @@
 	\begin{block}{ELBO}
 		\vspace{-0.6cm}
 		\[
-			\mathcal{L} (\bphi, \btheta)  = \mathbb{E}_{q(c | \bx, \bphi)} \log p(\bx | c, \btheta) - {\color{olive} KL(q(c| \bx, \bphi) || p(c))} \rightarrow \max_{\bphi, \btheta}.
+			\cL_{\bphi, \btheta}(\bx)  = \mathbb{E}_{q(c | \bx, \bphi)} \log p(\bx | c, \btheta) - {\color{olive} KL(q(c| \bx, \bphi) || p(c))} \rightarrow \max_{\bphi, \btheta}.
 		\]
 	\end{block}
 	\vspace{-1.0cm}
@@ -64,7 +64,7 @@
 	\begin{block}{ELBO}
 		\vspace{-0.6cm}
 		\[
-			\mathcal{L} (\bphi, \btheta)  = \mathbb{E}_{q(c | \bx, \bphi)} \log p(\bx | \be_{c} , \btheta) - \log K =  \log p(\bx | \bz_q, \btheta) - \log K.
+			\cL_{\bphi, \btheta}(\bx)  = \mathbb{E}_{q(c | \bx, \bphi)} \log p(\bx | \be_{c} , \btheta) - \log K =  \log p(\bx | \bz_q, \btheta) - \log K.
 		\]
 		\vspace{-0.6cm}
 	\end{block}
@@ -122,7 +122,7 @@
 		\vspace{-0.5cm}
 		{\small
 		\[
-		    \frac{1}{n} \sum_{i=1}^n \cL_i(\bphi, \btheta) = \underbrace{\frac{1}{n} \sum_{i=1}^n \mathbb{E}_{q(\bz | \bx_i, \bphi)} \log p(\bx_i | \bz, \btheta)}_{\text{Reconstruction loss}}
+		    \frac{1}{n} \sum_{i=1}^n \cL_{\bphi, \btheta}(\bx_i) = \underbrace{\frac{1}{n} \sum_{i=1}^n \mathbb{E}_{q(\bz | \bx_i, \bphi)} \log p(\bx_i | \bz, \btheta)}_{\text{Reconstruction loss}}
 		    - \underbrace{\vphantom{ \sum_{i=1}^n} \bbI_q [\bx, \bz]}_{\text{MI}} - \underbrace{\vphantom{ \sum_{i=1}^n} KL({\color{teal}q_{\text{agg}}(\bz | \bphi)} || {\color{violet}p(\bz)})}_{\text{Marginal KL}}
 		\]}
 	\end{block}
@@ -170,7 +170,7 @@
 	\begin{block}{ELBO revisiting}
 		\vspace{-0.3cm}
 		\[
-		\frac{1}{n}\sum_{i=1}^n \cL_i(\bphi, \btheta) = \text{RL} - \text{MI} -  KL(q_{\text{agg}}(\bz | \bphi) || {\color{teal}p(\bz | \blambda)})
+		\frac{1}{n}\sum_{i=1}^n \cL_{\bphi, \btheta}(\bx_i) = \text{RL} - \text{MI} -  KL(q_{\text{agg}}(\bz | \bphi) || {\color{teal}p(\bz | \blambda)})
 		\]
 		It is Forward KL with respect to $p(\bz | \blambda)$.
 	\end{block}
@@ -197,7 +197,7 @@
 		\vspace{-0.5cm}
 		{\small
 			\begin{multline*}
-				\mathcal{L}(\bphi, \btheta) = \mathbb{E}_{q(\bz | \bx, \bphi)} \left[ \log p(\bx | \bz, \btheta) + {\color{violet}\log p(\bz | \blambda)} - \log q(\bz | \bx, \bphi) \right] \\
+				\cL_{\bphi, \btheta}(\bx) = \mathbb{E}_{q(\bz | \bx, \bphi)} \left[ \log p(\bx | \bz, \btheta) + {\color{violet}\log p(\bz | \blambda)} - \log q(\bz | \bx, \bphi) \right] \\
 				= \mathbb{E}_{q(\bz | \bx, \bphi)} \Bigl[ \log p(\bx | \bz, \btheta) + \underbrace{ \Bigl({\color{violet} \log p(\bff_{\blambda}(\bz)) + \log \left| \det (\bJ_\bff) \right|} \Bigr) }_{\text{NF-based prior}} - \log q(\bz | \bx, \bphi) \Bigr] 
 			\end{multline*}
 		}

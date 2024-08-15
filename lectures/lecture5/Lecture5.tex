@@ -117,14 +117,14 @@
 		\vspace{-0.3cm}
 		\begin{multline*}
 			\log p(\bx| \btheta) 
-			= \log \int p(\bx, \bz | \btheta) d\bz \geq \bbE_{q} \log \frac{p(\bx, \bz| \btheta)}{q(\bz)} =  \cL(q, \btheta)
+			= \log \int p(\bx, \bz | \btheta) d\bz \geq \bbE_{q} \log \frac{p(\bx, \bz| \btheta)}{q(\bz)} = \cL_{q, \btheta}(\bx)
 		\end{multline*}
 		\vspace{-0.3cm}
 	\end{block}
 	\begin{block}{ELBO derivation 2 (equality)}
 		\vspace{-0.3cm}
 		\begin{multline*}
-			\mathcal{L} (q, \btheta) = \int q(\bz) \log \frac{p(\bx, \bz | \btheta)}{q(\bz)}d\bz = 
+			\cL_{q, \btheta}(\bx) = \int q(\bz) \log \frac{p(\bx, \bz | \btheta)}{q(\bz)}d\bz = 
 			\int q(\bz) \log \frac{p(\bz|\bx, \btheta)p(\bx| \btheta)}{q(\bz)}d\bz = \\
 			= \log p(\bx| \btheta) - KL(q(\bz) || p(\bz|\bx, \btheta))
 		\end{multline*}
@@ -132,7 +132,7 @@
 	\vspace{-0.3cm}
 	\begin{block}{Variational decomposition}
 		\[
-		\log p(\bx| \btheta) = \mathcal{L} (q, \btheta) + KL(q(\bz) || p(\bz|\bx, \btheta)) \geq \mathcal{L} (q, \btheta).
+		\log p(\bx| \btheta) = \cL_{q, \btheta}(\bx) + KL(q(\bz) || p(\bz|\bx, \btheta)) \geq \cL_{q, \btheta}(\bx).
 		\]
 	\end{block}
 \end{frame}
@@ -141,13 +141,13 @@
 	\begin{block}{Variational lower Bound (ELBO)}
 		\vspace{-0.3cm}
 		\[
-			\log p(\bx| \btheta) = \mathcal{L} (q, \btheta) + KL(q(\bz) || p(\bz|\bx, \btheta)) \geq \mathcal{L} (q, \btheta).
+			\log p(\bx| \btheta) = \cL_{q, \btheta}(\bx) + KL(q(\bz) || p(\bz|\bx, \btheta)) \geq \cL_{q, \btheta}(\bx).
 		\]
 	\end{block}
 	
 	\vspace{-0.5cm}
 	\[
-	 	{\color{olive}\mathcal{L} (q, \btheta)} = \int q(\bz) \log \frac{p(\bx, \bz | \btheta)}{q(\bz)}d\bz = \mathbb{E}_{q} \log p(\bx | \bz, \btheta) - KL (q(\bz) || p(\bz))
+	 	{\color{olive}\cL_{q, \btheta}(\bx)} = \int q(\bz) \log \frac{p(\bx, \bz | \btheta)}{q(\bz)}d\bz = \mathbb{E}_{q} \log p(\bx | \bz, \btheta) - KL (q(\bz) || p(\bz))
 	\]
 	\vspace{-0.3cm}
 	\begin{block}{Log-likelihood decomposition}
@@ -159,11 +159,11 @@
 	\begin{itemize}
 	\item Instead of maximizing incomplete likelihood, maximize ELBO
    	\[
-\max_{\btheta} p(\bx | \btheta) \quad \rightarrow \quad \max_{q, \btheta} \mathcal{L} (q, \btheta)
+\max_{\btheta} p(\bx | \btheta) \quad \rightarrow \quad \max_{q, \btheta} \cL_{q, \btheta}(\bx)
    	\]
    	\item Maximization of ELBO by variational distribution $q$ is equivalent to minimization of KL
   	\[
-\argmax_q \mathcal{L} (q, \btheta) \equiv \argmin_q KL(q(\bz) || p(\bz|\bx, \btheta)).
+\argmax_q \cL_{q, \btheta}(\bx) \equiv \argmin_q KL(q(\bz) || p(\bz|\bx, \btheta)).
   	\]
   	\end{itemize}
   	    
@@ -178,22 +178,22 @@
 \begin{frame}{EM-algorithm}
 	\vspace{-0.5cm}
 	\begin{multline*}
-		\mathcal{L} (q, \btheta)  =  \mathbb{E}_{q} \log p(\bx | \bz, \btheta) - KL (q(\bz) || p(\bz)) = \\ = \bbE_q \left[ \log p(\bx | \bz, \btheta) - \log \frac{q(\bz)}{p(\bz)} \right]d\bz \rightarrow \max_{q, \btheta}.
+		\cL_{q, \btheta}(\bx)  =  \mathbb{E}_{q} \log p(\bx | \bz, \btheta) - KL (q(\bz) || p(\bz)) = \\ = \bbE_q \left[ \log p(\bx | \bz, \btheta) - \log \frac{q(\bz)}{p(\bz)} \right]d\bz \rightarrow \max_{q, \btheta}.
 	\end{multline*}
 	\vspace{-0.5cm}
 	\begin{block}{Block-coordinate optimization}
 		\begin{itemize}
 			\item Initialize $\btheta^*$;
-			\item \textbf{E-step} ($\mathcal{L} (q, \btheta) \rightarrow \max_q$)
+			\item \textbf{E-step} ($\cL_{q, \btheta}(\bx) \rightarrow \max_q$)
 			\vspace{-0.2cm}
 			\begin{multline*}
-				q^*(\bz) = \argmax_q \mathcal{L} (q, \btheta^*) = \\
+				q^*(\bz) = \argmax_q \cL_{q, \btheta^*}(\bx) = \\
 				= \argmin_q KL(q(\bz) || p(\bz | \bx, \btheta^*)) = p(\bz| \bx, \btheta^*);
 			\end{multline*}
-			\item \textbf{M-step} ($\mathcal{L} (q, \btheta) \rightarrow \max_{\btheta}$)
+			\item \textbf{M-step} ($\cL_{q, \btheta}(\bx) \rightarrow \max_{\btheta}$)
 			\vspace{-0.2cm}
 			\[
-			\btheta^* = \argmax_{\btheta} \mathcal{L} (q^*, \btheta);
+			\btheta^* = \argmax_{\btheta} \cL_{q^*, \btheta}(\bx);
 			\]
 			\vspace{-0.2cm}
 			\item Repeat E-step and M-step until convergence.
@@ -226,7 +226,7 @@
 	\begin{block}{E-step}
 		\vspace{-0.3cm}
 		\[
-		q(\bz) = \argmax_q \mathcal{L} (q, \btheta^*) = \argmin_q KL(q || p) =
+		q(\bz) = \argmax_q \cL_{q, \btheta^*}(\bx) = \argmin_q KL(q || p) =
 		p(\bz| \bx, \btheta^*).
 		\]
 		\vspace{-0.3cm}
@@ -245,11 +245,11 @@
 	\begin{itemize}
 		\item E-step
 		\[
-			\bphi_k = \bphi_{k-1} + \left.\eta \cdot \nabla_{\bphi} \mathcal{L}(\bphi, \btheta_{k-1})\right|_{\bphi=\bphi_{k-1}}
+			\bphi_k = \bphi_{k-1} + \left.\eta \cdot \nabla_{\bphi} \cL_{\bphi, \btheta_{k-1}}(\bx)\right|_{\bphi=\bphi_{k-1}}
 		\]
 		\item M-step
 		\[
-			\btheta_k = \btheta_{k-1} + \left.\eta \cdot \nabla_{\btheta} \mathcal{L}(\bphi_k, \btheta)\right|_{\btheta=\btheta_{k-1}}
+			\btheta_k = \btheta_{k-1} + \left.\eta \cdot \nabla_{\btheta} \cL_{\bphi_k, \btheta}(\bx)\right|_{\btheta=\btheta_{k-1}}
 		\]
 	\end{itemize}
 \end{frame}
@@ -258,11 +258,11 @@
 	\begin{itemize}
 		\item E-step
 		\[
-			\bphi_k = \bphi_{k-1} + \left.\eta \nabla_{\bphi} \mathcal{L}(\bphi, \btheta_{k-1})\right|_{\bphi=\bphi_{k-1}}
+			\bphi_k = \bphi_{k-1} + \left.\eta \nabla_{\bphi} \cL_{\bphi, \btheta_{k-1}}(\bx)\right|_{\bphi=\bphi_{k-1}}
 		\]
 		\item M-step
 		\[
-			\btheta_k = \btheta_{k-1} + \left.\eta \nabla_{\btheta} \mathcal{L}(\bphi_k, \btheta)\right|_{\btheta=\btheta_{k-1}}
+			\btheta_k = \btheta_{k-1} + \left.\eta \nabla_{\btheta} \cL_{\bphi_k, \btheta}(\bx)\right|_{\btheta=\btheta_{k-1}}
 		\]
 	\end{itemize}
 	\begin{figure}
@@ -276,37 +276,37 @@
 	\begin{block}{ELBO}
 		\vspace{-0.5cm}
 		\[
-		\log p(\bx| \btheta) = \mathcal{L} (\bphi, \btheta) + KL(q(\bz | \bx, \bphi) || p(\bz|\bx, \btheta)) \geq \mathcal{L} (\bphi, \btheta).
+		\log p(\bx| \btheta) = \cL_{\bphi, \btheta}(\bx) + KL(q(\bz | \bx, \bphi) || p(\bz|\bx, \btheta)) \geq \cL_{\bphi, \btheta}(\bx).
 		\]
 		\vspace{-0.5cm}
 	\end{block}
 	\begin{itemize}
 		\item \textbf{E-step}
 		\[
-		\bphi_k = \bphi_{k-1} + \left.\eta \cdot \nabla_{\bphi} \mathcal{L}(\bphi, \btheta_{k-1})\right|_{\bphi=\bphi_{k-1}},
+		\bphi_k = \bphi_{k-1} + \left.\eta \cdot \nabla_{\bphi} \cL_{\bphi, \btheta_{k-1}}(\bx)\right|_{\bphi=\bphi_{k-1}},
 		\]
 		where $\bphi$~-- parameters of variational posterior distribution $q(\bz | \bx, \bphi)$.
 		\item \textbf{M-step}
 		\[
-		\btheta_k = \btheta_{k-1} + \left.\eta \cdot \nabla_{\btheta} \mathcal{L}(\bphi_k, \btheta)\right|_{\btheta=\btheta_{k-1}},
+		\btheta_k = \btheta_{k-1} + \left.\eta \cdot \nabla_{\btheta} \cL_{\bphi_k, \btheta}(\bx)\right|_{\btheta=\btheta_{k-1}},
 		\]
 		where $\btheta$~-- parameters of the generative distribution $p(\bx | \bz, \btheta)$.
 	\end{itemize}
-	Now all that is left is to obtain gradients: $\nabla_{\bphi} \mathcal{L}(\bphi, \btheta)$, $\nabla_{\btheta} \mathcal{L}(\bphi, \btheta)$.  \\
+	Now all that is left is to obtain gradients: $\nabla_{\bphi} \cL_{\bphi, \btheta}(\bx)$, $\nabla_{\btheta} \cL_{\bphi, \btheta}(\bx)$.  \\
 	\textbf{Challenge:} Number of samples $n$ could be huge (we need derive the \textbf{unbiased} stochastic gradients).
 \end{frame}
 %=======
 \subsection{ELBO gradients, reparametrization trick}
 %=======
-\begin{frame}{ELBO gradients, (M-step, $\nabla_{\btheta} \mathcal{L}(\bphi, \btheta)$)}
+\begin{frame}{ELBO gradients, (M-step, $\nabla_{\btheta} \cL_{\bphi, \btheta}(\bx)$)}
 	\[
-	\mathcal{L} (\bphi, \btheta)  = \mathbb{E}_{q(\bz | \bx, \bphi)} \left[\log p(\bx | \bz, \btheta) - \log \frac{q(\bz | \bx, \bphi)}{p(\bz)} \right] \rightarrow \max_{\bphi, \btheta}.
+	\cL_{\bphi, \btheta}(\bx)  = \mathbb{E}_{q(\bz | \bx, \bphi)} \left[\log p(\bx | \bz, \btheta) - \log \frac{q(\bz | \bx, \bphi)}{p(\bz)} \right] \rightarrow \max_{\bphi, \btheta}.
 	\]	
 	\vspace{-0.5cm}
-	\begin{block}{M-step: $\nabla_{\btheta} \mathcal{L}(\bphi, \btheta)$}
+	\begin{block}{M-step: $\nabla_{\btheta} \cL_{\bphi, \btheta}(\bx)$}
 		\vspace{-0.7cm}
 		\begin{multline*}
-			\nabla_{\btheta} \mathcal{L} (\bphi, \btheta)
+			\nabla_{\btheta} \cL_{\bphi, \btheta}(\bx)
 			= \int q(\bz|\bx, \bphi) \nabla_{\btheta}\log p(\bx|\bz, \btheta) d \bz \approx  \\
 			\approx \nabla_{\btheta}\log p(\bx|\bz^*, \btheta), \quad \bz^* \sim q(\bz|\bx, \bphi).
 		\end{multline*}
@@ -323,11 +323,11 @@
 	\myfootnotewithlink{https://jmtomczak.github.io/blog/4/4\_VAE.html}{image credit: https://jmtomczak.github.io/blog/4/4\_VAE.html}
 \end{frame}
 %=======
-\begin{frame}{ELBO gradients, (E-step, $\nabla_{\bphi} \mathcal{L}(\bphi, \btheta)$)}
-	\begin{block}{E-step: $\nabla_{\bphi} \mathcal{L}(\bphi, \btheta)$}
+\begin{frame}{ELBO gradients, (E-step, $\nabla_{\bphi} \cL_{\bphi, \btheta}(\bx)$)}
+	\begin{block}{E-step: $\nabla_{\bphi} \cL_{\bphi, \btheta}(\bx)$}
 		Difference from M-step: density function $q(\bz| \bx, \bphi)$ depends on the parameters $\bphi$, it is impossible to use the Monte-Carlo estimation:
 		\begin{align*}
-			\nabla_{\bphi} \mathcal{L} (\bphi, \btheta) &= \nabla_{\bphi} \int q(\bz | \bx, \bphi) \left[\log p(\bx | \bz, \btheta) - \log \frac{q(\bz| \bx, \bphi)}{p(\bz)} \right] d \bz \\
+			\nabla_{\bphi} \cL_{\bphi, \btheta}(\bx) &= \nabla_{\bphi} \int q(\bz | \bx, \bphi) \left[\log p(\bx | \bz, \btheta) - \log \frac{q(\bz| \bx, \bphi)}{p(\bz)} \right] d \bz \\
 			& \neq  \int q(\bz | \bx, \bphi) \nabla_{\bphi} \left[\log p(\bx | \bz, \btheta) - \log \frac{q(\bz| \bx, \bphi)}{p(\bz)} \right] d \bz 
 		\end{align*}
 	\end{block}
@@ -345,10 +345,10 @@
 	\end{block}
 \end{frame}
 %=======
-\begin{frame}{ELBO gradient (E-step, $\nabla_{\bphi} \mathcal{L}(\bphi, \btheta)$)}
+\begin{frame}{ELBO gradient (E-step, $\nabla_{\bphi} \cL_{\bphi, \btheta}(\bx)$)}
 	\vspace{-0.5cm}
 	\begin{multline*}
-		\nabla_{\bphi} \mathcal{L} (\bphi, \btheta) = \nabla_{\bphi}\int q(\bz|\bx, \bphi) \log p(\bx| \bz, \btheta)  d\bz - \nabla_{\bphi} \text{KL}(q(\bz | \bx, \bphi) || p(\bz))
+		\nabla_{\bphi} \cL_{\bphi, \btheta}(\bx) = \nabla_{\bphi}\int q(\bz|\bx, \bphi) \log p(\bx| \bz, \btheta)  d\bz - \nabla_{\bphi} \text{KL}(q(\bz | \bx, \bphi) || p(\bz))
 		\\ = \int r(\bepsilon) \nabla_{\bphi} \log p(\bx | \bg_{\bphi}(\bx, \bepsilon), \btheta) d\bepsilon  - \nabla_{\bphi} \text{KL}(q(\bz | \bx, \bphi) || p(\bz))
 		\\ \approx \nabla_{\bphi} \log p(\bx | \bg_{\bphi}(\bx, \bepsilon^*), \btheta)  - \nabla_{\bphi} \text{KL}(q(\bz | \bx, \bphi) || p(\bz))
 	\end{multline*}
@@ -430,17 +430,17 @@
 				\bepsilon^* \sim r(\bepsilon); \quad \bz^* = \bg_{\bphi}(\bx, \bepsilon^*);
 			\]
 			\[
-				\cL(\bphi, \btheta) \approx  \log p(\bx | \bz^*, \btheta) - KL(q(\bz^* | \bx, \bphi) || p(\bz^*)).
+				\cL_{\bphi, \btheta}(\bx) \approx  \log p(\bx | \bz^*, \btheta) - KL(q(\bz^* | \bx, \bphi) || p(\bz^*)).
 			\]
 			\item compute a stochastic gradients w.r.t. $\bphi$ and $\btheta$
 			\begin{align*}
-				\nabla_{\bphi} \mathcal{L} (\bphi, \btheta) &\approx \nabla_{\bphi} \log p(\bx | \bg_{\bphi}(\bx, \bepsilon^*), \btheta)  - \nabla_{\bphi} \text{KL}(q(\bz | \bx, \bphi) || p(\bz)); \\
-				\nabla_{\btheta} \mathcal{L} (\bphi, \btheta) &\approx \nabla_{\btheta} \log p(\bx|\bz^*, \btheta).
+				\nabla_{\bphi} \cL_{\bphi, \btheta}(\bx) &\approx \nabla_{\bphi} \log p(\bx | \bg_{\bphi}(\bx, \bepsilon^*), \btheta)  - \nabla_{\bphi} \text{KL}(q(\bz | \bx, \bphi) || p(\bz)); \\
+				\nabla_{\btheta} \cL_{\bphi, \btheta}(\bx) &\approx \nabla_{\btheta} \log p(\bx|\bz^*, \btheta).
 			\end{align*}
 			\item update $\btheta, \bphi$ according to the selected optimization method (SGD, Adam, etc):
 			\begin{align*}
-				\bphi &:= \bphi + \eta \cdot \nabla_{\bphi} \mathcal{L}(\bphi, \btheta), \\
-				\btheta &:= \btheta + \eta \cdot \nabla_{\btheta} \mathcal{L}(\bphi, \btheta).
+				\bphi &:= \bphi + \eta \cdot \nabla_{\bphi} \cL_{\bphi, \btheta}(\bx), \\
+				\btheta &:= \btheta + \eta \cdot \nabla_{\btheta} \cL_{\bphi, \btheta}(\bx).
 			\end{align*}
 		\end{itemize}
 	\end{block}
@@ -466,12 +466,12 @@
 %=======
 \begin{frame}{Variational Autoencoder}
 	\[
-	\mathcal{L} (\bphi, \btheta)  = \mathbb{E}_{q(\bz | \bx, \bphi)} \left[\log p(\bx | \bz, \btheta) - \log \frac{q(\bz | \bx, \bphi)}{p(\bz)} \right] \rightarrow \max_{\bphi, \btheta}.
+	\cL_{\bphi, \btheta}(\bx)  = \mathbb{E}_{q(\bz | \bx, \bphi)} \left[\log p(\bx | \bz, \btheta) - \log \frac{q(\bz | \bx, \bphi)}{p(\bz)} \right] \rightarrow \max_{\bphi, \btheta}.
 	\]	
 	\vspace{-0.3cm}
 	\begin{figure}[h]
 		\centering
-		\includegraphics[width=.65\linewidth]{figs/VAE.png}
+		\includegraphics[width=.65\linewidth]{figs/VAE}
 	\end{figure}
 	\myfootnotewithlink{http://ijdykeman.github.io/ml/2016/12/21/cvae.html}{image credit: http://ijdykeman.github.io/ml/2016/12/21/cvae.html}
 \end{frame}
@@ -483,10 +483,14 @@
 	\end{itemize}
 	\begin{figure}[h]
 		\centering
-		\includegraphics[width=\linewidth]{figs/vae-gaussian.png}
+		\includegraphics[width=0.7\linewidth]{figs/vae-encoder}
+	\end{figure}
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.9\linewidth]{figs/vae-decoder}
 	\end{figure}
 	
-	\myfootnotewithlink{https://lilianweng.github.io/lil-log/2018/08/12/from-autoencoder-to-beta-vae.html}{image credit: https://lilianweng.github.io/lil-log/2018/08/12/from-autoencoder-to-beta-vae.html}
+	\myfootnotewithlink{https://arxiv.org/pdf/2403.18103}{Chan S. Tutorial on Diffusion Models for Imaging and Vision, 2024}
 \end{frame}
 %=======
 \section{Normalizing flows as VAE model}
@@ -530,7 +534,7 @@
 			\]
 			\item Log-likelihood decomposition
 			\[
-				\log p(\bx | \btheta) = \cL(\btheta) + {\color{olive}KL(q(\bz | \bx, \btheta) || p(\bz | \bx, \btheta))} = \cL(\btheta).
+				\log p(\bx | \btheta) = \cL_{\btheta}(\bx) + {\color{olive}KL(q(\bz | \bx, \btheta) || p(\bz | \bx, \btheta))} = \cL_{\btheta}(\bx).
 			\]
 		\end{enumerate}
 	\end{block}
@@ -564,7 +568,7 @@
 			\item Log-likelihood decomposition
 			\vspace{-0.3cm}
 			\[
-				\log p(\bx | \btheta) = \cL(\btheta) = \log p(f_{\btheta}(\bx)) +  \log |\det \bJ_\bff|.
+				\log p(\bx | \btheta) = \cL_{\btheta}(\bx) = \log p(f_{\btheta}(\bx)) +  \log |\det \bJ_\bff|.
 			\]
 		\end{enumerate}
 	\end{block}

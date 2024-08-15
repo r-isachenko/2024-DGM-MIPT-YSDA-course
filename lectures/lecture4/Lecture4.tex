@@ -337,14 +337,14 @@
 		\begin{multline*}
 			\log p(\bx| \btheta) 
 			= \log \int p(\bx, \bz | \btheta) d\bz = \log \int \frac{q(\bz)}{q(\bz)} p(\bx, \bz | \btheta) d\bz = \\
-			= \log \bbE_{q} \left[\frac{p(\bx, \bz| \btheta)}{q(\bz)} \right] \geq \bbE_{q} \log \frac{p(\bx, \bz| \btheta)}{q(\bz)} =  \cL(q, \btheta)
+			= \log \bbE_{q} \left[\frac{p(\bx, \bz| \btheta)}{q(\bz)} \right] \geq \bbE_{q} \log \frac{p(\bx, \bz| \btheta)}{q(\bz)} = \cL_{q, \btheta}(\bx)
 		\end{multline*}
 		\vspace{-0.7cm}
 	\end{block}
 	\begin{block}{Derivation 2 (equality)}
 		\vspace{-0.7cm}
 		\begin{multline*}
-			\mathcal{L} (q, \btheta) = \int q(\bz) \log \frac{p(\bx, \bz | \btheta)}{q(\bz)}d\bz = 
+			\cL_{q, \btheta}(\bx) = \int q(\bz) \log \frac{p(\bx, \bz | \btheta)}{q(\bz)}d\bz = 
 			\int q(\bz) \log \frac{p(\bz|\bx, \btheta)p(\bx| \btheta)}{q(\bz)}d\bz = \\
 			= \int q(\bz) \log p(\bx| \btheta) d\bz + \int q(\bz) \log \frac{p(\bz|\bx, \btheta)}{q(\bz)}d\bz = \\
 			= \log p(\bx| \btheta) - KL(q(\bz) || p(\bz|\bx, \btheta))
@@ -353,7 +353,7 @@
 	\vspace{-0.7cm}
 	\begin{block}{Variational decomposition}
 		\[
-			\log p(\bx| \btheta) = \mathcal{L} (q, \btheta) + KL(q(\bz) || p(\bz|\bx, \btheta)) \geq \mathcal{L} (q, \btheta).
+			\log p(\bx| \btheta) = \cL_{q, \btheta}(\bx) + KL(q(\bz) || p(\bz|\bx, \btheta)) \geq \cL_{q, \btheta}(\bx).
 		\]
 	\end{block}
 \end{frame}
@@ -361,7 +361,7 @@
 \begin{frame}{Variational lower bound (ELBO)}
 	\vspace{-0.3cm}
 	\begin{align*}
-		\mathcal{L} (q, \btheta) &= \int q(\bz) \log \frac{\color{violet}p(\bx, \bz | \btheta)}{\color{teal}q(\bz)}d\bz = \\ 
+		\cL_{q, \btheta}(\bx) &= \int q(\bz) \log \frac{\color{violet}p(\bx, \bz | \btheta)}{\color{teal}q(\bz)}d\bz = \\ 
 		&= \int q(\bz) \log {\color{violet}p(\bx | \bz, \btheta)} d\bz + \int q(\bz) \log \frac{\color{violet}p(\bz)}{\color{teal}q(\bz)}d\bz \\ 
 		&= \mathbb{E}_{q} \log p(\bx | \bz, \btheta) - KL (q(\bz) || p(\bz))
 	\end{align*}
@@ -369,18 +369,18 @@
 	\begin{block}{Log-likelihood decomposition}
 		\vspace{-0.8cm}
 		\begin{multline*}
-			\log p(\bx| \btheta) = {\color{olive}\mathcal{L} (q, \btheta)} + KL(q(\bz) || p(\bz|\bx, \btheta)) \\ = {\color{olive}\mathbb{E}_{q} \log p(\bx | \bz, \btheta) - KL (q(\bz) || p(\bz))} + KL(q(\bz) || p(\bz|\bx, \btheta)).
+			\log p(\bx| \btheta) = {\color{olive}\cL_{q, \btheta}(\bx)} + KL(q(\bz) || p(\bz|\bx, \btheta)) \\ = {\color{olive}\mathbb{E}_{q} \log p(\bx | \bz, \btheta) - KL (q(\bz) || p(\bz))} + KL(q(\bz) || p(\bz|\bx, \btheta)).
 		\end{multline*}
 		\vspace{-0.7cm}
 	\end{block}
 	\begin{itemize}
 		\item Instead of maximizing incomplete likelihood, maximize ELBO
 		\[
-		\max_{\btheta} p(\bx | \btheta) \quad \rightarrow \quad \max_{q, \btheta} \mathcal{L} (q, \btheta)
+		\max_{\btheta} p(\bx | \btheta) \quad \rightarrow \quad \max_{q, \btheta} \cL_{q, \btheta}(\bx)
 		\]
 		\item Maximization of ELBO by \textbf{variational} distribution $q$ is equivalent to minimization of KL
 		\[
-		\argmax_q \mathcal{L} (q, \btheta) \equiv \argmin_q KL(q(\bz) || p(\bz|\bx, \btheta)).
+		\argmax_q \cL_{q, \btheta}(\bx) \equiv \argmin_q KL(q(\bz) || p(\bz|\bx, \btheta)).
 		\]
 	\end{itemize}
 \end{frame}
