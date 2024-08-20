@@ -9,428 +9,21 @@
 \end{frame}
 %=======
 \begin{frame}{Recap of previous lecture}
-	\begin{itemize}
-		\item Standard Gaussian $p(\bz) = \mathcal{N}(0, \bI)$ $\Rightarrow$ over-regularization;
-		\item $p(\bz) = q_{\text{agg}}(\bz | \bphi) = \frac{1}{n}\sum_{i=1}^n q(\bz | \bx_i, \bphi)$ $\Rightarrow$ overfitting and highly expensive.
-	\end{itemize}
-	\begin{block}{ELBO revisiting}
-		\vspace{-0.4cm}
-		\[
-		\frac{1}{n}\sum_{i=1}^n \cL_{\bphi, \btheta}(\bx_i) = \text{RL} - \text{MI} -  KL(q_{\text{agg}}(\bz | \bphi) || {\color{violet}p(\bz | \blambda)})
-		\]
-		It is Forward KL with respect to $p(\bz | \blambda)$.
-	\end{block}
-	\begin{block}{ELBO with flow-based VAE prior}
-		\vspace{-0.6cm}
-		{\small
-			\begin{multline*}
-				\cL_{\bphi, \btheta}(\bx) = \mathbb{E}_{q(\bz | \bx, \bphi)} \left[ \log p(\bx | \bz, \btheta) + {\color{violet}\log p(\bz | \blambda)} - \log q(\bz | \bx, \bphi) \right] \\
-				= \mathbb{E}_{q(\bz | \bx, \bphi)} \Bigl[ \log p(\bx | \bz, \btheta) + \underbrace{ \Bigl({\color{violet} \log p(f_{\blambda}(\bz)) + \log \left| \det (\bJ_\bff) \right|} \Bigr) }_{\text{flow-based prior}} - \log q(\bz | \bx, \bphi) \Bigr] 
-			\end{multline*}
-		}
-		\vspace{-0.5cm}
-		\[
-		\bz = \bff^{-1}_{\blambda}(\bz^*) = \bg_{\blambda}(\bz^*), \quad \bz^* \sim p(\bz^*) = \cN(0, \bI)
-		\]
-	\end{block}
-	\vspace{-0.5cm}
-	\myfootnotewithlink{https://arxiv.org/abs/1611.02731}{Chen X. et al. Variational Lossy Autoencoder, 2016}
-\end{frame}
-%=======
-\begin{frame}{Recap of previous lecture}
-	\begin{block}{Likelihood-free learning}
-		\begin{itemize}
-			\item Likelihood is not a perfect quality measure for generative model.
-			\item Likelihood could be intractable.
-		\end{itemize}
-	\end{block}
-	Imagine we have two sets of samples 
-	\begin{itemize}
-		\item $\cS_1 = \{\bx_i\}_{i=1}^{n_1} \sim \pi(\bx)$ -- real samples;
-		\item $\cS_2 = \{\bx_i\}_{i=1}^{n_2} \sim p(\bx | \btheta)$ -- generated (or fake) samples.
-	\end{itemize}
-	Let define discriminative model (classifier):
-	\[
-		p(y = 1 | \bx) = P\bigl(\{\bx \sim \pi(\bx)\}\bigr); \quad p(y = 0 | \bx) = P\bigl(\{\bx \sim p(\bx | \btheta)\}\bigr)
-	\]
-	\vspace{-0.5cm}
-	\begin{block}{Assumption}
-		Generative distribution $p(\bx | \btheta)$ equals to the true distribution $\pi(\bx)$ if we can not distinguish them using discriminative model $p(y | \bx)$. \\
-		It means that $p(y = 1 | \bx) = 0.5$ for each sample $\bx$.
-	\end{block}
-\end{frame}
-%=======
-\begin{frame}{Recap of previous lecture}
-	\begin{itemize}
-		\item \textbf{Generator:} generative model $\bx = \bG(\bz)$, which makes generated sample more realistic.
-		\item \textbf{Discriminator:} a classifier $D(\bx) \in [0, 1]$, which distinguishes real samples from generated samples.
-	\end{itemize}
-	\vspace{-0.1cm}
-	\begin{block}{GAN optimality theorem}
-		The minimax game 
-		\vspace{-0.3cm}
-		\[
-		\min_{G} \max_D \Bigl[ \underbrace{\bbE_{\pi(\bx)} \log D(\bx) + \bbE_{p(\bz)} \log (1 - D(\bG(\bz)))}_{V(G, D)} \Bigr]
-		\]
-		\vspace{-0.5cm} \\
-		has the global optimum $\pi(\bx) = p(\bx | \btheta)$, in this case $D^*(\bx) = 0.5$.
-	\end{block}
-	\[
-		\min_{G} V(G, D^*) = \min_{G} \left[ 2 JSD(\pi || p) - \log 4 \right] = -\log 4, \quad \pi(\bx) = p(\bx | \btheta).
-	\]
-	\vspace{-0.5cm} \\
-	If the generator could be \textbf{any} function and the discriminator is \textbf{optimal} at every step, then the generator is \textbf{guaranteed to converge} to the data distribution.
-	 \myfootnotewithlink{https://arxiv.org/abs/1406.2661}{Goodfellow I. J. et al. Generative Adversarial Networks, 2014}
-\end{frame}
-%=======
-\begin{frame}{Recap of previous lecture}
-	\begin{itemize}
-		\item Generator updates are made in parameter space, discriminator is not optimal at every step.
-		\item Generator and discriminator loss keeps oscillating during GAN training.
-	\end{itemize}
-	\begin{block}{Objective}
-		\vspace{-0.5cm}
-		\[
-		\min_{\btheta} \max_{\bphi} \left[ \bbE_{\pi(\bx)} \log D_{\bphi}(\bx) + \bbE_{p(\bz)} \log (1 - D_{\bphi}(\bG_{\btheta}(\bz))) \right]
-		\]
-		\vspace{-0.5cm}
-	\end{block}
-	\begin{figure}
-		\centering
-		\includegraphics[width=1.0\linewidth]{figs/gan_1}
-	\end{figure}
-	\myfootnotewithlink{https://arxiv.org/abs/1406.2661}{Goodfellow I. J. et al. Generative Adversarial Networks, 2014}
-\end{frame}
-%=======
-\begin{frame}{Outline}
-	\tableofcontents
-\end{frame}
-%=======
-\section{Wasserstein distance}
-%=======
-\begin{frame}{Informal theoretical results}
 	\vspace{-0.3cm}
-	\begin{itemize}
-		\item The dimensionality of $\bz$ is lower than the dimensionality of $\bx$. Hence, support of $p(\bx | \btheta)$ with $\bx = \bG_{\btheta}(\bz)$ lies on low-dimensional manifold.
-		\item Distribution of real images $\pi(\bx)$ is also concentrated on a low dimensional manifold.
-		\begin{figure}
-			\centering
-			\includegraphics[width=0.55\linewidth]{figs/low_dim_manifold}
-		\end{figure}
-		\item If $\pi(\bx)$ and $p(\bx | \btheta)$ have disjoint supports, then there is a smooth optimal discriminator.
-		\item For such low-dimensional disjoint manifolds
-		\vspace{-0.2cm}
-		\[
-		KL(\pi || p) = KL(p || \pi) = \infty, \quad JSD(\pi || p) = \log 2
-		\]
-	\end{itemize}
-	\myfootnote{\href{https://arxiv.org/abs/1904.08994}{Weng L. From GAN to WGAN, 2019} \\ 
-		\href{https://arxiv.org/abs/1701.04862}{Arjovsky M., Bottou L. Towards Principled Methods for Training Generative Adversarial Networks, 2017}}
-\end{frame}
-%=======
-\begin{frame}{Wasserstein distance (discrete)}
-	A.k.a. \textbf{Earth Mover's distance}.
-	\begin{block}{Optimal transport formulation}
-		The minimum cost of moving and transforming a pile of dirt in the shape of one probability distribution to the shape of the other distribution.
-	\end{block}
-	\begin{figure}
-		\centering
-		\includegraphics[width=\linewidth]{figs/discrete_wasserstein}
-	\end{figure}
-	\myfootnotewithlink{https://udlbook.github.io/udlbook/}{Simon J.D. Prince. Understanding Deep Learning, 2023}
-\end{frame}
-%=======
-\begin{frame}{Wasserstein distance (continuous)}
-	\vspace{-0.7cm}
-	\[
-	W(\pi, p) = \inf_{\gamma \in \Gamma(\pi, p)} \bbE_{(\bx, \by) \sim \gamma} \| \bx - \by \| =  \inf_{{\color{olive}\gamma}\in {\color{teal}\Gamma(\pi, p)}} \int {\color{violet} \| \bx - \by \|} {\color{olive}\gamma (\bx, \by)} d \bx d \by
-	\]
-	\vspace{-0.4cm}
-	\begin{itemize}
-		\item ${\color{olive}\gamma (\bx, \by)}$ -- transportation plan (the amount of "dirt" that should be transported from point $\bx$ to point $\by$)
-		\vspace{-0.2cm}
-		\[
-		\int \gamma(\bx, \by) d \bx = p(\by); \quad \int \gamma(\bx, \by) d \by = \pi(\bx).
-		\]
-		\vspace{-0.6cm}
-		\item ${\color{teal}\Gamma(\pi, p)}$ -- the set of all joint distributions $\gamma (\bx, \by)$ with marginals $\pi$ and $p$.
-		\item ${\color{olive}\gamma(\bx, \by)}$ -- the amount, ${\color{violet} \| \bx - \by \|}$-- the distance.
-	\end{itemize}
-	\begin{block}{Wasserstein metric}
-		\vspace{-0.2cm}
-		\[
-		W_s(\pi, p) = \inf_{\gamma \in \Gamma(\pi, p)} \left(\bbE_{(\bx, \by) \sim \gamma} \| \bx - \by \|^s\right)^{1/s}
-		\]
-		\vspace{-0.4cm}
-	\end{block}
-	Here we will use $W(\pi, p) = W_1(\pi, p)$ that corresponds to the optimal transport formulation.
-	\myfootnotewithlink{https://arxiv.org/abs/1701.07875}{Arjovsky M., Chintala S., Bottou L. Wasserstein GAN, 2017}
-\end{frame}
-%=======
-\begin{frame}{Wasserstein distance vs KL vs JSD}
-	
-	\begin{minipage}[t]{0.48\columnwidth}
-		\vspace{0.1cm}
-		Consider 2d distributions
-		\[
-		\pi(x, y) = (0, U[0,1])
-		\]	
-		\[
-		p(x, y | \theta) = (\theta, U[0, 1])
-		\]
-	\end{minipage}%
-	\begin{minipage}[t]{0.52\columnwidth}
-		\begin{figure}
-			\centering
-			\includegraphics[width=0.8\linewidth]{figs/w_kl_jsd}
-		\end{figure}
-	\end{minipage}
-	\begin{itemize}
-		\footnotesize
-		\item $\theta = 0$.
-		Distributions are the same 
-		\[
-		KL(\pi || p) = KL(p || \pi) = JSD(p || \pi) = W(\pi, p) = 0
-		\]
-		\item $\theta \neq 0$
-		\[
-		KL(\pi || p) = \int_{U[0, 1]} 1 \log \frac{1}{0} d y = \infty = KL(p || \pi)
-		\]
-		\[
-		JSD(\pi || p) = \frac{1}{2}\left( \int_{U[0, 1]}1 \log \frac{1}{1/2} dy + \int_{U[0, 1]}1 \log \frac{1}{1/2} dy \right) = \log 2
-		\]
-		\[
-		W(\pi, p) = |\theta|
-		\]
-	\end{itemize}
-	
-	\myfootnote{\href{https://arxiv.org/abs/1904.08994}{Weng L. From GAN to WGAN, 2019} \\ 
-		\href{https://arxiv.org/abs/1701.07875}{Arjovsky M., Chintala S., Bottou L. Wasserstein GAN, 2017}}
-\end{frame}
-%=======
-\begin{frame}{Wasserstein distance vs KL vs JSD}
-	\begin{block}{Theorem 1}
-		Let $\bG_{\btheta}(\bz)$ be (almost) any feedforward neural network, and $p(\bz)$ a prior over $\bz$ such that $\bbE_{p(\bz)} \|\bz\| < \infty$. Then therefore $W(\pi, p)$ is continuous everywhere and differentiable almost everywhere.
-	\end{block}
-	\begin{block}{Theorem 2}
-		Let $\pi$ be a distribution on a compact space $\cX$ and $\{p_t\}_{t=1}^\infty$ be a sequence of distributions on $\cX$. 
-		\begin{align}
-			KL(\pi || p_t) &\rightarrow 0 \, (\text{or }KL (p_t || \pi) \rightarrow 0) \\
-			JSD(\pi || p_t) &\rightarrow 0 \\
-			W(\pi || p_t) &\rightarrow 0
-		\end{align}
-		
-		Then, considering limits as $t \rightarrow \infty$, (1) implies (2), (2) implies (3).
-	\end{block}
-	\myfootnotewithlink{https://arxiv.org/abs/1701.07875}{Arjovsky M., Chintala S., Bottou L. Wasserstein GAN, 2017}
-\end{frame}
-%=======
-\begin{frame}{Wasserstein GAN}
-	\begin{block}{Wasserstein distance}
-		\vspace{-0.5cm}
-		\[
-		W(\pi || p) = \inf_{\gamma \in \Gamma(\pi, p)} \bbE_{(\bx, \by) \sim \gamma} \| \bx - \by \| =  \inf_{\gamma \in \Gamma(\pi, p)} \int \| \bx - \by \| \gamma (\bx, \by) d \bx d \by
-		\]
-		\vspace{-0.3cm}
-	\end{block}
-	The infimum across all possible joint distributions in $\Gamma(\pi, p)$ is intractable.
-	\begin{block}{Theorem (Kantorovich-Rubinstein duality)}
+	\begin{block}{f-divergence minimization}
 		\vspace{-0.3cm}
 		\[
-		W(\pi || p) = \frac{1}{K} \max_{\| f \|_L \leq K} \left[ \bbE_{\pi(\bx)} f(\bx)  - \bbE_{p(\bx)} f(\bx)\right],
-		\]
-		where $f : \bbR^n \rightarrow \bbR$, $\| f \|_L \leq K$ are $K-$Lipschitz continuous functions ($f: \cX \rightarrow \bbR$)
-		\vspace{-0.2cm}
-		\[
-		|f(\bx_1) - f(\bx_2)| \leq K \| \bx_1 - \bx_2 \|, \quad \text{for all } \bx_1, \bx_2 \in \cX.
-		\]
-		\vspace{-0.6cm}
-	\end{block}
-	Now we need only samples to get Monte Carlo estimate for $W(\pi || p)$.
-	
-	\myfootnotewithlink{https://arxiv.org/abs/1701.07875}{Arjovsky M., Chintala S., Bottou L. Wasserstein GAN, 2017}
-\end{frame}
-%=======
-\section{Lipschitzness of Wasserstein GAN critic}
-%=======
-\subsection{Wasserstein GAN}
-%=======
-\begin{frame}{Wasserstein GAN}
-	\begin{block}{Theorem (Kantorovich-Rubinstein duality)}
-		\[
-		W(\pi || p) = \frac{1}{K} \max_{\| f \|_L \leq K} \left[ \bbE_{\pi(\bx)} f(\bx)  - \bbE_{p(\bx)} f(\bx)\right],
-		\]
-	\end{block}
-	\begin{itemize}
-		\item Now we have to ensure that $f$ is $K$-Lipschitz continuous.
-		\item Let $f_{\bphi}(\bx)$ be a feedforward neural network parametrized by~$\bphi$.
-		\item If parameters $\bphi$ lie in a compact set $\boldsymbol{\Phi}$ then $f_{\bphi}(\bx)$ will be $K$-Lipschitz continuous function. 
-		\item Let the parameters be clamped to a fixed box $\boldsymbol{\Phi} \in [-c, c]^d$ (e.x. $c = 0.01$) after each gradient update.
-	\end{itemize}
-	\begin{multline*}
-		K \cdot W(\pi || p) = \max_{\| f \|_L \leq K} \left[ \bbE_{\pi(\bx)} f(\bx)  - \bbE_{p(\bx)} f(\bx)\right] \geq \\  \geq \max_{\bphi \in \boldsymbol{\Phi}} \left[ \bbE_{\pi(\bx)} f_{\bphi}(\bx)  - \bbE_{p(\bx)} f_{\bphi}(\bx)\right]
-	\end{multline*}
-	
-	\myfootnotewithlink{https://arxiv.org/abs/1701.07875}{Arjovsky M., Chintala S., Bottou L. Wasserstein GAN, 2017}
-\end{frame}
-%=======
-\begin{frame}{Wasserstein GAN}
-	\begin{block}{Standard GAN objective}
-		\vspace{-0.2cm}
-		\[
-		\min_{\btheta} \max_{\bphi} \bbE_{\pi(\bx)} \log D_{\bphi}(\bx) + \bbE_{p(\bz)} \log (1 - D_{\bphi}(\bG_{\btheta}(\bz)))
-		\]
-		\vspace{-0.2cm}
-	\end{block}
-	\begin{block}{WGAN objective}
-		\vspace{-0.3cm}
-		\[
-		\min_{\btheta} W(\pi || p) \approx \min_{\btheta} \max_{\bphi \in \boldsymbol{\Phi}} \left[ \bbE_{\pi(\bx)} f_{\bphi}(\bx)  - \bbE_{p(\bz)} f_{\bphi}(\bG_{\btheta}(\bz))\right].
-		\]
-		\vspace{-0.3cm}
-	\end{block}
-	\begin{itemize}
-		\item Discriminator $D$ is similar to the function $f$, but not the same (it is not a classifier anymore). In the WGAN model, function~$f$ is usually called $\textbf{critic}$.
-		\item \textit{"Weight clipping is a clearly terrible way to enforce a Lipschitz constraint"}. If the clipping parameter $c$ is too large, it is hard to train the critic till optimality. If the clipping parameter $c$ is too small, it could lead to vanishing gradients.
-	\end{itemize}
-	
-	\myfootnotewithlink{https://arxiv.org/abs/1701.07875}{Arjovsky M., Chintala S., Bottou L. Wasserstein GAN, 2017}
-\end{frame}
-%=======
-\begin{frame}{Wasserstein GAN}
-	\begin{minipage}[t]{0.6\columnwidth}
-		\begin{itemize}
-			\item WGAN has non-zero gradients for disjoint supports.
-			\item $JSD(\pi || p)$ correlates poorly with the sample quality. Stays constast nearly maximum value $\log 2 \approx 0.69$.
-			\item $W(\pi || p)$ is highly correlated with the sample quality. 
-		\end{itemize}
-	\end{minipage}%
-	\begin{minipage}[t]{0.4\columnwidth}
-		\begin{figure}
-			\centering
-			\includegraphics[width=\linewidth]{figs/wgan_toy}
-		\end{figure}
-	\end{minipage}
-	\begin{minipage}[t]{0.5\columnwidth}
-		\begin{figure}
-			\centering
-			\includegraphics[width=1.0\linewidth]{figs/dcgan_quality}
-		\end{figure}
-	\end{minipage}%
-	\begin{minipage}[t]{0.5\columnwidth}
-		\begin{figure}
-			\centering
-			\includegraphics[width=1.0\linewidth]{figs/wgan_quality}
-		\end{figure}
-	\end{minipage}
-	
-	\myfootnotewithlink{https://arxiv.org/abs/1701.07875}{Arjovsky M., Chintala S., Bottou L. Wasserstein GAN, 2017}
-\end{frame}
-%=======
-\subsection{WGAN with Gradient Penalty}
-%=======
-\begin{frame}{Wasserstein GAN with Gradient Penalty}
-	\vspace{-0.2cm}
-	\begin{figure}
-		\centering
-		\includegraphics[width=0.9\linewidth]{figs/wgan_gp_weights}
-	\end{figure}
-	\vspace{-0.2cm} 
-	
-	\begin{block}{Weight clipping analysis}
-		\begin{itemize}
-			\item The gradients either grow or decay exponentially.
-			\item Gradient penalty makes the gradients more stable.
-		\end{itemize}
-	\end{block}
-	\myfootnotewithlink{https://arxiv.org/abs/1704.00028}{Gulrajani I. et al. Improved Training of Wasserstein GANs, 2017}
-\end{frame}
-%=======
-\begin{frame}{Wasserstein GAN with Gradient Penalty}
-	\begin{block}{Theorem}
-		Let $\pi(\bx)$ and $p(\bx)$ be two distribution in $\cX$, a compact metric space. Let $\gamma$ be the optimal transportation plan between $\pi(\bx)$ and $p(\bx)$. Then
-		\begin{enumerate}
-			\item there is 1-Lipschitz function $f^*$ which is the optimal solution of 
-			\[
-				\max_{\| f \|_L \leq 1} \left[ \bbE_{\pi(\bx)} f(\bx)  - \bbE_{p(\bx)} f(\bx)\right].
-			\]
-			\item if $f^*$ is differentiable, $\gamma(\by = \bz) = 0$ and $\hat{\bx}_t = t \by + (1 - t) \bz$ with $\by \sim \pi(\bx)$, $\bz \sim p(\bx | \btheta)$, $t \in [0, 1]$ it holds that
-			\[
-				\bbP_{(\by, \bz) \sim \gamma} \left[ \nabla f^*(\hat{\bx}_t) = \frac{\bz - \hat{\bx}_t}{\| \bz - \hat{\bx}_t \|} \right] = 1.
-			\]
-		\end{enumerate}
-	\end{block}
-	\vspace{-0.5cm}
-	\begin{block}{Corollary}
-		$f^*$ has gradient norm 1 almost everywhere under $\pi(\bx)$ and $p(\bx)$.
-	\end{block}
-
-	\myfootnotewithlink{https://arxiv.org/abs/1704.00028}{Gulrajani I. et al. Improved Training of Wasserstein GANs, 2017}
-\end{frame}
-%=======
-\begin{frame}{Wasserstein GAN with Gradient Penalty}
-	A differentiable function is 1-Lipschtiz if and only if it has gradients with norm at most 1 everywhere.
-	\begin{block}{Gradient penalty}
-		\vspace{-0.3cm}
-		\[
-			W(\pi || p) = \underbrace{\bbE_{\pi(\bx)} f(\bx)  - \bbE_{p(\bx)} f(\bx)}_{\text{original critic loss}} + \lambda \underbrace{\bbE_{U[0, 1]} \left[ \left( \| \nabla f(\hat{\bx}) \|_2 - 1 \right) ^ 2\right]}_{\text{gradient penalty}},
-		\]
-		\vspace{-0.3cm}
-	\end{block}
-	\begin{itemize}
-		\item Samples $\hat{\bx}_t = t \cdot \by + (1 - t) \cdot \bz$ with $t \in [0, 1]$ are uniformly sampled along straight lines between pairs of points: $\by \sim \pi(\bx)$ and $\bz \sim p(\bx | \btheta)$.
-		\item Enforcing the unit gradient norm constraint everywhere is intractable, it turns out to be sifficient to enforce it only along these straight lines.
-	\end{itemize}
-
-	\myfootnotewithlink{https://arxiv.org/abs/1704.00028}{Gulrajani I. et al. Improved Training of Wasserstein GANs, 2017}
-\end{frame}
-%=======
-\section{f-divergence minimization}
-%=======
-\begin{frame}{Divergences}
-	\begin{itemize}
-		\item Forward KL divergence in maximum likelihood estimation.
-		\item Reverse KL in variational inference.
-		\item JS divergence in standard GAN.
-		\item Wasserstein distance in WGAN.
-	\end{itemize}
-	\begin{block}{What is a divergence?}
-		Let $\cP$ be the set of all possible probability distributions. Then $D: \cP \times \cP \rightarrow \bbR$ is a divergence if 
-		\begin{itemize}
-			\item $D(\pi || p) \geq 0$ for all $\pi, p \in \cP$;
-			\item $D(\pi || p) = 0$ if and only if $\pi \equiv p$.
-		\end{itemize}
-	\end{block}
-	\begin{block}{General divergence minimization task}
-		\vspace{-0.3cm}
-		\[
-			\min_p D(\pi || p)
-		\]
-		\vspace{-0.7cm}
-	\end{block}
-	\begin{block}{Chalenge}
-		We do not know the real distribution $\pi(\bx)$!
-	\end{block}
-\end{frame}
-%=======
-\begin{frame}{f-divergence family}
-	
-	\begin{block}{f-divergence}
-		\vspace{-0.3cm}
-		\[
-		D_f(\pi || p) = \bbE_{p(\bx)}  f\left( \frac{\pi(\bx)}{p(\bx)} \right)  = \int p(\bx) f\left( \frac{\pi(\bx)}{p(\bx)} \right) d \bx.
+			D_f(\pi || p) = \bbE_{p(\bx)}  f\left( \frac{\pi(\bx)}{p(\bx)} \right) \rightarrow \min_p.
 		\]
 		Here $f: \bbR_+ \rightarrow \bbR$ is a convex, lower semicontinuous function satisfying $f(1) = 0$.
 	\end{block}
-	\begin{figure}
-		\centering
-		\includegraphics[width=\linewidth]{figs/f_divs}
-	\end{figure}
-	\myfootnotewithlink{https://arxiv.org/abs/1606.00709}{Nowozin S., Cseke B., Tomioka R. f-GAN: Training Generative Neural Samplers using Variational Divergence Minimization, 2016}
-\end{frame}
-%=======
-\begin{frame}{f-divergence family}
-	\vspace{-0.2cm}
+	\begin{block}{Variational divergence estimation}
+		\vspace{-0.3cm}
+		\[
+			D_f(\pi || p) \geq \sup_{T \in \cT} \left[\bbE_{\pi}T(\bx) -  \bbE_p f^*(T(\bx)) \right],
+		\]
+		\vspace{-0.7cm}
+	\end{block}
 	\begin{block}{Fenchel conjugate}
 		\vspace{-0.7cm}
 		\[
@@ -438,94 +31,484 @@
 		\]
 		\vspace{-0.5cm}
 	\end{block}
-	\textbf{Important property:} $ f^{**} = f$ for convex $f$.
-	\begin{block}{f-divergence}
-		\vspace{-0.8cm}
+	\textbf{Note:} To evaluate lower bound we only need samples from $\pi(\bx)$ and $p(\bx)$. Hence, we could fit implicit generative model.
+	\myfootnotewithlink{https://arxiv.org/abs/1606.00709}{Nowozin S., Cseke B., Tomioka R. f-GAN: Training Generative Neural Samplers using Variational Divergence Minimization, 2016}
+\end{frame}
+%=======
+\begin{frame}{Recap of previous lecture}
+	How to evaluate likelihood-free models?
+	
+	$p(y | \bx)$ -- pretrained image classification model (e.g. ImageNet classifier).
+	\begin{block}{What do we want from samples?}
+		\begin{itemize}
+			\item \textbf{Sharpness}
+			\begin{figure}
+				\centering
+				\includegraphics[width=0.9\linewidth]{figs/sharpness}
+			\end{figure}
+			$p(y | \bx)$ has low entropy (each image $\bx$ should have distinctly recognizable object).
+			\item \textbf{Diversity}
+			\begin{figure}
+				\centering
+				\includegraphics[width=0.9\linewidth]{figs/diversity}
+			\end{figure}
+			$p(y) = \int p(y | \bx) p(\bx) d \bx$ has high entropy (there should be as many classes generated as possible).
+		\end{itemize}
+	\end{block}
+	\myfootnotewithlink{https://deepgenerativemodels.github.io}{image credit: https://deepgenerativemodels.github.io}
+\end{frame}
+%=======
+\begin{frame}{Recap of previous lecture}
+	\vspace{-0.3cm}
+	\begin{block}{Frechet Inception Distance (FID)}
+		In case of Normal distributions $\pi(\bx) = \cN(\bmu_\pi, \bSigma_\pi)$, $p(\by) = \cN(\bmu_p, \bSigma_p)$:
+		\vspace{-0.3cm}
 		\begin{multline*}
-			D_f(\pi || p) = \bbE_{p(\bx)}  f\left( \frac{\pi(\bx)}{p(\bx)} \right)  = \int p(\bx) {\color{violet}f\left( \frac{\pi(\bx)}{p(\bx)} \right) } d \bx = \\ = \int p(\bx) {\color{violet} \sup_{t \in \text{dom}_{f^*}} \left( \frac{\pi(\bx)}{p(\bx)} t - f^*(t) \right)} d \bx = \\ 
-			= \int \sup_{t \in \text{dom}_{f^*}} \left( \pi(\bx)t - p(\bx) f^*(t) \right) d \bx .
+			\text{FID} (\pi, p) =  W_2^2(\pi, p) = \inf_{\gamma \in \Gamma(\pi, p)} \bbE_{(\bx, \by) \sim \gamma} \| \bx - \by \|^2 \\
+			= \| \bmu_{\pi} - \bmu_{p}\|_2^2 + \text{tr} \left[ \bSigma_{\pi} + \bSigma_p - 2 \left(\bSigma_{\pi}^{1/2} \bSigma_p \bSigma_{\pi}^{1/2} \right)^{1/2} \right]
 		\end{multline*}
 		\vspace{-0.6cm}
-	\end{block}
-	Here we seek value of $t$, which gives us maximum value of $ \pi(\bx)t - p(\bx) f^*(t)$, for each data point $\bx$.
-	\myfootnotewithlink{https://arxiv.org/abs/1606.00709}{Nowozin S., Cseke B., Tomioka R. f-GAN: Training Generative Neural Samplers using Variational Divergence Minimization, 2016}
+	\end{block}		
+	\begin{block}{Maximum Mean Discrepancy (MMD)}
+		$\pi(\bx) = p(\by)$ if and only if $\bbE_{\pi(\bx)} f(\bx) = \bbE_{p(\by)} f(\by)$ for any bounded and continuous $f$
+		\[
+			\text{MMD}^2(\pi, p) = \bbE_{\substack{\bx \sim\pi(\bx) \\ \bx' \sim\pi(\bx)}} k(\bx, \bx') + \bbE_{\substack{\by \sim p(\by) \\ \by' \sim p(\by)}} k(\by, \by') - 2 \bbE_{\substack{\bx \sim\pi(\bx) \\ \by \sim p(\by)}} k(\bx, \by)
+		\]
+	\end{block}		
+	
+	\myfootnote{\href{https://arxiv.org/abs/1706.08500}{Heusel M. et al. GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium, 2017} \\
+	\href{https://arxiv.org/abs/2401.09603}{Jayasumana S. et al. Rethinking FID: Towards a Better Evaluation Metric for Image Generation, 2024} }
 \end{frame}
 %=======
-\begin{frame}{f-divergence family}
+\begin{frame}{Recap of previous lecture}
+		\begin{itemize}
+			\item $\cS_{\pi} = \{\bx_i\}_{i=1}^{n} \sim \pi(\bx)$ -- real samples;
+			\item $\cS_{p} = \{\bx_i\}_{i=1}^{n} \sim p(\bx | \btheta)$ -- generated samples.
+		\end{itemize}
+		Embed samples using pretrained classifier network (as previously):
+		\[
+			\cG_{\pi} = \{\mathbf{g}_i\}_{i=1}^n, \quad \cG_{p} = \{\mathbf{g}_i\}_{i=1}^n.
+		\]
+		Define binary function:
+		\[
+			f(\mathbf{g}, \cG) = 
+			\begin{cases}
+				1, \text{if exists } \mathbf{g}' \in \cG: \| \mathbf{g}  - \mathbf{g}'\|_2 \leq \| \mathbf{g}' - \text{NN}_k(\mathbf{g}', \cG)\|_2; \\
+				0, \text{otherwise.}
+			\end{cases}
+		\]
+		\[
+			\text{Precision} (\cG_{\pi}, \cG_{p}) = \frac{1}{n} \sum_{\mathbf{g} \in \cG_{p}} f(\mathbf{g}, \cG_{\pi}); \quad \text{Recall} (\cG_{\pi}, \cG_{p}) = \frac{1}{n} \sum_{\mathbf{g} \in \cG_{\pi}} f(\mathbf{g}, \cG_{p}).
+		\]
+		\vspace{-0.4cm}
+		\begin{figure}
+			\includegraphics[width=0.7\linewidth]{figs/pr_k_nearest}
+		\end{figure}
+		\myfootnotewithlink{https://arxiv.org/abs/1904.06991}{Kynkäänniemi T. et al. Improved precision and recall metric for assessing generative models, 2019}
+\end{frame}
+%=======
+\begin{frame}{Outline}
+	\tableofcontents
+\end{frame}
+%=======
+\section{Langevin dynamic}
+%=======
+\begin{frame}{Langevin dynamic}
 	\vspace{-0.4cm}
-	\begin{block}{f-divergence}
+	\begin{block}{Statement}
+		Let $\bx_0$ be a random vector. Then samples from the following dynamics
 		\vspace{-0.3cm}
 		\[
-		D_f(\pi || p) = \bbE_{p(\bx)}  f\left( \frac{\pi(\bx)}{p(\bx)} \right)  = \int p(\bx) f\left( \frac{\pi(\bx)}{p(\bx)} \right) d \bx.
+			\bx_{l + 1} = \bx_l + \frac{\eta}{2} \cdot \nabla_{\bx_l} \log p(\bx_l | \btheta) + \sqrt{\eta} \cdot \bepsilon, \quad \bepsilon \sim \cN(0, \bI).
 		\]
-		\vspace{-0.4cm}
+		will come from $p(\bx | \btheta)$ (under mild regularity conditions, for small enough $\eta$ and large enough $l$).
 	\end{block}
-	\begin{block}{Variational f-divergence estimation}
-		\vspace{-0.8cm}
-		\begin{multline*}
-			D_f(\pi || p)  = {\color{violet}\int} {\color{teal} \sup_{t \in \text{dom}_{f^*}}} \left( \pi(\bx)t - p(\bx) f^*(t) \right) d \bx \geq \\
-			 \geq {\color{teal}\sup_{T \in \cT}} {\color{violet}\int} \left( \pi(\bx)T(\bx) - p(\bx) f^*(T(\bx)) \right) d \bx = \\
-			 = \sup_{T \in \cT} \left[\bbE_{\pi}T(\bx) -  \bbE_p f^*(T(\bx)) \right]
-		\end{multline*}
-	\vspace{-0.6cm}
-	\end{block}
-	This is a lower bound because of Jensen inequality and restricted class of functions $\cT: \cX \rightarrow \bbR$. 
-	
-	\myfootnotewithlink{https://arxiv.org/abs/1606.00709}{Nowozin S., Cseke B., Tomioka R. f-GAN: Training Generative Neural Samplers using Variational Divergence Minimization, 2016}
-\end{frame}
-%=======
-\begin{frame}{f-divergence family}
-	\begin{block}{Variational divergence estimation}
-		\[
-			D_f(\pi || p) \geq \sup_{T \in \cT} \left[\bbE_{\pi}T(\bx) -  \bbE_p f^*(T(\bx)) \right]
-		\]
-		The lower bound is tight for $T^*(\bx) = f'\left( \frac{\pi(\bx)}{p(\bx)} \right)$.
-	\end{block}
-	\begin{block}{Example (JSD)}
+	\begin{minipage}{0.55\linewidth}
 		\begin{itemize}
-			\item Let define function $f$ and its conjugate $f^*$
-			\[ 
-				f(u) = u \log u - (u + 1) \log (u + 1), \quad f^*(t) = - \log (1 - e^t).
-			\]
-			\item Let reparametrize $T(\bx) = \log D(\bx)$.
+			\item Here we assume that we already have some generative model $p(\bx | \btheta)$.
+			\item The density $p(\bx | \btheta)$ is a \textbf{stationary} distribution for the Markov chain. \\
+			\item What do we get if $\bepsilon = \boldsymbol{0}$?
 		\end{itemize}
-		\vspace{-0.4cm}
+	\end{minipage}%
+	\begin{minipage}{0.4\linewidth}
+		\begin{figure}
+			\centering
+			\includegraphics[width=0.9\linewidth]{figs/langevin_dynamic}
+		\end{figure}
+	\end{minipage}
+	\myfootnotewithlink{https://yang-song.github.io/blog/2021/score/}{Song Y. Generative Modeling by Estimating Gradients of the Data Distribution, blog post, 2021} 
+	\end{frame}
+%=======
+\begin{frame}{Energy-based models}
+	\begin{block}{Langevin dynamic}
+		\vspace{-0.3cm}
+		\[
+			\bx_{l + 1} = \bx_l + \frac{\eta}{2} \cdot \nabla_{\bx_l} \log p(\bx_l | \btheta) + \sqrt{\eta} \cdot \bepsilon, \quad \bepsilon \sim \cN(0, \bI).
+		\]
+		We are able to sample from the model using Langevin dynamics if we have $\nabla_{\bx}\log p(\bx| \btheta)$.
 	\end{block}
-	\[
-		\min_{G} \max_D \left[ \bbE_{\pi(\bx)} \log D(\bx) + \bbE_{p(\bz)} \log (1 - D(\bG(\bz))) \right]
-	\]
-
-	\myfootnotewithlink{https://arxiv.org/abs/1606.00709}{Nowozin S., Cseke B., Tomioka R. f-GAN: Training Generative Neural Samplers using Variational Divergence Minimization, 2016}
+	\begin{block}{Unnormalized density}
+		\vspace{-0.2cm}
+		\[
+			p(\bx | \btheta) = \frac{\hat{p}(\bx | \btheta)}{Z_{\btheta}}, \quad \text{where } Z_{\btheta} = \int \hat{p}(\bx | \btheta) d \bx
+		\]
+		\vspace{-0.3cm}
+		\begin{itemize}
+			\item $\hat{p}(\bx | \btheta)$ is any non-negative function. \\
+			\item If we use the reparametrization $\hat{p}(\bx | \btheta) = \exp(-f_{\btheta}(\bx))$, we remove the non-negativite constraint.
+		\end{itemize}
+		\[
+			\nabla_{\bx} \log p(\bx | \btheta) = \nabla_{\bx} \log \hat{p}(\bx | \btheta) - \nabla_{\bx} \log Z_{\btheta} = \nabla_{\bx} \log \hat{p}(\bx | \btheta)
+		\]
+		The gradient of the normalized density equals to the gradient of the unnormalized density.
+	\end{block}
 \end{frame}
 %=======
-\begin{frame}{f-divergence family}
-	\begin{block}{Variational divergence estimation}
-		\[
-			D_f(\pi || p) \geq \sup_{T \in \cT} \left[\bbE_{\pi}T(\bx) -  \bbE_p f^*(T(\bx)) \right]
-		\]
+\section{Score matching}
+%=======
+\begin{frame}{Score matching}
+	\begin{block}{Score function}
+		\vspace{-0.3cm}
+		 \[
+			 \bs_{\btheta}(\bx) = \nabla_{\bx}\log p(\bx| \btheta)
+		 \]
+		\vspace{-0.5cm} 
 	\end{block}
-	\textbf{Note:} To evaluate lower bound we only need samples from $\pi(\bx)$ and $p(\bx)$. Hence, we could fit implicit generative model.
+	\begin{block}{Langevin dynamic}
+		If we find the score function $\bs_{\btheta}(\bx) = \nabla_{\bx}\log p(\bx| \btheta)$ we will be able to sample from the model using Langevin dynamic. 
+		\[
+			\bx_{l + 1} = \bx_l + \frac{\eta}{2} \cdot {\color{violet}\nabla_{\bx_l} \log p(\bx_l | \btheta)} + \sqrt{\eta} \cdot \bepsilon = \bx_l + \frac{\eta}{2} \cdot  {\color{violet}\bs_{\btheta}(\bx_l)} + \sqrt{\eta} \cdot \bepsilon.
+		\] 
+		\vspace{-0.5cm} 
+	\end{block}
+	\begin{block}{Fisher divergence}
+		\vspace{-0.5cm}
+		\begin{multline*}
+			D_F(\pi, p) = \frac{1}{2}\bbE_{\pi}\bigl\| \nabla_{\bx}\log p(\bx| \btheta) - \nabla_\bx \log \pi(\bx) \bigr\|^2_2 = \\ 
+			= \frac{1}{2}\bbE_{\pi}\bigl\| \bs_{\btheta}(\bx) - \nabla_\bx \log \pi(\bx) \bigr\|^2_2 \rightarrow \min_{\btheta}
+		\end{multline*}
+		\vspace{-0.3cm}
+	\end{block}
+	\myfootnotewithlink{https://yang-song.github.io/blog/2021/score/}{Song Y. Generative Modeling by Estimating Gradients of the Data Distribution, blog post, 2021}
+\end{frame}
+%=======
+\begin{frame}{Score matching}
+	\begin{block}{Fisher divergence}
+		\vspace{-0.3cm}
+		\[
+			D_F(\pi, p) = \frac{1}{2}\bbE_{\pi}\bigl\| \bs_{\btheta}(\bx) - \nabla_\bx \log \pi(\bx) \bigr\|^2_2 \rightarrow \min_{\btheta}
+		\]
+		\vspace{-0.5cm}
+	\end{block}
 	\begin{figure}
 		\centering
-		\includegraphics[width=1.0\linewidth]{figs/f_div_results}
+		\includegraphics[width=\linewidth]{figs/smld}
+	\end{figure} 
+	\textbf{Problem:} We do not know $\nabla_\bx \log \pi(\bx)$.
+	\myfootnotewithlink{https://yang-song.github.io/blog/2021/score/}{Song Y. Generative Modeling by Estimating Gradients of the Data Distribution, blog post, 2021}
+\end{frame}
+%=======
+\section{Denoising score matching}
+%=======
+\begin{frame}{Denoising score matching}
+	Let perturb original data $\bx \sim \pi(\bx)$ by random normal noise 
+	\[
+		\bx_{\sigma} = \bx + \sigma \cdot \bepsilon, \quad \bepsilon \sim \cN(0, \bI), \quad q(\bx_{\sigma} | \bx) = \cN(\bx, \sigma^2 \cdot \bI)
+	\]
+	\vspace{-0.4cm}
+	\[
+		q(\bx_{\sigma}) = \int q(\bx_{\sigma} | \bx) \pi(\bx) d\bx.
+	\]
+	\vspace{-0.4cm} 
+	\begin{block}{Assumption}
+		The solution of 
+		\[
+			\frac{1}{2} \bbE_{\pi(\bx_{\sigma} | \sigma)}\bigl\| \bs_{\btheta, \sigma}(\bx_{\sigma}) - \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma}) \bigr\|^2_2 \rightarrow \min_{\btheta}
+		\]
+		\vspace{-0.3cm} \\
+		satisfies $\bs_{\btheta, \sigma}(\bx_{\sigma}) \approx \bs_{\btheta, 0}(\bx_0) = \bs_{\btheta}(\bx)$ if $\sigma$ is small enough.
+	\end{block}
+	\begin{itemize}
+		\item $\bs_{\btheta, \sigma}(\bx_{\sigma})$ tries to \textbf{denoise} a corrupted sample $\bx_{\sigma}$.
+		\item Score function $\bs_{\btheta, \sigma}(\bx_{\sigma})$ parametrized by $\sigma$. 
+		\item \textbf{Problem:} We don't know $q(\bx_{\sigma})$, just like $\pi(\bx)$.
+	\end{itemize}
+	\myfootnotewithlink{http://www.iro.umontreal.ca/~vincentp/Publications/smdae_techreport.pdf}{Vincent P. A Connection Between Score Matching and Denoising Autoencoders, 2010}
+\end{frame}
+%=======
+\begin{frame}{Denoising score matching}
+	\begin{block}{Theorem}
+	\vspace{-0.5cm}
+	\begin{multline*}
+		\bbE_{q(\bx_{\sigma})}\underbrace{\bigl\| \bs_{\btheta, \sigma}(\bx_{\sigma}) - \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma}) \bigr\|^2_2}_{h(\bx_{\sigma})} = \\
+		= \bbE_{\pi(\bx)} \bbE_{q(\bx_{\sigma} | \bx)}\bigl\| \bs_{\btheta, \sigma}(\bx_{\sigma}) - \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma} | \bx) \bigr\|^2_2 + \text{const}(\btheta)
+	\end{multline*}
+	\vspace{-0.5cm}
+	\end{block}
+	\begin{block}{Proof}
+		\vspace{-0.7cm}
+		\begin{multline*}
+			\bbE_{q(\bx_{\sigma})} h(\bx_{\sigma}) = \int {\color{violet}q(\bx_{\sigma})} h(\bx_{\sigma}) d\bx_{\sigma} = \\
+			= \int \left({\color{violet}\int q(\bx_{\sigma} | \bx) \pi(\bx) d\bx}\right) h(\bx_{\sigma}) d\bx_{\sigma} =  \bbE_{\pi(\bx)} \bbE_{q(\bx_{\sigma} | \bx)}  h(\bx_{\sigma}) d\bx_{\sigma}
+		\end{multline*}
+		\vspace{-0.7cm}
+		{\small
+		\begin{multline*}
+			\bbE_{q(\bx_{\sigma})}\bigl\| \bs_{\btheta, \sigma}(\bx_{\sigma}) - \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma}) \bigr\|^2_2 = \\ 
+			= \bbE_{q(\bx_{\sigma})} \Bigl[\| \bs_{\btheta, \sigma}(\bx_{\sigma}) \|^2 + \underbrace{\| \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma}) \|^2_2}_{\text{const}(\btheta)} - 2 {\color{teal}\bs_{\btheta, \sigma}^T(\bx_{\sigma}) \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma})} \Bigr]
+		\end{multline*}
+		}
+	\end{block}
+	\myfootnotewithlink{http://www.iro.umontreal.ca/~vincentp/Publications/smdae_techreport.pdf}{Vincent P. A Connection Between Score Matching and Denoising Autoencoders, 2010}
+\end{frame}
+%=======
+\begin{frame}{Denoising score matching}
+	\begin{block}{Theorem}
+	\vspace{-0.5cm}
+	\begin{multline*}
+		\bbE_{q(\bx_{\sigma})}\bigl\| \bs_{\btheta, \sigma}(\bx_{\sigma}) - \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma}) \bigr\|^2_2 = \\
+		= \bbE_{\pi(\bx)} \bbE_{q(\bx_{\sigma} | \bx)}\bigl\| \bs_{\btheta, \sigma}(\bx_{\sigma}) - \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma} | \bx) \bigr\|^2_2 + \text{const}(\btheta)
+	\end{multline*}
+	\vspace{-0.5cm}
+	\end{block}
+	\begin{block}{Proof (continued)}
+		\vspace{-0.7cm}
+		{\small
+		\begin{multline*}
+			\bbE_{q(\bx_{\sigma})} \left[{\color{teal}\bs_{\btheta, \sigma}^T(\bx_{\sigma}) \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma})} \right] = \int q(\bx_{\sigma}) \left[\bs_{\btheta, \sigma}^T(\bx_{\sigma}) \frac{\nabla_{\bx_{\sigma}} {\color{violet}q(\bx_{\sigma})}}{q(\bx_{\sigma})} \right] d\bx_{\sigma} = \\
+			= \int \left[\bs_{\btheta, \sigma}^T(\bx_{\sigma}) \nabla_{\bx_{\sigma}}\left({\color{violet}\int q(\bx_{\sigma} | \bx) \pi(\bx) d\bx}\right) \right] d\bx_{\sigma} = \\
+			=  \int \int \pi(\bx) \left[\bs_{\btheta, \sigma}^T(\bx_{\sigma}) {\color{olive}\nabla_{\bx_{\sigma}}q(\bx_{\sigma} | \bx)} \right] d\bx_{\sigma} d\bx = \\
+			= \int \int \pi(\bx) {\color{olive} q(\bx_{\sigma} | \bx)} \left[\bs_{\btheta, \sigma}^T(\bx_{\sigma}) {\color{olive}\nabla_{\bx_{\sigma}} \log q(\bx_{\sigma} | \bx)} \right] d\bx_{\sigma} d\bx = \\
+			= \bbE_{\pi(\bx)} \bbE_{q(\bx_{\sigma} | \bx)} \left[{\color{teal}\bs_{\btheta, \sigma}^T(\bx_{\sigma}) \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma} | \bx)} \right]
+		\end{multline*}
+		}
+	\end{block}
+	\myfootnotewithlink{http://www.iro.umontreal.ca/~vincentp/Publications/smdae_techreport.pdf}{Vincent P. A Connection Between Score Matching and Denoising Autoencoders, 2010}
+\end{frame}
+%=======
+\begin{frame}{Denoising score matching}
+	\vspace{-0.3cm}
+	\begin{block}{Theorem}
+	\vspace{-0.7cm}
+	\begin{multline*}
+		\bbE_{q(\bx_{\sigma})}\bigl\| \bs_{\btheta, \sigma}(\bx_{\sigma}) - \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma}) \bigr\|^2_2 = \\
+		= \bbE_{\pi(\bx)} \bbE_{q(\bx_{\sigma} | \bx)}\bigl\| \bs_{\btheta, \sigma}(\bx_{\sigma}) - \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma} | \bx) \bigr\|^2_2 + \text{const}(\btheta)
+	\end{multline*}
+	\vspace{-0.9cm}
+	\end{block}
+	\begin{block}{Proof (continued)}
+		\vspace{-0.7cm}
+		{\small
+		\begin{multline*}
+			\bbE_{q(\bx_{\sigma})}\bigl\| \bs_{\btheta, \sigma}(\bx_{\sigma}) - \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma}) \bigr\|^2_2 = \\ 
+			= {\color{olive}\bbE_{\pi(\bx)} \bbE_{q(\bx_{\sigma} | \bx)}}\Bigl[\| \bs_{\btheta, \sigma}(\bx_{\sigma}) \|^2 - 2 \bs_{\btheta, \sigma}^T(\bx_{\sigma}) {\color{teal}\nabla_{\bx_{\sigma}} \log q(\bx_{\sigma} | \bx)} \Bigr] + \text{const}(\btheta) \\
+			= {\color{olive}\bbE_{\pi(\bx)} \bbE_{q(\bx_{\sigma} | \bx)}} \bigl\|\bs_{\btheta, \sigma}(\bx_{\sigma}) - {\color{teal}\nabla_{\bx_{\sigma}} \log q(\bx_{\sigma} | \bx)} \bigr\|_2^2 + \text{const}(\btheta)
+		\end{multline*}
+		}
+		\vspace{-0.8cm}
+	\end{block}
+	\begin{block}{Gradient of the noise kernel}
+	\vspace{-0.3cm}
+	\[
+		\nabla_{\bx_{\sigma}} \log q(\bx_{\sigma} | \bx) = \nabla_{\bx_{\sigma}} \log \cN(\bx, \sigma^2 \bI) = - \frac{\bx_{\sigma} - \bx}{\sigma^2}  = - \frac{\bepsilon}{\sigma}
+	\]
+	\vspace{-0.5cm}
+	\end{block}
+	The RHS does not need to compute $\nabla_{\bx_{\sigma}} \log q(\bx_{\sigma})$ and even $\nabla_{\bx_{\sigma}} \log \pi(\bx_{\sigma})$.
+	\myfootnotewithlink{http://www.iro.umontreal.ca/~vincentp/Publications/smdae_techreport.pdf}{Vincent P. A Connection Between Score Matching and Denoising Autoencoders, 2010}
+\end{frame}
+%=======
+\begin{frame}{Denoising score matching}
+	Initial objective:
+	\vspace{-0.2cm}
+	\[
+		\bbE_{\pi}\bigl\| \bs_{\btheta}(\bx) - \nabla_\bx \log \pi(\bx) \bigr\|^2_2 \rightarrow \min_{\btheta}
+	\]
+	\vspace{-0.5cm} \\
+	Noised objective:
+	\vspace{-0.2cm}
+	\[
+		\bbE_{\pi}\bigl\| \bs_{\btheta, \sigma}(\bx_\sigma) - \nabla_\bx \log q(\bx_{\sigma}) \bigr\|^2_2 \rightarrow \min_{\btheta}
+	\]
+	\vspace{-0.5cm} \\
+	This is equivalent to denoising task
+	\vspace{-0.2cm}
+	\[
+		\bbE_{\pi(\bx)} \bbE_{q(\bx_{\sigma} | \bx)}\bigl\| \bs_{\btheta, \sigma}(\bx_{\sigma}) - \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma} | \bx) \bigr\|^2_2 \rightarrow \min_{\btheta}
+	\]
+	\vspace{-0.3cm}
+	\[
+		\bbE_{\pi(\bx)} \bbE_{\cN(0, \bI)}\left\| \bs_{\btheta, \sigma}(\bx + \sigma \cdot \bepsilon) + \frac{\bepsilon}{\sigma} \right\|^2_2 \rightarrow \min_{\btheta}
+	\]
+	\vspace{-0.5cm}
+	\begin{block}{Langevin dynamic}
+		\vspace{-0.3cm}
+		\[
+			\bx_{l + 1} = \bx_l + \frac{\eta}{2} \cdot \bs_{\btheta, \sigma}(\bx_l) + \sqrt{\eta} \cdot \bepsilon, \quad \bepsilon \sim \cN(0, \bI).
+		\]
+		\vspace{-0.7cm}
+	\end{block}
+	\myfootnotewithlink{https://yang-song.github.io/blog/2021/score/}{Song Y. Generative Modeling by Estimating Gradients of the Data Distribution, blog post, 2021}
+\end{frame}
+%=======
+\section{Noise Conditioned Score Network (NCSN)}
+%=======
+\begin{frame}{Denoising score matching}
+	\begin{itemize}
+		\item If $\sigma$ is \textbf{small}, the score function is not accurate and Langevin dynamics will probably fail to jump between modes.
+		\begin{figure}
+			\includegraphics[width=0.75\linewidth]{figs/pitfalls}
+		\end{figure}
+		\item If $\sigma$ is \textbf{large}, it is good for low-density regions and  multimodal distributions, but we will learn too corrupted distribution.
+		\begin{figure}
+			\includegraphics[width=0.75\linewidth]{figs/single_noise}
+		\end{figure}
+	\end{itemize}
+	\myfootnotewithlink{https://yang-song.github.io/blog/2021/score/}{Song Y. Generative Modeling by Estimating Gradients of the Data Distribution, blog post, 2021}
+\end{frame}
+%=======
+\begin{frame}{Noise Conditioned Score Network (NCSN)}
+	\begin{itemize}
+		\item Define the sequence of the noise levels: $\sigma_1 < \sigma_2 < \dots < \sigma_T$.
+		\item Perturb the original data with the different noise levels to obtain $\bx_t = \bx + \sigma_t \cdot \bepsilon$, $\bx_t \sim q(\bx_t)$. 
+		\item Choose $\sigma_1, \sigma_T$ such that:
+		\[
+			q(\bx_1) \approx \pi(\bx), \quad q(\bx_T) \approx \cN(0, \sigma_T^2 \cdot \bI).
+		\]
+	\end{itemize}
+	\begin{figure}
+		\includegraphics[width=0.6\linewidth]{figs/multi_scale}
 	\end{figure}
-
-	\myfootnotewithlink{https://arxiv.org/abs/1606.00709}{Nowozin S., Cseke B., Tomioka R. f-GAN: Training Generative Neural Samplers using Variational Divergence Minimization, 2016}
+	\begin{figure}
+		\includegraphics[width=\linewidth]{figs/duoduo}
+	\end{figure}
+	\myfootnotewithlink{https://arxiv.org/abs/1907.05600}{Song Y. et al. Generative Modeling by Estimating Gradients of the Data Distribution, 2019}
+\end{frame}
+%=======
+\begin{frame}{Noise Conditioned Score Network (NCSN)}
+	Train the denoising score function $\bs_{\btheta, \sigma_t}(\bx_t)$ for each noise level using unified weighted objective:
+	\vspace{-0.2cm}
+	\[
+		\sum_{t=1}^T {\color{violet}\sigma_t^2} \cdot \bbE_{\pi(\bx)} \bbE_{q(\bx_t | \bx)}\bigl\| \bs_{\btheta, \sigma_t}(\bx_t) - \nabla_{\bx_t} \log q(\bx_t | \bx) \bigr\|^2_2 \rightarrow \min_{\btheta}
+	\]
+	Here $\nabla_{\bx_t} \log q(\bx_t | \bx) = - \frac{\bx_t - \bx}{\sigma_t^2} = - \frac{\bepsilon}{\sigma_t}$.
+	\begin{block}{Training}
+		\begin{enumerate}
+			\item Get the sample $\bx_0 \sim \pi(\bx)$.
+			\item Sample noise level $t \sim U\{1, T\}$ and the noise $\bepsilon \sim \cN(0, \bI)$.
+			\item Get noisy image $\bx_t = \bx_0 + \sigma_t \cdot \bepsilon$.
+			\item Compute loss $ \cL = \sigma_t^2 \cdot \| \bs_{\btheta, \sigma_t}(\bx_t) + \frac{\bepsilon}{\sigma_t} \|^2 $.
+		\end{enumerate}
+	\end{block}
+	How to sample from this model?
+	\myfootnotewithlink{https://arxiv.org/abs/1907.05600}{Song Y. et al. Generative Modeling by Estimating Gradients of the Data Distribution, 2019}
+\end{frame}
+%=======
+\begin{frame}{Noise Conditioned Score Network (NCSN)}
+	\begin{block}{Sampling (annealed Langevin dynamics)}
+		\begin{itemize}
+			\item Sample $\bx_0 \sim \cN(0, \sigma_T^2 \cdot \bI) \approx q(\bx_T)$.
+			\item Apply $L$ steps of Langevin dynamic
+			\vspace{-0.2cm}
+			\[
+				\bx_l = \bx_{l-1} + \frac{\eta_t}{2} \cdot \bs_{\btheta, \sigma_t}(\bx_{l - 1}) + \sqrt{\eta_t} \cdot \bepsilon_l.
+			\] 
+			\vspace{-0.5cm}
+			\item Update $\bx_0 := \bx_L$ and choose the next $\sigma_t$.
+		\end{itemize}
+	\end{block}
+	\begin{figure}
+		\includegraphics[width=0.9\linewidth]{figs/ald}
+	\end{figure}
+	\myfootnotewithlink{https://arxiv.org/abs/2006.09011}{Song Y. et al. Improved Techniques for Training Score-Based Generative Models, 2020}
+\end{frame}
+%=======
+\section{Forward gaussian diffusion process}
+%=======
+\begin{frame}{Forward gaussian diffusion process}
+	Let $\bx_0 = \bx \sim \pi(\bx)$, $\beta_t \in (0, 1)$. Define the Markov chain
+	\[
+		\bx_t = \sqrt{1 - \beta_t} \cdot \bx_{t - 1} + \sqrt{\beta_t} \cdot \bepsilon_t, \quad \text{where }\bepsilon_t \sim \cN(0, \bI);
+	\]
+	\[
+		q(\bx_t | \bx_{t-1}) = \cN(\sqrt{1 - \beta_t} \cdot \bx_{t-1}, \beta_t \cdot \bI).
+	\]
+	\vspace{-0.5cm}
+	\begin{block}{Statement 1}
+		Let denote $\alpha_t = 1 - \beta_t$ and $\bar{\alpha}_t = \prod_{s=1}^t \alpha_s = \prod_{s=1}^t (1 - \beta_s)$. Then
+		\[
+			q(\bx_t | \bx_0) = \cN(\sqrt{\bar{\alpha}_t} \cdot \bx_0, (1 - \bar{\alpha}_t) \cdot \bI)
+		\]
+		We are able to sample from any timestamp using only $\bx_0$!
+		\vspace{-0.2cm}
+		{\small
+		\begin{multline*}
+			\bx_t = \sqrt{\alpha_t} \cdot {\color{teal}\bx_{t-1}} + \sqrt{1 - \alpha_t} \cdot \boldsymbol{\epsilon}_t = \\
+			= \sqrt{\alpha_t} ({\color{teal} \sqrt{\alpha_{t-1}} \cdot \bx_{t-2} + \sqrt{1 - \alpha_{t-1}} \cdot  \boldsymbol{\epsilon}_{t-1}}) + \sqrt{1 - \alpha_t} \cdot \boldsymbol{\epsilon}_t = \\
+			= \sqrt{\alpha_t \alpha_{t-1}} \cdot \bx_{t-2} + ( {\color{violet}\sqrt{\alpha_t (1 - \alpha_{t-1})} \cdot  \boldsymbol{\epsilon}_{t-1} + \sqrt{1 - \alpha_t} \cdot \boldsymbol{\epsilon}_t}) = \\
+			= \sqrt{\alpha_t \alpha_{t-1}} \cdot \bx_{t-2} + {\color{violet}\sqrt{1 - \alpha_{t-1} \alpha_t} \cdot \boldsymbol{\epsilon}'_t} = \\
+			 = \dots = \sqrt{\bar{\alpha}_t} \cdot \bx_{0} + \sqrt{1 - \bar{\alpha}_t} \cdot \bepsilon, \quad \text{where } \bepsilon \sim \cN(0, \bI).
+		\end{multline*}
+		}
+	\end{block}
+	\myfootnotewithlink{http://proceedings.mlr.press/v37/sohl-dickstein15.pdf}{Sohl-Dickstein J. Deep Unsupervised Learning using Nonequilibrium Thermodynamics, 2015}
+ \end{frame}
+%=======
+\begin{frame}{Forward gaussian diffusion process}
+	\vspace{-0.7cm}
+	{\small
+	\[
+		q(\bx_t | \bx_{t-1}) = \cN\left(\sqrt{1 - \beta_t} \bx_{t-1}, \beta_t \bI\right); \quad q(\bx_t | \bx_0) = \cN\left(\sqrt{\bar{\alpha}_t} \bx_0, (1 - \bar{\alpha}_t) \bI\right).
+	\]
+	}
+	\vspace{-0.8cm}
+	\begin{figure}
+		\includegraphics[width=0.8\linewidth]{figs/conditional_diffusion}
+	\end{figure}
+	\vspace{-0.5cm}
+	\begin{block}{Statement 2}
+		Applying the Markov chain to samples from any $\pi(\bx)$ we will get $\bx_{\infty} \sim p_{\infty}(\bx) = \cN(0, \bI)$. Here $p_{\infty}(\bx)$ is a \textbf{stationary} and \textbf{limiting} distribution:
+		\[
+			p_{\infty}(\bx) = \int q(\bx | \bx') p_{\infty}(\bx') d \bx'. 
+		\]
+		\[
+			p_{\infty}(\bx) = \int q(\bx_{\infty} | \bx_0) \pi(\bx_0) d\bx_0 \approx \cN(0, \bI) \int \pi(\bx_0) d\bx_0 = \cN(0, \bI)
+		\]
+		\vspace{-0.8cm}
+	\end{block}
+	\myfootnote{\href{https://arxiv.org/abs/2403.18103}{Chan S. Tutorial on Diffusion Models for Imaging and Vision, 2024} \\ \href{http://proceedings.mlr.press/v37/sohl-dickstein15.pdf}{Sohl-Dickstein J. Deep Unsupervised Learning using Nonequilibrium Thermodynamics, 2015}}
+ \end{frame}
+%=======
+\begin{frame}{Forward gaussian diffusion process}
+	\textbf{Diffusion} refers to the flow of particles from high-density regions towards low-density regions.
+	\vspace{-0.2cm}
+	\begin{figure}
+		\includegraphics[width=0.5\linewidth]{figs/diffusion_over_time}
+	\end{figure}
+	\vspace{-0.6cm}
+	\begin{enumerate}
+		\item $\bx_0 = \bx \sim \pi(\bx)$;
+		\item $\bx_t = \sqrt{1 - \beta_t} \cdot \bx_{t - 1} + \sqrt{\beta_t} \cdot \bepsilon$, where $\bepsilon \sim \cN(0, \bI)$, $t \geq 1$;
+		\item $\bx_T \sim p_{\infty}(\bx) = \cN(0, \bI)$, where $T >> 1$.
+	\end{enumerate}
+	If we are able to invert this process, we will get the way to sample $\bx \sim \pi(\bx)$ using noise samples $p_{\infty}(\bx) = \cN(0, \mathbf{I})$. \\ 
+	Now our goal is to revert this process.
+	\myfootnotewithlink{https://ayandas.me/blog-tut/2021/12/04/diffusion-prob-models.html}{Das A. An introduction to Diffusion Probabilistic Models, blog post, 2021}
 \end{frame}
 %=======
 \begin{frame}{Summary}
 	\begin{itemize}
-		\item KL and JS divergences work poorly as model objective in the case of disjoint supports.
+		\item Langevin dynamics allows to sample from the generative model using the gradient of the log-likelihood.	
 		\vfill
-		\item Earth-Mover distance is a more appropriate objective function for distribution matching problem.	
+		\item Score matching proposes to minimize the Fisher divergence to get the score function.
+		\vfill 
+		\item Denoising score matching minimizes Fisher divergence on noisy samples. It allows to estimate Fisher divergence using samples.
 		\vfill
-		\item Kantorovich-Rubinstein duality gives the way to calculate the EM distance using only samples.
+		\item Noise conditioned score network uses multiple noise levels and annealed Langevin dynamics to fit score function and sample from the model.	
 		\vfill
-		\item Wasserstein GAN uses Kantorovich-Rubinstein duality for getting Earth Mover distance as model objective.
+		\item Gaussian diffusion process is a Markov chain that injects special form of Gaussian noise to the samples.
 		\vfill
-		\item Weight clipping is a terrible way to enforce Lipschitzness. Gradient Penalty adds regularizer to loss that uses neccessary conditions for optimal critic. 	
-		\vfill
-		\item f-divergence family is a unified framework for divergence minimization, which uses variational approximation. Standard GAN is a special case of it.
+		\item Denoising score matching is applicable to gaussian diffusion process.
 	\end{itemize}
 \end{frame}
 %=======

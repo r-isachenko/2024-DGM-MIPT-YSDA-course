@@ -12,234 +12,11 @@
 \end{frame}
 %=======
 \begin{frame}{Recap of previous lecture}
-	\begin{block}{Assumptions}
+	\begin{block}{Likelihood-free learning}
 		\begin{itemize}
-			\item Let $c \sim \text{Categorical}(\bpi)$, where 
-			\vspace{-0.6cm}
-			\[
-			\bpi = (\pi_1, \dots, \pi_K), \quad \pi_k = P(c = k), \quad \sum_{k=1}^K \pi_k = 1.
-			\]
-			\vspace{-0.7cm}
-			\item Let VAE model has discrete latent representation $c$ with prior $p(c) = \text{Uniform}\{1, \dots, K\}$.
+			\item Likelihood is not a perfect quality measure for generative model.
+			\item Likelihood could be intractable.
 		\end{itemize}
-	\end{block}
-	\begin{block}{ELBO}
-		\vspace{-0.6cm}
-		\[
-			\cL_{\bphi, \btheta}(\bx)  = \mathbb{E}_{q(c | \bx, \bphi)} \log p(\bx | c, \btheta) - {\color{olive} KL(q(c| \bx, \bphi) || p(c))} \rightarrow \max_{\bphi, \btheta}.
-		\]
-	\end{block}
-	\vspace{-1.0cm}
-	\[
-		KL(q(c| \bx, \bphi) || p(c)) = - H(q(c | \bx, \bphi)) + \log K. 
-	\]		
-	\vspace{-0.5cm}
-	\begin{block}{Vector quantization}
-		Define the dictionary space $\{\be_k\}_{k=1}^K$, where $\be_k \in \bbR^C$, $K$ is the size of the dictionary.
-		\vspace{-0.3cm}
-		\[
-		\bz_q = \bq (\bz) = \be_{k^*}, \quad \text{where } k^* = \argmin_k \| \bz - \be_k \|.
-		\] 
-		\vspace{-0.7cm}
-	\end{block}
-	\myfootnotewithlink{https://arxiv.org/abs/1711.00937}{Oord A., Vinyals O., Kavukcuoglu K. Neural Discrete Representation Learning, 2017} 
-\end{frame}
-%=======
-\begin{frame}{Recap of previous lecture}
-	\begin{figure}
-		\centering
-		\includegraphics[width=0.85\linewidth]{figs/vqvae}
-	\end{figure}
-	\vspace{-0.3cm}
-	\begin{block}{Deterministic variational posterior}
-		\vspace{-0.8cm}
-		\[
-			q(c_{ij} = k^* | \bx, \bphi) = \begin{cases}
-				1 , \quad \text{for } k^* = \argmin_k \| [\bz_e]_{ij} - \be_k \|; \\
-				0, \quad \text{otherwise}.
-			\end{cases}
-		\]
-		\vspace{-0.8cm}
-	\end{block}
-	\begin{block}{ELBO}
-		\vspace{-0.6cm}
-		\[
-			\cL_{\bphi, \btheta}(\bx)  = \mathbb{E}_{q(c | \bx, \bphi)} \log p(\bx | \be_{c} , \btheta) - \log K =  \log p(\bx | \bz_q, \btheta) - \log K.
-		\]
-		\vspace{-0.6cm}
-	\end{block}
-	\begin{block}{Straight-through gradient estimation}
-		\vspace{-0.6cm}
-		\[
-			\frac{\partial \log p(\bx | \bz_q , \btheta)}{\partial \bphi} = \frac{\partial \log p(\bx | \bz_q, \btheta)}{\partial \bz_q} \cdot {\color{red}\frac{\partial \bz_q}{\partial \bphi}} \approx \frac{\partial \log p(\bx | \bz_q, \btheta)}{\partial \bz_q} \cdot \frac{\partial \bz_e}{\partial \bphi}
-		\]
-	\end{block}
-	\myfootnotewithlink{https://arxiv.org/abs/1711.00937}{Oord A., Vinyals O., Kavukcuoglu K. Neural Discrete Representation Learning, 2017} 
-\end{frame}
-%=======
-\begin{frame}{Recap of previous lecture}
-	\vspace{-0.4cm}
-	\begin{block}{Gumbel-max trick}
-		Let $g_k \sim \text{Gumbel}(0, 1)$ for $k = 1, \dots, K$. Then
-		\vspace{-0.3cm}
-		\[
-			c = \argmax_k [\log \pi_k + g_k]
-		\]
-		\vspace{-0.6cm} \\
-		has a categorical distribution $c \sim \text{Categorical}(\bpi)$.
-	\end{block}
-	\vspace{-0.2cm}
-	\begin{block}{Gumbel-softmax relaxation}
-		{\color{violet}Con}{\color{teal}crete} distribution = {\color{violet}\textbf{con}tinuous} + {\color{teal}dis\textbf{crete}}
-		\[
-			\hat{\bc} = \text{Softmax}\left(\frac{\log q(\bc | \bx, \bphi) + \bg}{\color{olive}\tau}\right)
-		\]
-		\vspace{-0.7cm}
- 	\end{block}
-	\begin{block}{Reparametrization trick}
-		\vspace{-0.4cm}
-		\[
-			\nabla_{\bphi} \mathbb{E}_{q(c | \bx, \bphi)} \log p(\bx | \be_{c} , \btheta) = \bbE_{\text{Gumbel}(0, 1)} \nabla_{\bphi} \log p(\bx | \bz , \btheta),
-		\]
-		where $\bz = \sum_{k=1}^K\hat{c}_k \be_k$ (all operations are differentiable now).
-	\end{block}
- 	\vspace{-0.2cm}
-	\myfootnote{
-	\href{https://arxiv.org/abs/1611.00712}{Maddison C. J., Mnih A., Teh Y. W. The Concrete distribution: A continuous relaxation of discrete random variables, 2016} \\
-	\href{https://arxiv.org/abs/1611.01144}{Jang E., Gu S., Poole B. Categorical reparameterization with Gumbel-Softmax, 2016}
-	}
-\end{frame}
-%=======
-\begin{frame}{Recap of previous lecture}
-	\begin{block}{Theorem}
-		\vspace{-0.6cm}
-		\[
-			\frac{1}{n} \sum_{i=1}^n KL(q(\bz | \bx_i, \bphi) || p(\bz)) = KL({\color{teal}q_{\text{agg}}(\bz | \bphi) }|| p(\bz)) + \bbI_{q} [\bx, \bz].
-		\]
-		\vspace{-0.6cm}
-	\end{block}
-	\begin{block}{ELBO surgery}
-		\vspace{-0.5cm}
-		{\small
-		\[
-		    \frac{1}{n} \sum_{i=1}^n \cL_{\bphi, \btheta}(\bx_i) = \underbrace{\frac{1}{n} \sum_{i=1}^n \mathbb{E}_{q(\bz | \bx_i, \bphi)} \log p(\bx_i | \bz, \btheta)}_{\text{Reconstruction loss}}
-		    - \underbrace{\vphantom{ \sum_{i=1}^n} \bbI_q [\bx, \bz]}_{\text{MI}} - \underbrace{\vphantom{ \sum_{i=1}^n} KL({\color{teal}q_{\text{agg}}(\bz | \bphi)} || {\color{violet}p(\bz)})}_{\text{Marginal KL}}
-		\]}
-	\end{block}
-	\vspace{-0.7cm}
-	\begin{block}{Optimal prior}
-		\vspace{-0.7cm}
-		\[
-			KL(q_{\text{agg}}(\bz | \bphi) || p(\bz)) = 0 \quad \Leftrightarrow \quad p (\bz) = q_{\text{agg}}(\bz) = \frac{1}{n} \sum_{i=1}^n q(\bz | \bx_i, \bphi).
-		\]
-		\vspace{-0.5cm}\\
-		The optimal prior distribution $p(\bz)$ is the aggregated variational posterior distribution $q_{\text{agg}}(\bz | \bphi)$.
-	\end{block}
-	\myfootnotewithlink{http://approximateinference.org/accepted/HoffmanJohnson2016.pdf}{Hoffman M. D., Johnson M. J. ELBO surgery: yet another way to carve up the variational evidence lower bound, 2016}
-\end{frame}
-%=======
-\begin{frame}{Outline}
-	\tableofcontents
-\end{frame}
-%=======
-\section{Learnable VAE prior}
-%=======
-\begin{frame}{Optimal VAE prior}
-	\begin{itemize}
-		\item Standard Gaussian $p(\bz) = \mathcal{N}(0, \bI)$ $\Rightarrow$ over-regularization;
-		\item $p(\bz) = q_{\text{agg}}(\bz | \bphi) = \frac{1}{n}\sum_{i=1}^n q(\bz | \bx_i, \bphi)$ $\Rightarrow$ overfitting and highly expensive.
-	\end{itemize}
-	\vspace{-0.5cm}
-	\begin{minipage}[t]{0.5\columnwidth}
-		\begin{block}{Non learnable prior $p(\bz)$}
-			\begin{figure}[h]
-				\centering
-				\includegraphics[width=0.6\linewidth]{figs/non_learnable_prior}
-			\end{figure}
-		\end{block}
-	\end{minipage}%
-	\begin{minipage}[t]{0.5\columnwidth}
-		\begin{block}{Learnable prior $p(\bz | \blambda)$}
-			\begin{figure}[h]
-				\centering
-				\includegraphics[width=0.6\linewidth]{figs/learnable_prior}
-			\end{figure}
-		\end{block}
-	\end{minipage}
-	\vspace{-0.4cm}
-	\begin{block}{ELBO revisiting}
-		\vspace{-0.3cm}
-		\[
-		\frac{1}{n}\sum_{i=1}^n \cL_{\bphi, \btheta}(\bx_i) = \text{RL} - \text{MI} -  KL(q_{\text{agg}}(\bz | \bphi) || {\color{teal}p(\bz | \blambda)})
-		\]
-		It is Forward KL with respect to $p(\bz | \blambda)$.
-	\end{block}
-	\myfootnotewithlink{https://jmtomczak.github.io/blog/7/7\_priors.html}{image credit: https://jmtomczak.github.io/blog/7/7\_priors.html}
-\end{frame}
-%=======
-\begin{frame}{NF-based VAE prior}
-	\begin{block}{NF model in latent space}
-		\vspace{-0.5cm}
-		\[
-		\log p(\bz | \blambda) = \log p(\bz^*) + \log  \left | \det \left(\frac{d \bz^*}{d\bz}\right)\right| = \log p(\bff_{\blambda}(\bz)) + \log \left | \det (\bJ_\bff)\right| 
-		\]
-		\vspace{-0.3cm}
-		\[
-		\bz = \bg_{\blambda}(\bz^*) = \bff^{-1}_{\blambda}(\bz^*)
-		\]
-	\end{block}
-	\vspace{-0.3cm}
-	\begin{itemize}
-		\item RealNVP with coupling layers.
-		\item Autoregressive NF (fast $\bff_{\blambda}(\bz)$, slow $\bg_{\blambda}(\bz^*)$).
-	\end{itemize}
-	\begin{block}{ELBO with NF-based VAE prior}
-		\vspace{-0.5cm}
-		{\small
-			\begin{multline*}
-				\cL_{\bphi, \btheta}(\bx) = \mathbb{E}_{q(\bz | \bx, \bphi)} \left[ \log p(\bx | \bz, \btheta) + {\color{violet}\log p(\bz | \blambda)} - \log q(\bz | \bx, \bphi) \right] \\
-				= \mathbb{E}_{q(\bz | \bx, \bphi)} \Bigl[ \log p(\bx | \bz, \btheta) + \underbrace{ \Bigl({\color{violet} \log p(\bff_{\blambda}(\bz)) + \log \left| \det (\bJ_\bff) \right|} \Bigr) }_{\text{NF-based prior}} - \log q(\bz | \bx, \bphi) \Bigr] 
-			\end{multline*}
-		}
-	\end{block}
-	\myfootnotewithlink{https://arxiv.org/abs/1611.02731}{Chen X. et al. Variational Lossy Autoencoder, 2016}
-\end{frame}
-%=======
-\section{Likelihood-free learning}
-%=======
-\begin{frame}{Likelihood based models}
-	\begin{minipage}[t]{0.48\columnwidth}
-		\begin{block}{Poor likelihood \\ Great samples}
-			\vspace{-0.3cm}
-			\[
-				p_1(\bx) = \frac{1}{n} \sum_{i=1}^n \cN(\bx | \bx_i, \epsilon \bI)
-			\]
-			For small $\epsilon$ this model will generate samples with great quality, but likelihood of test sample will be very poor.
-		\end{block}
-	\end{minipage}%
-	\begin{minipage}[t]{0.52\columnwidth}
-		\begin{block}{Great likelihood \\ Poor samples}
-			\vspace{-0.3cm}
-			\[
-				p_2(\bx) = 0.01p(\bx) + 0.99p_{\text{noise}}(\bx)
-			\]
-			\begin{multline*}
-				\log \left[ 0.01p(\bx) + 0.99p_{\text{noise}}(\bx) \right] \geq  \\ \geq \log \left[ 0.01p(\bx) \right]  = \log p(\bx) - \log 100
-			\end{multline*}
-		Noisy irrelevant samples, but for high dimensions $\log p(\bx)$ becomes proportional to $m$.
-		\end{block}
-	\end{minipage}
-	\begin{itemize}
-		\item Likelihood is not a perfect quality measure for generative model.
-		\item Likelihood could be intractable.
-	\end{itemize}
-	\myfootnotewithlink{https://arxiv.org/abs/1511.01844}{Theis L., Oord A., Bethge M. A note on the evaluation of generative models, 2015}
-\end{frame}
-%=======
-\begin{frame}{Likelihood-free learning}
-	\begin{block}{Where did we start}
-	 We would like to approximate true data distribution $\pi(\bx)$.
-	Instead of searching true $\pi(\bx)$ over all probability distributions, learn function approximation $p(\bx | \btheta) \approx \pi(\bx)$.
 	\end{block}
 	Imagine we have two sets of samples 
 	\begin{itemize}
@@ -255,130 +32,15 @@
 		Generative distribution $p(\bx | \btheta)$ equals to the true distribution $\pi(\bx)$ if we can not distinguish them using discriminative model $p(y | \bx)$. \\
 		It means that $p(y = 1 | \bx) = 0.5$ for each sample $\bx$.
 	\end{block}
-
 \end{frame}
 %=======
-\begin{frame}{Generative adversarial networks (GAN)}
-	The more powerful discriminative model we will have, the more likely we will get the "best" generative distribution $p(\bx | \btheta)$. \\
-	The most common way to learn a classifier is to minimize cross entropy loss.
+\begin{frame}{Recap of previous lecture}
 	\begin{itemize}
-		\item \textbf{Generator:} generative model $\bx = \bG(\bz)$, which makes generated sample more realistic. Here $\bz$ comes from the base (known) distribution $p(\bz)$ and $\bx \sim p(\bx | \btheta)$. Generator tries to \textbf{maximize} cross entropy.
-		\item \textbf{Discriminator:} a classifier $p(y = 1 | \bx) = D(\bx) \in [0, 1]$, which distinguishes real samples from generated samples. Discriminator tries to \textbf{minimize} cross entropy (tries to enhance discriminative model).
+		\item \textbf{Generator:} generative model $\bx = \bG(\bz)$, which makes generated sample more realistic.
+		\item \textbf{Discriminator:} a classifier $D(\bx) \in [0, 1]$, which distinguishes real samples from generated samples.
 	\end{itemize}
-	\begin{block}{Objective}
-		\vspace{-0.5cm}
-		\[
-			\min_{G} \max_D \left[ \bbE_{\pi(\bx)} \log D(\bx) + \bbE_{p(\bx | \btheta)} \log (1 - D(\bx)) \right] 
-		\]
-		\[
-			\min_{G} \max_D \left[ \bbE_{\pi(\bx)} \log D(\bx) + \bbE_{p(\bz)} \log (1 - D(\bG(\bz))) \right]
-		\]
-	\end{block}
-	\myfootnotewithlink{https://arxiv.org/abs/1406.2661}{Goodfellow I. J. et al. Generative Adversarial Networks, 2014}
-\end{frame}
-%=======
-\section{Generative adversarial networks (GAN)}
-%=======
-\begin{frame}{Generative models zoo}
-	\begin{tikzpicture}[
-	 	basic/.style  = {draw, text width=2cm, drop shadow, rectangle},
-	 	root/.style   = {basic, rounded corners=2pt, thin, text height=1.1em, text width=7em, align=center, fill=blue!40},
-	 	level 1/.style={sibling distance=55mm},
-	 	level 2/.style = {basic, rounded corners=6pt, thin, align=center, fill=blue!20, text height=1.1em, text width=9em, sibling distance=38mm},
-	 	level 3/.style = {basic, rounded corners=6pt, thin,align=center, fill=blue!20, text width=8.5em},
-	 	level 4/.style = {basic, thin, align=left, fill=pink!30, text width=7em},
-	 	level 5/.style = {basic, thin, align=left, fill=pink!90, text width=7em},
-		edge from parent/.style={->,draw},
-		>=latex]
-		
-		% root of the the initial tree, level 1
-		\node[root] {\Large Generative models}
-		% The first level, as children of the initial tree
-		child {node[level 2] (c1) {Likelihood-based}
-			child {node[level 3] (c11) {Tractable density}}
-			child {node[level 3] (c12) {Approximate density}}
-		}
-		child {node[level 2] (c2) {Implicit density}};
-		
-		% The second level, relatively positioned nodes
-		\begin{scope}[every node/.style={level 4}]
-		\node [below of = c11, yshift=-5pt, xshift=10pt] (c111) {Autoregressive models};
-		\node [below of = c111, yshift=-5pt] (c112) {Normalizing Flows};
-		
-		\node [below of = c12, xshift=10pt] (c121) {VAEs};
-		\node [below of = c121] (c122) {Diffusion models};
-		
-		\end{scope}
-		
-		% The second level, relatively positioned nodes
-		\begin{scope}[every node/.style={level 5}]
-		\node [below of = c2, xshift=10pt] (c21) {GANs};
-		\end{scope}
-		
-		
-		% lines from each level 1 node to every one of its "children"
-		\foreach \value in {1,2}
-		\draw[->] (c11.194) |- (c11\value.west);
-		
-		\foreach \value in {1,2}
-		\draw[->] (c12.194) |- (c12\value.west);
-		
-		\draw[->] (c2.194) |- (c21.west);
-		
-	\end{tikzpicture}
-\end{frame}
-%=======
-\begin{frame}{GAN optimality}
-	\begin{block}{Theorem}
-		The minimax game 
-		\vspace{-0.3cm}
-		\[
-			\min_{G} \max_D \Bigl[ \underbrace{\bbE_{\pi(\bx)} \log D(\bx) + \bbE_{p(\bz)} \log (1 - D(\bG(\bz)))}_{V(G, D)} \Bigr]
-		\]
-		\vspace{-0.5cm} \\
-		has the global optimum $\pi(\bx) = p(\bx | \btheta)$, in this case $D^*(\bx) = 0.5$.
-	\end{block}
-	\begin{block}{Proof (fixed $G$)}
-		\vspace{-0.5cm}
-		\begin{align*}
-			V(G, D) &= \bbE_{\pi(\bx)} \log D(\bx) + \bbE_{p(\bx | \btheta)} \log (1 - D(\bx)) \\
-			&= \int \underbrace{\left[ \pi(\bx) \log D(\bx) + p(\bx | \btheta)\log (1 - D(\bx) \right]}_{y(D)} d \bx
-		\end{align*}
-		\vspace{-0.2cm}
-		\[
-			\frac{d y(D)}{d D} = \frac{\pi(\bx)}{D(\bx)} - \frac{p(\bx | \btheta)}{1 - D(\bx)} = 0 \quad \Rightarrow \quad D^*(\bx) = \frac{\pi(\bx)}{\pi(\bx) + p(\bx | \btheta)}
-		\]
-	\end{block}
-	\myfootnotewithlink{https://arxiv.org/abs/1406.2661}{Goodfellow I. J. et al. Generative Adversarial Networks, 2014}
-\end{frame}
-%=======
-\begin{frame}{GAN optimality}
-	\begin{block}{Proof continued (fixed $D = D^*$)}
-		\vspace{-0.5cm}
-		\begin{multline*}
-			V(G, D^*) = \bbE_{\pi(\bx)} \log \left( \frac{\pi(\bx)}{\pi(\bx) + p(\bx | \btheta)} \right) + \bbE_{p(\bx | \btheta)} \log \left( \frac{p(\bx | \btheta)}{\pi(\bx) + p(\bx | \btheta)}\right)  \\
-		 = KL \left(\pi(\bx) || \frac{\pi(\bx) + p(\bx | \btheta)}{2}\right) + KL \left(p(\bx | \btheta) || \frac{\pi(\bx) + p(\bx | \btheta)}{2}\right) - 2\log 2 \\
-		 = 2JSD(\pi(\bx) || p(\bx | \btheta)) - 2\log 2.
-		\end{multline*}
-	\end{block}
-	\vspace{-0.3cm}
-	\begin{block}{Jensen-Shannon divergence (symmetric KL divergence)}
-		\vspace{-0.2cm}
-		\footnotesize
-		\[
-			JSD(\pi(\bx) || p(\bx | \btheta)) = \frac{1}{2} \left[KL \left(\pi(\bx) || \frac{\pi(\bx) + p(\bx | \btheta)}{2}\right) + KL \left(p(\bx | \btheta) || \frac{\pi(\bx) + p(\bx | \btheta)}{2}\right) \right]
-		\]
-	\end{block}
-	Could be used as a distance measure!
-	\[
-		V(G^*, D^*) = -2\log 2, \quad \pi(\bx) = p(\bx | \btheta), \quad  D^*(\bx) = 0.5.
-	\]
-	
-	 \myfootnotewithlink{https://arxiv.org/abs/1406.2661}{Goodfellow I. J. et al. Generative Adversarial Networks, 2014}
-\end{frame}
-%=======
-\begin{frame}{GAN optimality}
-	\begin{block}{Theorem}
+	\vspace{-0.1cm}
+	\begin{block}{GAN optimality theorem}
 		The minimax game 
 		\vspace{-0.3cm}
 		\[
@@ -387,106 +49,465 @@
 		\vspace{-0.5cm} \\
 		has the global optimum $\pi(\bx) = p(\bx | \btheta)$, in this case $D^*(\bx) = 0.5$.
 	\end{block}
-	\vspace{-0.2cm}
-	\begin{block}{Expectations}
-		If the generator could be \textbf{any} function and the discriminator is \textbf{optimal} at every step, then the generator is \textbf{guaranteed to converge} to the data distribution.
-	\end{block}
-	\begin{block}{Reality}
-		\begin{itemize}
-			\item Generator updates are made in parameter space, discriminator is not optimal at every step.
-			\item Generator and discriminator loss keeps oscillating during GAN training.
-		\end{itemize}
-	\end{block}
+	\[
+		\min_{G} V(G, D^*) = \min_{G} \left[ 2 JSD(\pi || p) - \log 4 \right] = -\log 4, \quad \pi(\bx) = p(\bx | \btheta).
+	\]
+	\vspace{-0.5cm} \\
+	If the generator could be \textbf{any} function and the discriminator is \textbf{optimal} at every step, then the generator is \textbf{guaranteed to converge} to the data distribution.
 	 \myfootnotewithlink{https://arxiv.org/abs/1406.2661}{Goodfellow I. J. et al. Generative Adversarial Networks, 2014}
 \end{frame}
 %=======
-\begin{frame}{GAN training}
-	Let further assume that generator and discriminator are parametric models: $D_{\bphi}(\bx)$ and $\bG_{\btheta}(\bz)$.
+\begin{frame}{Recap of previous lecture}
+	\begin{itemize}
+		\item Generator updates are made in parameter space, discriminator is not optimal at every step.
+		\item Generator and discriminator loss keeps oscillating during GAN training.
+	\end{itemize}
 	\begin{block}{Objective}
-		\vspace{-0.7cm}
+		\vspace{-0.5cm}
 		\[
 		\min_{\btheta} \max_{\bphi} \left[ \bbE_{\pi(\bx)} \log D_{\bphi}(\bx) + \bbE_{p(\bz)} \log (1 - D_{\bphi}(\bG_{\btheta}(\bz))) \right]
 		\]
-		\vspace{-0.7cm}
+		\vspace{-0.5cm}
 	\end{block}
 	\begin{figure}
 		\centering
 		\includegraphics[width=1.0\linewidth]{figs/gan_1}
 	\end{figure}
-
-	\begin{itemize}
-		\item $\bz \sim p(\bz)$ is a latent variable.
-		\item $p(\bx | \bz, \btheta) = \delta(\bx - \bG_{\btheta}(\bz))$ is deterministic decoder ({\color{gray} like NF}).
-		\item We do not have encoder at all.
-	\end{itemize}
-
-	 \myfootnotewithlink{https://arxiv.org/abs/1406.2661}{Goodfellow I. J. et al. Generative Adversarial Networks, 2014}
+	\myfootnotewithlink{https://arxiv.org/abs/1406.2661}{Goodfellow I. J. et al. Generative Adversarial Networks, 2014}
 \end{frame}
 %=======
-\begin{frame}{Mode collapse}
-	The phenomena where the generator of a GAN collapses to one or few distribution modes.
-	\vspace{-0.15cm}
-	\begin{figure}
-		\centering
-		\includegraphics[width=0.75\linewidth]{figs/mode_collapse_1}
-	\end{figure}
-	\vspace{-0.3cm}
-	\begin{figure}
-		\centering
-		\includegraphics[width=1.0\linewidth]{figs/mode_collapse_4}
-	\end{figure}
-	Alternate architectures, adding regularization terms, injecting small noise
-	perturbations and other millions bags and tricks are used to avoid the mode collapse.
-	
+
+\begin{frame}{Recap of previous lecture}
+	\begin{block}{Main problems of standard GAN}
+		\begin{itemize}
+			\item Vanishing gradients (solution: non-saturating GAN);
+			\item Mode collapse (caused by Jensen-Shannon divergence).
+		\end{itemize}
+	\end{block}
+	\begin{block}{Standard GAN}
+		\vspace{-0.2cm}
+		\[
+		\min_{\btheta} \max_{\bphi} \left[ \bbE_{\pi(\bx)} \log D_{\bphi}(\bx) + \bbE_{p(\bz)} \log (1 - D_{\bphi}(\bG_{\btheta}(\bz))) \right]
+		\]
+		\vspace{-0.4cm}
+	\end{block}
+	\vspace{-0.1cm}
+	\begin{block}{Informal theoretical results}
+		The real images distribution $\pi(\bx)$ and the generated images distribution $p(\bx | \btheta)$ are low-dimensional and have disjoint supports. In this case
+		\vspace{-0.3cm}
+		\[
+		KL(\pi || p) = KL(p || \pi) = \infty, \quad JSD(\pi || p) = \log 2.
+		\]
+	\end{block}
 	\myfootnote{\href{https://arxiv.org/abs/1406.2661}{Goodfellow I. J. et al. Generative Adversarial Networks, 2014} \\
-		\href{https://arxiv.org/abs/1611.02163}{Metz L. et al. Unrolled Generative Adversarial Networks, 2016}}
+		\href{https://arxiv.org/abs/1701.04862}{Arjovsky M., Bottou L. Towards Principled Methods for Training Generative Adversarial Networks, 2017}}
 \end{frame}
 %=======
-\begin{frame}{Jensen-Shannon vs Kullback-Leibler }
-	\begin{itemize}
-		\item $\pi(\bx)$ is a fixed mixture of 2 gaussians.
-		\item $p(\bx | \mu, \sigma) = \cN(\mu, \sigma^2)$.
-	\end{itemize}
-	\begin{block}{Mode covering vs mode seeking}
-		\vspace{-0.7cm}
+\begin{frame}{Recap of previous lecture}
+	\begin{block}{Wasserstein distance}
+		\vspace{-0.5cm}
 		\[
-		KL(\pi || p) = \int \pi(\bx) \log \frac{\pi(\bx)}{p(\bx)}d\bx, \quad KL(p || \pi) = \int p(\bx) \log \frac{p(\bx)}{\pi(\bx)}d\bx
+		W(\pi, p) = \inf_{\gamma \in \Gamma(\pi, p)} \bbE_{(\bx, \by) \sim \gamma} \| \bx - \by \| =  \inf_{\gamma \in \Gamma(\pi, p)} \int \| \bx - \by \| \gamma (\bx, \by) d \bx d \by
 		\]
+		\vspace{-0.5cm}
+		\begin{itemize}
+			\item $\gamma(\bx, \by)$ -- transportation plan (the amount of "dirt" that should be transported from point $\bx$ to point $\by$).
+			\item $\Gamma(\pi, p)$ -- the set of all joint distributions $\gamma (\bx, \by)$ with marginals $\pi$ and $p$ ($\int \gamma(\bx, \by) d \bx = p(\by)$, $\int \gamma(\bx, \by) d \by = \pi(\bx)$).
+			\item $\gamma(\bx, \by)$ -- the amount, $\|\bx - \by \|$-- the distance.
+		\end{itemize}
+	\end{block}
+	\begin{block}{Theorem (Kantorovich-Rubinstein duality)}
+		\vspace{-0.2cm}
 		\[
-		JSD(\pi || p) = \frac{1}{2} \left[KL \left(\pi(\bx) || \frac{\pi(\bx) + p(\bx)}{2}\right) + KL \left(p(\bx) || \frac{\pi(\bx) + p(\bx)}{2}\right) \right]
+		W(\pi || p) = \frac{1}{K} \max_{\| f \|_L \leq K} \left[ \bbE_{\pi(\bx)} f(\bx)  - \bbE_{p(\bx)} f(\bx)\right],
 		\]
-		\vspace{-0.7cm}
-		
-		\begin{minipage}[t]{0.33\columnwidth}
-			\begin{figure}
-				\includegraphics[width=\linewidth]{figs/forward_KL}
-			\end{figure}
-		\end{minipage}%
-		\begin{minipage}[t]{0.33\columnwidth}
-			\begin{figure}
-				\includegraphics[width=\linewidth]{figs/reverse_KL}
-			\end{figure}
-		\end{minipage}%
-		\begin{minipage}[t]{0.33\columnwidth}
-			\begin{figure}
-				\includegraphics[width=\linewidth]{figs/JSD}
-			\end{figure}
-		\end{minipage}
+		where $\| f \|_L \leq K$ are $K-$Lipschitz continuous functions ($f: \cX \rightarrow \bbR$).
+	\end{block}
+	\myfootnotewithlink{https://arxiv.org/abs/1701.07875}{Arjovsky M., Chintala S., Bottou L. Wasserstein GAN, 2017}
+\end{frame}
+%=======
+\begin{frame}{Recap of previous lecture}
+	\begin{block}{WGAN objective}
+		\vspace{-0.3cm}
+		\[
+		\min_{\btheta} W(\pi || p) = \min_{\btheta} \max_{\bphi \in \boldsymbol{\Phi}} \left[ \bbE_{\pi(\bx)} f_{\bphi}(\bx)  - \bbE_{p(\bz)} f_{\bphi}(\bG_{\btheta}(\bz))\right].
+		\]
 		\vspace{-0.3cm}
 	\end{block}
+	\begin{itemize}
+		\item Function~$f$ in WGAN is usually called $\textit{critic}$.
+		\item If parameters $\bphi$ lie in a compact set $\boldsymbol{\Phi} \in [-c, c]^d$ then $f(\bx, \bphi)$ will be $K$-Lipschitz continuous function. 
+	\end{itemize}
+	\begin{multline*}
+		K \cdot W(\pi || p) = \max_{\| f \|_L \leq K} \left[ \bbE_{\pi(\bx)} f(\bx)  - \bbE_{p(\bx)} f(\bx)\right] \geq \\  \geq \max_{\bphi \in \boldsymbol{\Phi}} \left[ \bbE_{\pi(\bx)} f_{\bphi}(\bx)  - \bbE_{p(\bx)} f_{\bphi}(\bx)\right]
+	\end{multline*}
+	\textit{"Weight clipping is a clearly terrible way to enforce a Lipschitz constraint"}
+	\myfootnotewithlink{https://arxiv.org/abs/1701.07875}{Arjovsky M., Chintala S., Bottou L. Wasserstein GAN, 2017}
+\end{frame}
+%=======
+\begin{frame}{Outline}
+	\tableofcontents
+\end{frame}
+%=======
+\section{f-divergence minimization}
+%=======
+\begin{frame}{Divergences}
+	\begin{itemize}
+		\item Forward KL divergence in maximum likelihood estimation.
+		\item Reverse KL in variational inference.
+		\item JS divergence in standard GAN.
+		\item Wasserstein distance in WGAN.
+	\end{itemize}
+	\begin{block}{What is a divergence?}
+		Let $\cP$ be the set of all possible probability distributions. Then $D: \cP \times \cP \rightarrow \bbR$ is a divergence if 
+		\begin{itemize}
+			\item $D(\pi || p) \geq 0$ for all $\pi, p \in \cP$;
+			\item $D(\pi || p) = 0$ if and only if $\pi \equiv p$.
+		\end{itemize}
+	\end{block}
+	\begin{block}{General divergence minimization task}
+		\vspace{-0.3cm}
+		\[
+			\min_p D(\pi || p)
+		\]
+		\vspace{-0.7cm}
+	\end{block}
+	\begin{block}{Chalenge}
+		We do not know the real distribution $\pi(\bx)$!
+	\end{block}
+\end{frame}
+%=======
+\begin{frame}{f-divergence family}
+	
+	\begin{block}{f-divergence}
+		\vspace{-0.3cm}
+		\[
+		D_f(\pi || p) = \bbE_{p(\bx)}  f\left( \frac{\pi(\bx)}{p(\bx)} \right)  = \int p(\bx) f\left( \frac{\pi(\bx)}{p(\bx)} \right) d \bx.
+		\]
+		Here $f: \bbR_+ \rightarrow \bbR$ is a convex, lower semicontinuous function satisfying $f(1) = 0$.
+	\end{block}
+	\begin{figure}
+		\centering
+		\includegraphics[width=\linewidth]{figs/f_divs}
+	\end{figure}
+	\myfootnotewithlink{https://arxiv.org/abs/1606.00709}{Nowozin S., Cseke B., Tomioka R. f-GAN: Training Generative Neural Samplers using Variational Divergence Minimization, 2016}
+\end{frame}
+%=======
+\begin{frame}{f-divergence family}
+	\vspace{-0.2cm}
+	\begin{block}{Fenchel conjugate}
+		\vspace{-0.7cm}
+		\[
+		f^*(t) = \sup_{u \in \text{dom}_f} \left( ut - f(u) \right), \quad f(u) = \sup_{t \in \text{dom}_{f^*}} \left( ut - f^*(t) \right)
+		\]
+		\vspace{-0.5cm}
+	\end{block}
+	\textbf{Important property:} $ f^{**} = f$ for convex $f$.
+	\begin{block}{f-divergence}
+		\vspace{-0.8cm}
+		\begin{multline*}
+			D_f(\pi || p) = \bbE_{p(\bx)}  f\left( \frac{\pi(\bx)}{p(\bx)} \right)  = \int p(\bx) {\color{violet}f\left( \frac{\pi(\bx)}{p(\bx)} \right) } d \bx = \\ = \int p(\bx) {\color{violet} \sup_{t \in \text{dom}_{f^*}} \left( \frac{\pi(\bx)}{p(\bx)} t - f^*(t) \right)} d \bx = \\ 
+			= \int \sup_{t \in \text{dom}_{f^*}} \left( \pi(\bx)t - p(\bx) f^*(t) \right) d \bx .
+		\end{multline*}
+		\vspace{-0.6cm}
+	\end{block}
+	Here we seek value of $t$, which gives us maximum value of $ \pi(\bx)t - p(\bx) f^*(t)$, for each data point $\bx$.
+	\myfootnotewithlink{https://arxiv.org/abs/1606.00709}{Nowozin S., Cseke B., Tomioka R. f-GAN: Training Generative Neural Samplers using Variational Divergence Minimization, 2016}
+\end{frame}
+%=======
+\begin{frame}{f-divergence family}
+	\vspace{-0.4cm}
+	\begin{block}{f-divergence}
+		\vspace{-0.3cm}
+		\[
+		D_f(\pi || p) = \bbE_{p(\bx)}  f\left( \frac{\pi(\bx)}{p(\bx)} \right)  = \int p(\bx) f\left( \frac{\pi(\bx)}{p(\bx)} \right) d \bx.
+		\]
+		\vspace{-0.4cm}
+	\end{block}
+	\begin{block}{Variational f-divergence estimation}
+		\vspace{-0.8cm}
+		\begin{multline*}
+			D_f(\pi || p)  = {\color{violet}\int} {\color{teal} \sup_{t \in \text{dom}_{f^*}}} \left( \pi(\bx)t - p(\bx) f^*(t) \right) d \bx \geq \\
+			 \geq {\color{teal}\sup_{T \in \cT}} {\color{violet}\int} \left( \pi(\bx)T(\bx) - p(\bx) f^*(T(\bx)) \right) d \bx = \\
+			 = \sup_{T \in \cT} \left[\bbE_{\pi}T(\bx) -  \bbE_p f^*(T(\bx)) \right]
+		\end{multline*}
+	\vspace{-0.6cm}
+	\end{block}
+	This is a lower bound because of Jensen inequality and restricted class of functions $\cT: \cX \rightarrow \bbR$. 
+	
+	\myfootnotewithlink{https://arxiv.org/abs/1606.00709}{Nowozin S., Cseke B., Tomioka R. f-GAN: Training Generative Neural Samplers using Variational Divergence Minimization, 2016}
+\end{frame}
+%=======
+\begin{frame}{f-divergence family}
+	\begin{block}{Variational divergence estimation}
+		\[
+			D_f(\pi || p) \geq \sup_{T \in \cT} \left[\bbE_{\pi}T(\bx) -  \bbE_p f^*(T(\bx)) \right]
+		\]
+		The lower bound is tight for $T^*(\bx) = f'\left( \frac{\pi(\bx)}{p(\bx)} \right)$.
+	\end{block}
+	\begin{block}{Example (JSD)}
+		\begin{itemize}
+			\item Let define function $f$ and its conjugate $f^*$
+			\[ 
+				f(u) = u \log u - (u + 1) \log (u + 1), \quad f^*(t) = - \log (1 - e^t).
+			\]
+			\item Let reparametrize $T(\bx) = \log D(\bx)$.
+		\end{itemize}
+		\vspace{-0.4cm}
+	\end{block}
+	\[
+		\min_{G} \max_D \left[ \bbE_{\pi(\bx)} \log D(\bx) + \bbE_{p(\bz)} \log (1 - D(\bG(\bz))) \right]
+	\]
+
+	\myfootnotewithlink{https://arxiv.org/abs/1606.00709}{Nowozin S., Cseke B., Tomioka R. f-GAN: Training Generative Neural Samplers using Variational Divergence Minimization, 2016}
+\end{frame}
+%=======
+\begin{frame}{f-divergence family}
+	\begin{block}{Variational divergence estimation}
+		\[
+			D_f(\pi || p) \geq \sup_{T \in \cT} \left[\bbE_{\pi}T(\bx) -  \bbE_p f^*(T(\bx)) \right]
+		\]
+	\end{block}
+	\textbf{Note:} To evaluate lower bound we only need samples from $\pi(\bx)$ and $p(\bx)$. Hence, we could fit implicit generative model.
+	\begin{figure}
+		\centering
+		\includegraphics[width=1.0\linewidth]{figs/f_div_results}
+	\end{figure}
+
+	\myfootnotewithlink{https://arxiv.org/abs/1606.00709}{Nowozin S., Cseke B., Tomioka R. f-GAN: Training Generative Neural Samplers using Variational Divergence Minimization, 2016}
+\end{frame}
+%=======
+\section{Evaluation of likelihood-free models}
+%=======
+\begin{frame}{Evaluation of likelihood-free models}
+	How to evaluate generative models?
+	\begin{block}{Likelihood-based models}
+		\begin{itemize}
+			\item Split data to train/val/test.
+			\item Fit model on the train part.
+			\item Tune hyperparameters on the validation part.
+			\item Evaluate generalization by reporting likelihoods on the test set.
+		\end{itemize}
+	\end{block}
+	\begin{block}{Not all models have tractable likelihoods}
+		\begin{itemize}
+			\item VAE: compare ELBO values.
+			\item GAN: ???
+		\end{itemize}
+	\end{block}
+\end{frame}
+%=======
+\begin{frame}{Evaluation of likelihood-free models}
+	Let take some pretrained image classification model to get the conditional label distribution $p(y | \bx)$ (e.g. ImageNet classifier).
+	\begin{block}{What do we want from samples?}
+		\begin{itemize}
+			\item \textbf{Sharpness}
+			\begin{figure}
+				\centering
+				\includegraphics[width=0.9\linewidth]{figs/sharpness}
+			\end{figure}
+			The conditional distribution $p(y | \bx)$ should have low entropy (each image $\bx$ should have distinctly recognizable object).
+			\item \textbf{Diversity}
+			\begin{figure}
+				\centering
+				\includegraphics[width=0.9\linewidth]{figs/diversity}
+			\end{figure}
+			The marginal distribution $p(y) = \int p(y | \bx) p(\bx) d \bx$ should have high entropy (there should be as many classes generated as possible).
+		\end{itemize}
+	\end{block}
+	\myfootnotewithlink{https://deepgenerativemodels.github.io}{image credit: https://deepgenerativemodels.github.io}
+\end{frame}
+%=======
+\subsection{Frechet Inception Distance (FID)}
+%=======
+\begin{frame}{Frechet Inception Distance (FID)}
+	\begin{block}{Wasserstein metric}
+		\vspace{-0.2cm}
+		\[
+		W_s(\pi, p) = \inf_{\gamma \in \Gamma(\pi, p)} \left(\bbE_{(\bx, \by) \sim \gamma} \| \bx - \by \|^s\right)^{1/s}
+		\]
+		\vspace{-0.6cm}
+	\end{block}
+	\begin{block}{Theorem}
+		If $\pi(\bx) = \cN(\bmu_\pi, \bSigma_\pi)$, $p(\by) = \cN(\bmu_p, \bSigma_p)$, then
+		\vspace{-0.3cm}
+		\[
+		W_2^2(\pi, p) = \| \bmu_{\pi} - \bmu_{p}\|_2^2 + \text{tr} \left[ \bSigma_{\pi} + \bSigma_p - 2 \left(\bSigma_{\pi}^{1/2} \bSigma_p \bSigma_{\pi}^{1/2} \right)^{1/2} \right]
+		\]
+		\vspace{-0.7cm}
+	\end{block}
+	\begin{block}{Frechet Inception Distance}
+		\vspace{-0.3cm}
+		\[
+			\text{FID} (\pi, p) =  W_2^2(\pi, p)
+		\]
+		\vspace{-0.6cm}
+	\end{block}
+	\begin{itemize}
+		\item Representations are the outputs of the intermediate layer from the pretrained classification model.
+		\item $\bmu_{\pi}$, $\bSigma_{\pi}$ and $\bmu_{p}$, $\bSigma_p$ are the statistics of the feature representations for the samples from $\pi(\bx)$ and $p(\bx | \btheta)$.
+	\end{itemize}
+	\myfootnotewithlink{https://arxiv.org/abs/1706.08500}{Heusel M. et al. GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium, 2017}
+\end{frame}
+%=======
+\begin{frame}{Frechet Inception Distance (FID)}
+	\vspace{-0.4cm}
+	\[
+	\text{FID} (\pi, p) =  \| \bmu_{\pi} - \bmu_{p}\|_2^2 + \text{tr} \left[ \bSigma_{\pi} + \bSigma_p - 2 \left(\bSigma_{\pi}^{1/2} \bSigma_p \bSigma_{\pi}^{1/2} \right)^{1/2} \right]
+	\]
+	\vspace{-0.3cm}
+	\begin{itemize}
+		\item Needs a large sample size for evaluation.
+		\item Calculation of FID is slow.
+		\item High dependence on the pretrained classification model.
+		\item Uses the normality assumption!
+	\end{itemize}
+	\begin{figure}
+		\includegraphics[width=0.95\linewidth]{figs/fid_normal}
+	\end{figure}
+	
+	\myfootnotewithlink{https://arxiv.org/abs/2401.09603}{Jayasumana S. et al. Rethinking FID: Towards a Better Evaluation Metric for Image Generation, 2024}
+\end{frame}
+%=======
+\subsection{Maximum Mean Discrepancy (MMD)}
+%=======
+\begin{frame}{Maximum Mean Discrepancy (MMD)}
+	\begin{block}{Theorem}
+		$\pi(\bx) = p(\by)$ if and only if $\bbE_{\pi(\bx)} f(\bx) = \bbE_{p(\by)} f(\by)$ for any bounded and continuous $f$.
+	\end{block}
+	\vspace{-0.3cm}
+	\[
+		\text{MMD}(\pi, p) = \sup_f \left[ \bbE_{\pi(\bx)} f(\bx) - \bbE_{p(\bx)} f(\bx) \right]
+	\]	
+	\vspace{-0.3cm}
+	\begin{block}{Theorem (Reproducing Kernel Hilbert Space)}
+		\vspace{-0.6cm}
+		\[
+			\text{MMD}^2(\pi, p) = \bbE_{\substack{\bx \sim\pi(\bx) \\ \bx' \sim\pi(\bx)}} k(\bx, \bx') + \bbE_{\substack{\by \sim p(\by) \\ \by' \sim p(\by)}} k(\by, \by') - 2 \bbE_{\substack{\bx \sim\pi(\bx) \\ \by \sim p(\by)}} k(\bx, \by)
+		\]
+		\begin{itemize}
+			\item $k(\bx, \by)$ is a positive definite, symmetric kernel function (for example $k(\bx, \by) = \frac{\exp(\|\bx - \by\|^2)}{\sigma^2}$);
+			\item $f(\bx) = \langle f, \phi(\bx) \rangle_{\mathcal{H}}$;
+			\item $\phi(\bx) = k(\cdot, \bx)$.
+		\end{itemize} 
+		\vspace{-0.3cm}
+	\end{block}
+	\myfootnotewithlink{https://arxiv.org/abs/2401.09603}{Jayasumana S. et al. Rethinking FID: Towards a Better Evaluation Metric for Image Generation, 2024}
+\end{frame}
+%=======
+\begin{frame}{Maximum Mean Discrepancy (MMD)}
+		\vspace{-0.6cm}
+		\[
+			\text{MMD}^2(\pi, p) = \bbE_{\substack{\bx \sim\pi(\bx) \\ \bx' \sim\pi(\bx)}} k(\bx, \bx') + \bbE_{\substack{\by \sim p(\by) \\ \by' \sim p(\by)}} k(\by, \by') - 2 \bbE_{\substack{\bx \sim\pi(\bx) \\ \by \sim p(\by)}} k(\bx, \by)
+		\]
+		\vspace{-0.3cm}
+	\begin{figure}
+		\includegraphics[width=0.95\linewidth]{figs/mmd_normal}
+	\end{figure}
+	\begin{itemize}
+		\item Needs less sample size for evaluation.
+		\item High dependence on the pretrained classification model.
+		\item Works with any distribution!
+	\end{itemize}
+	\myfootnotewithlink{https://arxiv.org/abs/2401.09603}{Jayasumana S. et al. Rethinking FID: Towards a Better Evaluation Metric for Image Generation, 2024}
+\end{frame}
+%=======
+\subsection{Precision-Recall}
+%=======
+\begin{frame}{Precision-Recall}
+	\begin{block}{What do we want from samples}
+		\begin{itemize}
+			\item \textbf{Sharpness}: generated samples should be of high quality.
+			\item \textbf{Diversity}: their variation should match that observed in the training set.
+		\end{itemize}
+	\end{block}
+	\vspace{-0.5cm}
+	\begin{figure}
+		\includegraphics[width=0.95\linewidth]{figs/pr_curve}
+	\end{figure}
+	\vspace{-0.3cm}
+	\begin{itemize}
+		\item \textbf{Precision} denotes the fraction of generated images that are realistic.
+		\item \textbf{Recall} measures the fraction of the training data manifold covered by the generator.
+	\end{itemize}
+	\myfootnotewithlink{https://arxiv.org/abs/1904.06991}{Kynkäänniemi T. et al. Improved precision and recall metric for assessing generative models, 2019}
+\end{frame}
+%=======
+\begin{frame}{Precision-Recall}
+	\begin{itemize}
+		\item $\cS_{\pi} = \{\bx_i\}_{i=1}^{n} \sim \pi(\bx)$ -- real samples;
+		\item $\cS_{p} = \{\bx_i\}_{i=1}^{n} \sim p(\bx | \btheta)$ -- generated samples.
+	\end{itemize}
+	Embed samples using pretrained classifier network (as previously):
+	\[
+		\cG_{\pi} = \{\mathbf{g}_i\}_{i=1}^n, \quad \cG_{p} = \{\mathbf{g}_i\}_{i=1}^n.
+	\]
+	Define binary function:
+	\[
+		f(\mathbf{g}, \cG) = 
+		\begin{cases}
+			1, \quad \text{if exists } \mathbf{g}' \in \cG: \| \mathbf{g}  - \mathbf{g}'\|_2 \leq \| \mathbf{g}' - \text{NN}_k(\mathbf{g}', \cG)\|_2; \\
+			0, \quad \text{otherwise.}
+		\end{cases}
+	\]
+	\[
+		\text{Precision} (\cG_{\pi}, \cG_{p}) = \frac{1}{n} \sum_{\mathbf{g} \in \cG_{p}} f(\mathbf{g}, \cG_{\pi}); \,\, \text{Recall} (\cG_{\pi}, \cG_{p}) = \frac{1}{n} \sum_{\mathbf{g} \in \cG_{\pi}} f(\mathbf{g}, \cG_{p}).
+	\]
+	\vspace{-0.4cm}
+	\begin{figure}
+		\includegraphics[width=0.7\linewidth]{figs/pr_k_nearest}
+	\end{figure}
+	\myfootnotewithlink{https://arxiv.org/abs/1904.06991}{Kynkäänniemi T. et al. Improved precision and recall metric for assessing generative models, 2019}
+\end{frame}
+%=======
+\begin{frame}{Precision-Recall}
+	\begin{figure}
+		\includegraphics[width=\linewidth]{figs/pr_vs_fid}
+	\end{figure}
+	\begin{figure}
+		\includegraphics[width=0.75\linewidth]{figs/pr_truncation}
+	\end{figure}
+	\myfootnotewithlink{https://arxiv.org/abs/1904.06991}{Kynkäänniemi T. et al. Improved precision and recall metric for assessing generative models, 2019}
+\end{frame}
+%=======
+\begin{frame}{Truncation trick}
+	\begin{block}{BigGAN: truncated normal sampling}
+		\vspace{-0.3cm}
+		\[
+			p(\bz | \psi) = \cN(\bz | 0, \bI) / \int_{-\infty}^\psi \cN(\bz' | 0, \bI) d\bz'
+		\]
+		Components of $\bz \sim \cN(0, \bI)$ which fall outside a predefined range are resampled.
+	\end{block}
+	
+	\begin{block}{StyleGAN}
+		\vspace{-0.2cm}
+		\[
+			\bz' = \hat{\bz} + \psi \cdot (\bz - \hat{\bz}), \quad \hat{\bz} = \bbE_{\bz} \bz
+		\]
+		\vspace{-0.2cm}
+		\begin{itemize}
+			\item Constant $\psi$ is a tradeoff between diversity and fidelity. 
+			\item $\psi=0.7$ is used for most of the results.
+		\end{itemize}
+	\end{block}
+
+	\myfootnote{\href{https://arxiv.org/abs/1809.11096}{Brock A., Donahue J., Simonyan K. Large Scale GAN Training for High Fidelity Natural Image Synthesis, 2018} \\
+	\href{https://arxiv.org/abs/1812.04948}{Karras T., Laine S., Aila T. A Style-Based Generator Architecture for Generative Adversarial Networks, 2018}}
 \end{frame}
 %=======
 \begin{frame}{Summary}
 	\begin{itemize}
-		\item We could use NF-based prior in VAE (even autoregressive).
+		\item f-divergence family is a unified framework for divergence minimization, which uses variational approximation. Standard GAN is a special case of it.
 		\vfill
-		\item Likelihood is not a perfect criteria to measure quality of generative model.		
+		\item We need a measure of quality for the implicit models (like GANs). 
+		\vfill 
+		\item Frechet Inception Distance is the most popular metric for the implicit models evaluation. 
 		\vfill
-		\item Adversarial learning suggests to solve minimax problem to match the distributions.
+		\item Maximum Mean Discrepancy tries to fix some of the FID drawbacks.
 		\vfill
-		\item GAN tries to optimize Jensen-Shannon divergence (in theory).
-		\vfill
-		\item Mode collapse is one of the main problems of vanilla GAN.  Lots of tips and tricks has to be used to make the GAN training is stable and scalable.
+		\item Precision-recall allow to select model that compromises the sample quality and the sample diversity.	
+		\vfill 
+		\item Truncation tricks help to select model with the compromised samples: diverse and sharp.
 	\end{itemize}
 \end{frame}
 \end{document} 

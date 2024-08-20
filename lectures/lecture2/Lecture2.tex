@@ -307,103 +307,6 @@
 	\myfootnotewithlink{https://arxiv.org/abs/1912.02762}{Papamakarios G. et al. Normalizing flows for probabilistic modeling and inference, 2019} 
 \end{frame}
 %=======
-\section{Forward and Reverse KL for NF}
-%=======
-\begin{frame}{Forward KL vs Reverse KL}
-	\begin{block}{Forward KL $\equiv$ MLE}
-		\vspace{-0.5cm}
-		\begin{align*}
-			KL(\pi || p) &= \int \pi (\bx) \log \frac{\pi(\bx)}{p(\bx | \btheta)} d \bx \\
-			&= - \bbE_{\pi(\bx)} \log p(\bx | \btheta) + \text{const} \rightarrow \min_{\btheta}
-		\end{align*}
-	\end{block}
-	\begin{block}{Forward KL for NF model}
-	    \vspace{-0.1cm}
-		\[
-			\log p(\bx|\btheta) = \log p(\bff_{\btheta}(\bx)) + \log  |\det (\bJ_\bff)|
-		\]		
-		\[
-			KL(\pi || p)  = - \bbE_{\pi(\bx)} \left[\log p(\bff_{\btheta}(\bx)) + \log  |\det (\bJ_\bff)|\right] + \text{const} 
-		\]
-		\vspace{-0.2cm}
-		\begin{itemize}
-			\item We need to be able to compute $\bff_{\btheta}(\bx)$ and its Jacobian.
-			\item We need to be able to compute the density $p(\bz)$.
-			\item We don’t need to think about computing the function $\bg_{\btheta}(\bz) = \bff^{-1}_{\btheta}(\bz)$ until we want to sample from the NF.
-		\end{itemize}
-	\end{block}
-\end{frame}
-%=======
-\begin{frame}{Forward KL vs Reverse KL}
-	\begin{block}{Reverse KL}
-	  	\vspace{-0.5cm}
-			\begin{align*}
-				KL(p || \pi) &= \int p(\bx | \btheta) \log \frac{p(\bx | \btheta)}{\pi(\bx)} d \bx \\
-				&= \bbE_{p(\bx | \btheta)} \left[{\color{violet}\log p(\bx | \btheta)} - \log \pi(\bx)\right] \rightarrow \min_{\btheta}
-			\end{align*}
-		\vspace{-0.7cm}
-	\end{block}
-	\begin{block}{Reverse KL for NF model (LOTUS trick)}
-  		\vspace{-0.3cm}
-		\[
-			 \log p(\bx | \btheta) = \log p(\bz) +  \log  |\det (\bJ_\bff)| = \log p(\bz) - \log |\det (\bJ_\bg)| 
-		\]
-		\[
-			KL(p || \pi)  = \bbE_{p(\bz)} \left[ {\color{violet} \log p(\bz) -  \log |\det (\bJ_\bg)| } - \log \pi(\bg_{\btheta}(\bz)) \right]
-		\]
-		\vspace{-0.3cm}
-		\begin{itemize}
-		\item We need to be able to compute $\bg_{\btheta}(\bz)$ and its Jacobian.
-		\item We need to be able to sample from the density $p(\bz)$ (do not need to evaluate it) and to evaluate(!) $\pi(\bx)$.
-		\item We don’t need to think about computing the function $\bff_{\btheta}(\bx)$.
-		\end{itemize}
-	\end{block}
-\end{frame}
-%=======
-\begin{frame}{Normalizing flows KL duality}
-	\begin{block}{Theorem}
-		Fitting NF model $p(\bx| \btheta)$ to the target distribution $\pi(\bx)$ using forward KL (MLE) is equivalent to fitting the induced distribution $p(\bz| \btheta)$ to the base $p(\bz)$ using reverse KL:
-		\vspace{-0.2cm}
-		\[
-			\argmin_{\btheta} KL(\pi(\bx) || p(\bx | \btheta)) = \argmin_{\btheta} KL(p(\bz | \btheta) || p(\bz)).
-		\]
-		\vspace{-0.7cm}
-	\end{block}
-	\begin{figure}
-		\includegraphics[width=0.85\linewidth]{figs/flows_how2}
-	\end{figure}
-	\myfootnotewithlink{https://arxiv.org/abs/1912.02762}{Papamakarios G. et al. Normalizing flows for probabilistic modeling and inference, 2019} 
-\end{frame}
-%=======
-\begin{frame}{Normalizing flows KL duality}
-	\begin{block}{Theorem}
-		\vspace{-0.3cm}
-		\[
-			\argmin_{\btheta} KL(\pi(\bx) || p(\bx | \btheta)) = \argmin_{\btheta} KL(p(\bz | \btheta) || p(\bz)).
-		\]
-		\vspace{-0.5cm}
-	\end{block}
-	\begin{block}{Proof}
-		\begin{itemize}
-			\item $\bz \sim p(\bz)$, $\bx = \bg_{\btheta}(\bz)$, $\bx \sim p(\bx| \btheta)$;
-			\item $\bx \sim \pi(\bx)$, $\bz = \bff_{\btheta}(\bx)$, $\bz \sim p(\bz | \btheta)$;
-		\end{itemize}
-		\vspace{-0.3cm}
-		\begin{align*}
-			\log p(\bz | \btheta) &= \log \pi(\bg_{\btheta}(\bz)) + \log | \det ( \bJ_\bg) |; \\
-			\log p(\bx | \btheta) &= \log p(\bff_{\btheta}(\bx)) + \log | \det ( \bJ_\bff) |.
-		\end{align*}
-		\vspace{-0.9cm}
-		\begin{multline*}
-			KL\left(p(\bz | \btheta) || p(\bz) \right) = \mathbb{E}_{p(\bz | \btheta)} \bigl[ {\color{violet}\log p(\bz | \btheta)} - \log p(\bz) \bigr] = \\ 
-			= \mathbb{E}_{{\color{olive}p(\bz | \btheta)}} \left[ {\color{violet}\log \pi(\bg_{\btheta}(\bz)) +  \log |\det (\bJ_\bg)|} - \log p(\bz) \right] = \\
-			= \mathbb{E}_{{\color{olive}\pi(\bx)}} \left[ \log \pi(\bx) {\color{teal} - \log |\det (\bJ_\bff)| - \log p(\bff_{\btheta}(\bx))} \right] = \\
-			= \mathbb{E}_{\pi(\bx)} \bigl[ \log \pi(\bx) {\color{teal} -\log p(\bx | \btheta)} \bigr] = KL (\pi(\bx) || p(\bx | \btheta)).
-		\end{multline*}
-	\end{block}
-	\myfootnotewithlink{https://arxiv.org/abs/1705.07057}{Papamakarios G., Pavlakou T., Murray I. Masked Autoregressive Flow for Density Estimation, 2017} 
-\end{frame}
-%=======
 \section{NF examples}
 %=======
 \subsection{Linear normalizing flows}
@@ -579,6 +482,98 @@
 	\myfootnotewithlink{https://blog.evjang.com/2018/01/nf2.html}{image credit: https://blog.evjang.com/2018/01/nf2.html}
 \end{frame}
 %=======
+\subsection{Coupling layer (RealNVP)}
+%=======
+\begin{frame}{RealNVP}
+	\vspace{-0.5cm}
+	Let split $\bx$ and $\bz$ in two parts: 
+	\[
+		\bx = [\bx_1, \bx_2] = [\bx_{1:d}, \bx_{d+1:m}]; \quad \bz = [\bz_1, \bz_2] = [\bz_{1:d}, \bz_{d+1:m}].
+	\]
+	\vspace{-0.7cm}
+	\begin{block}{Coupling layer}
+		\vspace{-0.7cm}
+		\[
+			\begin{cases} \bx_1 = \bz_1; \\ \bx_2 = \bz_2 \odot \bsigma_{\btheta}(\bz_1) + \bmu_{\btheta}(\bz_1).\end{cases}  
+			\begin{cases} \bz_1 = \bx_1; \\ \bz_2 = \left(\bx_2 - \bmu_{\btheta}({\color{olive}\bx_1}) \right) \odot \frac{1}{\bsigma_{\btheta}({\color{olive}\bx_1})}.\end{cases}
+		\]
+	\end{block}
+	\vspace{-0.5cm}
+	\begin{block}{Image partitioning}
+		
+		\begin{minipage}[t]{0.5\columnwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=\linewidth]{figs/realnvp_masking.png}
+			\end{figure}
+		\end{minipage}% 
+		\begin{minipage}[t]{0.5\columnwidth}
+			\begin{itemize}
+				\item Checkerboard ordering uses masking.
+				\item Channelwise ordering uses splitting.
+			\end{itemize}
+		\end{minipage}
+	\end{block}
+	\vspace{-0.5cm}
+	\myfootnotewithlink{https://arxiv.org/abs/1605.08803}{Dinh L., Sohl-Dickstein J., Bengio S. Density estimation using Real NVP, 2016} 
+\end{frame}
+%=======
+\begin{frame}{RealNVP}
+	\begin{block}{Coupling layer}
+		\vspace{-0.7cm}
+		\[
+		 \begin{cases} {\color{violet}\bx_1} = {\color{teal}\bz_1}; \\ {\color{violet}\bx_2} = {\color{teal}\bz_2} \odot \bsigma_{\btheta}({\color{teal}\bz_1}) + \bmu_{\btheta}({\color{teal}\bz_1}).\end{cases}  
+		\begin{cases} {\color{teal}\bz_1} ={\color{violet} \bx_1}; \\ {\color{teal}\bz_2} = \left({\color{violet}\bx_2} - \bmu_{\btheta}({\color{violet}\bx_1}) \right) \odot \frac{1}{\bsigma_{\btheta}({\color{violet}\bx_1})}.\end{cases}
+		\]
+		Estimating the density takes 1 pass, sampling takes 1 pass!
+	\end{block}
+	\begin{block}{Jacobian}
+		\vspace{-0.5cm}
+		\[
+		\det \left( \frac{\partial \bz}{\partial \bx} \right) = \det 
+		\begin{pmatrix}
+			\bI_d & 0_{d \times m - d} \\
+			\frac{\partial \bz_2}{\partial \bx_1} & \frac{\partial \bz_2}{\partial \bx_2}
+		\end{pmatrix} = \prod_{j=1}^{m - d} \frac{1}{\sigma_j(\bx_1)}.
+		\]
+		\vspace{-0.5cm}
+	\end{block}
+	\begin{block}{Gaussian AR NF}
+		\vspace{-0.6cm}
+		\begin{align*}
+			\bx &= \bg_{\btheta}(\bz) \quad \Rightarrow \quad {\color{violet}x_j} = \sigma_j ({\color{violet}\bx_{1:j-1}}) \cdot {\color{teal} z_j} + \mu_j({\color{violet}\bx_{1:j-1}}). \\
+			\bz &= \bff_{\btheta}(\bx) \quad \Rightarrow \quad {\color{teal} z_j} = \left({\color{violet} x_j} - \mu_j({\color{violet}\bx_{1:j-1}}) \right) \cdot \frac{1}{\sigma_j ({\color{violet} \bx_{1:j-1}}) }.
+		\end{align*}
+		\vspace{-0.5cm}
+	\end{block}
+	How to get RealNVP coupling layer from gaussian AR NF?
+	
+	\myfootnotewithlink{https://arxiv.org/abs/1605.08803}{Dinh L., Sohl-Dickstein J., Bengio S. Density estimation using Real NVP, 2016} 
+\end{frame}
+%=======
+\begin{frame}{Glow samples}
+	Glow model: coupling layer + linear flows (1x1 convs)
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\linewidth]{figs/glow_faces.png}
+	\end{figure}
+	\myfootnotewithlink{https://arxiv.org/abs/1807.03039}{Kingma D. P., Dhariwal P. Glow: Generative Flow with Invertible 1x1 Convolutions, 2018}
+\end{frame}
+%=======
+\begin{frame}{Venn diagram for Normalizing flows}
+	
+	\begin{figure}
+		\centering
+		\includegraphics[width=\linewidth]{figs/venn_diagram}
+	\end{figure}
+	\begin{itemize}
+		\item $\cI$ -- invertible functions.
+		\item $\cF$ -- continuously differentiable functions whose Jacobian is lower triangular.
+		\item $\cM$ -- invertible functions from $\cF$.
+	\end{itemize}
+	\myfootnotewithlink{https://arxiv.org/abs/1907.07945}{Song Y., Meng C., Ermon S. Mintnet: Building invertible neural networks with masked convolutions, 2019}
+\end{frame}
+%=======
 \begin{frame}{Summary}
 	\begin{itemize}
 		\item Change of variable theorem allows to get the density function of the random variable under the invertible transformation.
@@ -587,11 +582,11 @@
 		\vfill
 		\item Normalizing flows have a tractable likelihood that is given by the change of variable theorem.
 		\vfill
-		\item We fit normalizing flows using forward or reverse KL minimization. 
-		\vfill 
 		\item Linear NF try to parametrize set of invertible matrices via matrix decompositions.
 		\vfill
-		\item Gaussian autoregressive NF is an autoregressive model with triangular Jacobian. It has fast inference function and slow generation function. Forward KL is a natural loss function.
+		\item Gaussian autoregressive NF is an autoregressive model with triangular Jacobian. 
+		\vfill
+		\item The RealNVP coupling layer is an effective type of NF (special case of AR NF) that has fast inference and generation modes.
 	\end{itemize}
 \end{frame}
 \end{document} 

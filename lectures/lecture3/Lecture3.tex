@@ -55,36 +55,6 @@
 \end{frame}
 %=======
 \begin{frame}{Recap of previous lecture}
-	\begin{block}{Forward KL for flow model}
-	  	\vspace{-0.1cm}
-		\[
-			\log p(\bx|\btheta) = \log p(\bff_{\btheta}(\bx)) + \log  |\det (\bJ_\bff)|
-		\]
-		\vspace{-0.3cm}
-	\end{block}
-	\begin{block}{Reverse KL for flow model}
-  		\vspace{-0.1cm}
-		\[
-			KL(p || \pi)  = \bbE_{p(\bz)} \left[  \log p(\bz) -  \log |\det (\bJ_\bg)| - \log \pi(\bg_{\btheta}(\bz)) \right]
-		\]
-		\vspace{-0.5cm}
-	\end{block}
-	\begin{block}{Flow KL duality}
-	  	\vspace{-0.3cm}
-		\[
-			\argmin_{\btheta} KL(\pi(\bx) || p(\bx | \btheta)) = \argmin_{\btheta} KL(p(\bz | \btheta) || p(\bz))
-		\]
-		\vspace{-0.3cm}
-		\begin{itemize}
-			\item $p(\bz)$ is a base distribution; $\pi(\bx)$ is a data distribution;
-			\item $\bz \sim p(\bz)$, $\bx = \bg_{\btheta}(\bz)$, $\bx \sim p(\bx| \btheta)$;
-			\item $\bx \sim \pi(\bx)$, $\bz = \bff_{\btheta}(\bx)$, $\bz \sim p(\bz | \btheta)$.
-		\end{itemize}
-	\end{block}
-	\myfootnotewithlink{https://arxiv.org/abs/1912.02762}{Papamakarios G. et al. Normalizing flows for probabilistic modeling and inference, 2019} 
-\end{frame}
-%=======
-\begin{frame}{Recap of previous lecture}
 	\vspace{-0.5cm}
 	\begin{block}{Flow log-likelihood}
 		\vspace{-0.3cm}
@@ -144,57 +114,22 @@
 	\myfootnotewithlink{https://arxiv.org/abs/1705.07057}{Papamakarios G., Pavlakou T., Murray I. Masked Autoregressive Flow for Density Estimation, 2017} 
 \end{frame}
 %=======
-\begin{frame}{Outline}
-    \tableofcontents
-\end{frame}
-%=======
-\section{RealNVP: coupling layer}
-%=======
-\begin{frame}{RealNVP}
-	\vspace{-0.5cm}
+\begin{frame}{Recap of previous lecture}
 	Let split $\bx$ and $\bz$ in two parts: 
 	\[
-		\bx = [\bx_1, \bx_2] = [\bx_{1:d}, \bx_{d+1:m}]; \quad \bz = [\bz_1, \bz_2] = [\bz_{1:d}, \bz_{d+1:m}].
+	\bx = [\bx_1, \bx_2] = [\bx_{1:d}, \bx_{d+1:m}]; \quad \bz = [\bz_1, \bz_2] = [\bz_{1:d}, \bz_{d+1:m}].
 	\]
-	\vspace{-0.7cm}
-	\begin{block}{Coupling layer}
-		\vspace{-0.7cm}
-		\[
-			\begin{cases} \bx_1 = \bz_1; \\ \bx_2 = \bz_2 \odot \bsigma_{\btheta}(\bz_1) + \bmu_{\btheta}(\bz_1).\end{cases}  
-			\begin{cases} \bz_1 = \bx_1; \\ \bz_2 = \left(\bx_2 - \bmu_{\btheta}({\color{olive}\bx_1}) \right) \odot \frac{1}{\bsigma_{\btheta}({\color{olive}\bx_1})}.\end{cases}
-		\]
-	\end{block}
 	\vspace{-0.5cm}
-	\begin{block}{Image partitioning}
-		
-		\begin{minipage}[t]{0.5\columnwidth}
-			\begin{figure}
-				\centering
-				\includegraphics[width=\linewidth]{figs/realnvp_masking.png}
-			\end{figure}
-		\end{minipage}% 
-		\begin{minipage}[t]{0.5\columnwidth}
-			\begin{itemize}
-				\item Checkerboard ordering uses masking.
-				\item Channelwise ordering uses splitting.
-			\end{itemize}
-		\end{minipage}
-	\end{block}
-	\vspace{-0.5cm}
-	\myfootnotewithlink{https://arxiv.org/abs/1605.08803}{Dinh L., Sohl-Dickstein J., Bengio S. Density estimation using Real NVP, 2016} 
-\end{frame}
-%=======
-\begin{frame}{RealNVP}
 	\begin{block}{Coupling layer}
-		\vspace{-0.7cm}
+		\vspace{-0.5cm}
 		\[
-		 \begin{cases} {\color{violet}\bx_1} = {\color{teal}\bz_1}; \\ {\color{violet}\bx_2} = {\color{teal}\bz_2} \odot \bsigma_{\btheta}({\color{teal}\bz_1}) + \bmu_{\btheta}({\color{teal}\bz_1}).\end{cases}  
+		\begin{cases} {\color{violet}\bx_1} = {\color{teal}\bz_1}; \\ {\color{violet}\bx_2} = {\color{teal}\bz_2} \odot \bsigma_{\btheta}({\color{teal}\bz_1}) + \bmu_{\btheta}({\color{teal}\bz_1}).\end{cases}  
 		\begin{cases} {\color{teal}\bz_1} ={\color{violet} \bx_1}; \\ {\color{teal}\bz_2} = \left({\color{violet}\bx_2} - \bmu_{\btheta}({\color{violet}\bx_1}) \right) \odot \frac{1}{\bsigma_{\btheta}({\color{violet}\bx_1})}.\end{cases}
 		\]
 		Estimating the density takes 1 pass, sampling takes 1 pass!
 	\end{block}
 	\begin{block}{Jacobian}
-		\vspace{-0.5cm}
+		\vspace{-0.3cm}
 		\[
 		\det \left( \frac{\partial \bz}{\partial \bx} \right) = \det 
 		\begin{pmatrix}
@@ -202,210 +137,363 @@
 			\frac{\partial \bz_2}{\partial \bx_1} & \frac{\partial \bz_2}{\partial \bx_2}
 		\end{pmatrix} = \prod_{j=1}^{m - d} \frac{1}{\sigma_j(\bx_1)}.
 		\]
-		\vspace{-0.5cm}
 	\end{block}
-	\begin{block}{Gaussian AR NF}
-		\vspace{-0.6cm}
-		\begin{align*}
-			\bx &= \bg_{\btheta}(\bz) \quad \Rightarrow \quad {\color{violet}x_j} = \sigma_j ({\color{violet}\bx_{1:j-1}}) \cdot {\color{teal} z_j} + \mu_j({\color{violet}\bx_{1:j-1}}). \\
-			\bz &= \bff_{\btheta}(\bx) \quad \Rightarrow \quad {\color{teal} z_j} = \left({\color{violet} x_j} - \mu_j({\color{violet}\bx_{1:j-1}}) \right) \cdot \frac{1}{\sigma_j ({\color{violet} \bx_{1:j-1}}) }.
-		\end{align*}
-		\vspace{-0.5cm}
-	\end{block}
-	How to get RealNVP coupling layer from gaussian AR NF?
+	Coupling layer is a special case of autoregressive NF.
 	
 	\myfootnotewithlink{https://arxiv.org/abs/1605.08803}{Dinh L., Sohl-Dickstein J., Bengio S. Density estimation using Real NVP, 2016} 
 \end{frame}
 %=======
-\begin{frame}{Glow samples}
-	Glow model: coupling layer + linear flows (1x1 convs)
-	\begin{figure}
-		\centering
-		\includegraphics[width=0.9\linewidth]{figs/glow_faces.png}
-	\end{figure}
-	\myfootnotewithlink{https://arxiv.org/abs/1807.03039}{Kingma D. P., Dhariwal P. Glow: Generative Flow with Invertible 1x1 Convolutions, 2018}
+\begin{frame}{Outline}
+    \tableofcontents
 \end{frame}
 %=======
-\begin{frame}{Venn diagram for Normalizing flows}
-	
-	\begin{figure}
-		\centering
-		\includegraphics[width=\linewidth]{figs/venn_diagram}
-	\end{figure}
-	\begin{itemize}
-		\item $\cI$ -- invertible functions.
-		\item $\cF$ -- continuously differentiable functions whose Jacobian is lower triangular.
-		\item $\cM$ -- invertible functions from $\cF$.
-	\end{itemize}
-	\myfootnotewithlink{https://arxiv.org/abs/1907.07945}{Song Y., Meng C., Ermon S. Mintnet: Building invertible neural networks with masked convolutions, 2019}
-\end{frame}
+\section{Forward and Reverse KL for NF}
 %=======
-\section{Continuous-in-time normalizing flows}
-%=======
-\begin{frame}{Continuous-in-time normalizing flows}
-	\vspace{-0.3cm}
-	\begin{block}{Discrete-in-time NF}
-		Previously we assume that the time axis is discrete:
-		\vspace{-0.3cm}
-		  \[
-			  \bz_{t+1} = \bff_{\btheta}(\bz_t); \quad \log p(\bz_{t+1}) = \log p(\bz_{t}) - \log \left| \det \frac{\partial \bff_{\btheta}(\bz_t)}{\partial \bz_{t}} \right| .
-		  \]
-		\vspace{-0.6cm}
-	\end{block}
-	Let assume the more general case of continuous time. It means that we will have the dynamic function $\bz(t)$.
-	\begin{block}{Continuous-in-time dynamics}
-		Consider Ordinary Differential Equation (ODE)
-		\vspace{-0.3cm}
+\begin{frame}{Forward KL vs Reverse KL}
+	\begin{block}{Forward KL $\equiv$ MLE}
+		\vspace{-0.5cm}
 		\begin{align*}
-		   \frac{d \bz(t)}{dt} &= \bff_{\btheta}(\bz(t), t); \quad \text{with initial condition }\bz(t_0) = \bz_0. \\
-		   \bz(t_1) &= \int^{t_1}_{t_0} \bff_{\btheta}(\bz(t), t) d t  + \bz_0 \approx \text{ODESolve}(\bz(t_0), \bff_{\btheta}, t_0,t_1).
+			KL(\pi || p) &= \int \pi (\bx) \log \frac{\pi(\bx)}{p(\bx | \btheta)} d \bx \\
+			&= - \bbE_{\pi(\bx)} \log p(\bx | \btheta) + \text{const} \rightarrow \min_{\btheta}
 		\end{align*}
-		\vspace{-0.6cm}
 	\end{block}
-	Here we need to define the computational procedure $\text{ODESolve}(\bz(t_0), \bff_{\btheta}, t_0,t_1)$.
-	\myfootnotewithlink{https://arxiv.org/abs/1810.01367}{Grathwohl W. et al. FFJORD: Free-form Continuous Dynamics for Scalable Reversible Generative Models, 2018}  
-\end{frame}
-%=======
-\begin{frame}{Continuous-in-time normalizing flows}
-	\begin{block}{Euler update step}
-		\vspace{-0.5cm}
+	\begin{block}{Forward KL for NF model}
+	    \vspace{-0.1cm}
 		\[
-		    \frac{\bz(t + \Delta t) - \bz(t)}{\Delta t} = \bff_{\btheta}(\bz(t), t) \,\, \Rightarrow \,\, \bz(t + \Delta t) = \bz(t) + \Delta t \cdot \bff_{\btheta}(\bz(t), t)
+			\log p(\bx|\btheta) = \log p(\bff_{\btheta}(\bx)) + \log  |\det (\bJ_\bff)|
+		\]		
+		\[
+			KL(\pi || p)  = - \bbE_{\pi(\bx)} \left[\log p(\bff_{\btheta}(\bx)) + \log  |\det (\bJ_\bff)|\right] + \text{const} 
 		\]
-		\vspace{-0.5cm}
-	\end{block}
-	\textbf{Note:} Euler method is the simplest version of ODESolve that is unstable in practice.  It is possible to use more sophisticated methods (e.x. Runge-Kutta methods).
-	\begin{minipage}[t]{0.4\columnwidth}
-		\begin{figure}
-			\centering
-			\includegraphics[width=0.7\linewidth]{figs/euler}
-		\end{figure}
-	\end{minipage}%
-	\begin{minipage}[t]{0.6\columnwidth}
 		\vspace{-0.2cm}
-		\begin{figure}
-			\centering
-			\includegraphics[width=0.9\linewidth]{figs/resnet_vs_neural_ode.png}
-		\end{figure}
-	\end{minipage}
-	
-	\myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}   
-
+		\begin{itemize}
+			\item We need to be able to compute $\bff_{\btheta}(\bx)$ and its Jacobian.
+			\item We need to be able to compute the density $p(\bz)$.
+			\item We don’t need to think about computing the function $\bg_{\btheta}(\bz) = \bff^{-1}_{\btheta}(\bz)$ until we want to sample from the NF.
+		\end{itemize}
+	\end{block}
 \end{frame}
 %=======
-\begin{frame}{Continuous-in-time Normalizing Flows}
-	\vspace{-0.5cm}
-	\begin{block}{Neural ODE}
+\begin{frame}{Forward KL vs Reverse KL}
+	\begin{block}{Reverse KL}
+	  	\vspace{-0.5cm}
+			\begin{align*}
+				KL(p || \pi) &= \int p(\bx | \btheta) \log \frac{p(\bx | \btheta)}{\pi(\bx)} d \bx \\
+				&= \bbE_{p(\bx | \btheta)} \left[{\color{violet}\log p(\bx | \btheta)} - \log \pi(\bx)\right] \rightarrow \min_{\btheta}
+			\end{align*}
+		\vspace{-0.7cm}
+	\end{block}
+	\begin{block}{Reverse KL for NF model (LOTUS trick)}
+  		\vspace{-0.3cm}
+		\[
+			 \log p(\bx | \btheta) = \log p(\bz) +  \log  |\det (\bJ_\bff)| = \log p(\bz) - \log |\det (\bJ_\bg)| 
+		\]
+		\[
+			KL(p || \pi)  = \bbE_{p(\bz)} \left[ {\color{violet} \log p(\bz) -  \log |\det (\bJ_\bg)| } - \log \pi(\bg_{\btheta}(\bz)) \right]
+		\]
+		\vspace{-0.3cm}
+		\begin{itemize}
+		\item We need to be able to compute $\bg_{\btheta}(\bz)$ and its Jacobian.
+		\item We need to be able to sample from the density $p(\bz)$ (do not need to evaluate it) and to evaluate(!) $\pi(\bx)$.
+		\item We don’t need to think about computing the function $\bff_{\btheta}(\bx)$.
+		\end{itemize}
+	\end{block}
+\end{frame}
+%=======
+\begin{frame}{Normalizing flows KL duality}
+	\begin{block}{Theorem}
+		Fitting NF model $p(\bx| \btheta)$ to the target distribution $\pi(\bx)$ using forward KL (MLE) is equivalent to fitting the induced distribution $p(\bz| \btheta)$ to the base $p(\bz)$ using reverse KL:
+		\vspace{-0.2cm}
+		\[
+			\argmin_{\btheta} KL(\pi(\bx) || p(\bx | \btheta)) = \argmin_{\btheta} KL(p(\bz | \btheta) || p(\bz)).
+		\]
+		\vspace{-0.7cm}
+	\end{block}
+	\begin{figure}
+		\includegraphics[width=0.85\linewidth]{figs/flows_how2}
+	\end{figure}
+	\myfootnotewithlink{https://arxiv.org/abs/1912.02762}{Papamakarios G. et al. Normalizing flows for probabilistic modeling and inference, 2019} 
+\end{frame}
+%=======
+\begin{frame}{Normalizing flows KL duality}
+	\begin{block}{Theorem}
+		\vspace{-0.3cm}
+		\[
+			\argmin_{\btheta} KL(\pi(\bx) || p(\bx | \btheta)) = \argmin_{\btheta} KL(p(\bz | \btheta) || p(\bz)).
+		\]
 		\vspace{-0.5cm}
-		\begin{align*}
-  \frac{d \bz(t)}{dt} &= \bff_{\btheta}(\bz(t), t); \quad \text{with initial condition }\bz(t_0) = \bz_0
-		\end{align*}
-		\vspace{-0.8cm}
 	\end{block}
-	\begin{minipage}[t]{0.6\columnwidth}
+	\begin{block}{Proof}
 		\begin{itemize}
-			\item Let $\bz(t_0)$ will be a random variable with some density function $p(\bz(t_0))$.
-		 	\item Then $\bz(t_1)$ will be also a random variable with some other density function $p(\bz(t_1))$.
-			\item We could say that we have the joint density function $p(\bz(t), t)$.
-			\item What is the difference between $p(\bz(t), t)$ and $p(\bz, t)$?
+			\item $\bz \sim p(\bz)$, $\bx = \bg_{\btheta}(\bz)$, $\bx \sim p(\bx| \btheta)$;
+			\item $\bx \sim \pi(\bx)$, $\bz = \bff_{\btheta}(\bx)$, $\bz \sim p(\bz | \btheta)$;
 		\end{itemize}
-	\end{minipage}%
-	\begin{minipage}[t]{0.4\columnwidth}	
-		\begin{figure}
-			\centering
-			\includegraphics[width=\linewidth]{figs/cnf_flow.png}
-		\end{figure}
-	\end{minipage}
-	\myfootnotewithlink{https://arxiv.org/abs/1810.01367}{Grathwohl W. et al. FFJORD: Free-form Continuous Dynamics for Scalable Reversible Generative Models, 2018}  
+		\vspace{-0.3cm}
+		\begin{align*}
+			\log p(\bz | \btheta) &= \log \pi(\bg_{\btheta}(\bz)) + \log | \det ( \bJ_\bg) |; \\
+			\log p(\bx | \btheta) &= \log p(\bff_{\btheta}(\bx)) + \log | \det ( \bJ_\bff) |.
+		\end{align*}
+		\vspace{-0.9cm}
+		\begin{multline*}
+			KL\left(p(\bz | \btheta) || p(\bz) \right) = \mathbb{E}_{p(\bz | \btheta)} \bigl[ {\color{violet}\log p(\bz | \btheta)} - \log p(\bz) \bigr] = \\ 
+			= \mathbb{E}_{{\color{olive}p(\bz | \btheta)}} \left[ {\color{violet}\log \pi(\bg_{\btheta}(\bz)) +  \log |\det (\bJ_\bg)|} - \log p(\bz) \right] = \\
+			= \mathbb{E}_{{\color{olive}\pi(\bx)}} \left[ \log \pi(\bx) {\color{teal} - \log |\det (\bJ_\bff)| - \log p(\bff_{\btheta}(\bx))} \right] = \\
+			= \mathbb{E}_{\pi(\bx)} \bigl[ \log \pi(\bx) {\color{teal} -\log p(\bx | \btheta)} \bigr] = KL (\pi(\bx) || p(\bx | \btheta)).
+		\end{multline*}
+	\end{block}
+	\myfootnotewithlink{https://arxiv.org/abs/1705.07057}{Papamakarios G., Pavlakou T., Murray I. Masked Autoregressive Flow for Density Estimation, 2017} 
 \end{frame}
 %=======
-\begin{frame}{Continuous-in-time Normalizing Flows}
-	Let say that $p(\bz, t_0)$ is the base distribution (e.x. standard Normal) and $p(\bz, t_1)$ is the desired model distribution $p(\bx | \btheta)$.
-	\begin{block}{Theorem (Picard)}
-		If $\bff$ is uniformly Lipschitz continuous in $\bz$ and continuous in $t$, then the ODE has a \textbf{unique} solution.
+\section{Latent variable models (LVM)}
+%=======
+\begin{frame}{Bayesian framework}
+	\begin{block}{Bayes theorem}
+		\[
+			p(\bt | \bx) = \frac{p(\bx | \bt) p(\bt)}{p(\bx)} = \frac{p(\bx | \bt) p(\bt)}{\int p(\bx | \bt) p(\bt) d \bt} 
+		\]
+		\begin{itemize}
+			\item $\bx$ -- observed variables, $\bt$ -- unobserved variables (latent variables/parameters);
+			\item $p(\bx | \bt)$ -- likelihood;
+			\item $p(\bx) = \int p(\bx | \bt) p(\bt) d \bt$ -- evidence;
+			\item $p(\bt)$ -- prior distribution, $p(\bt | \bx)$ -- posterior distribution.
+		\end{itemize}
 	\end{block}
-	It means that we are able \textbf{uniquely revert} our ODE. 
-	\begin{block}{Forward and inverse transforms}
-		\vspace{-0.7cm}
-		\begin{align*}
-			\bx &= \bz(t_1) = \bz(t_0) + \int_{t_0}^{t_1} \bff_{\btheta}(\bz(t), t) dt \\
-			\bz &= \bz(t_0) = \bz(t_1) + \int_{t_1}^{t_0} \bff_{\btheta}(\bz(t), t) dt
-		\end{align*}
-		\vspace{-0.7cm}
+	\begin{block}{Meaning}
+		We have unobserved variables $\bt$ and some prior knowledge about them $p(\bt)$. Then, the data $\bx$ has been observed. 
+		Posterior distribution $p(\bt | \bx)$ summarizes the knowledge after the observations.
 	\end{block}
-	\textbf{Note:} Unlike discrete-in-time NF, $\bff$ does not need to be bijective (uniqueness guarantees bijectivity).
-	\myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}   
 \end{frame}
 %=======
-\begin{frame}{Continuous-in-time Normalizing Flows}
-	\begin{block}{What do we need?}
-		\begin{itemize}
-			\item We need the way to compute $p(\bz, t)$ at any moment $t$.
-			\item We need the way to find the optimal parameters $\btheta$ of the dynamic $\bff_{\btheta}$.
-		\end{itemize}
+\begin{frame}{Bayesian framework}
+	Let consider the case, where the unobserved variables $\bt$ is our model parameters $\btheta$.
+	\begin{itemize}
+		\item $\bX = \{\bx_i\}_{i=1}^n$ -- observed samples;
+		\item $p(\btheta)$ -- prior parameters distribution (we treat model parameters $\btheta$ as random variables).
+	\end{itemize}
+	\begin{block}{Posterior distribution}
+		\[
+			p(\btheta | \bX) = \frac{p(\bX | \btheta) p(\btheta)}{p(\bX)} = \frac{p(\bX | \btheta) p(\btheta)}{\int p(\bX | \btheta) p(\btheta) d \btheta} 
+		\]
+		\vspace{-0.2cm}
+	\end{block}
+	If evidence $p(\bX)$ is intractable (due to multidimensional integration), we can't get posterior distribution and perform the exact inference.
+    \begin{block}{Maximum a posteriori (MAP) estimation}
+    \vspace{-0.2cm}
+    \[
+        \btheta^* = \argmax_{\btheta} p(\btheta | \bX) = \argmax_{\btheta} \bigl(\log p(\bX | \btheta) + \log p(\btheta) \bigr)
+    \]
+    \end{block}
+\end{frame}
+%=======
+\begin{frame}{Latent variable models (LVM)}
+	\begin{block}{MLE problem}
+		\vspace{-0.5cm}
+		\[
+		\btheta^* = \argmax_{\btheta} p(\bX | \btheta) = \argmax_{\btheta} \prod_{i=1}^n p(\bx_i | \btheta) = \argmax_{\btheta} \sum_{i=1}^n \log p(\bx_i | \btheta).
+		\]
+		\vspace{-0.5cm}
+	\end{block}
+	The distribution $p(\bx | \btheta)$ could be very complex and intractable (as well as real distribution $\pi(\bx)$).
+	\begin{block}{Extended probabilistic model}
+		Introduce latent variable $\bz$ for each sample $\bx$
+		\[
+		p(\bx, \bz | \btheta) = p(\bx | \bz, \btheta) p(\bz); \quad 
+		\log p(\bx, \bz | \btheta) = \log p(\bx | \bz, \btheta) + \log p(\bz).
+		\]
+		\[
+		p(\bx | \btheta) = \int p(\bx, \bz | \btheta) d\bz = \int p(\bx | \bz, \btheta) p(\bz) d\bz.
+		\]
 	\end{block}
 	\vspace{-0.3cm}
-	\begin{block}{Theorem (Kolmogorov-Fokker-Planck: special case)}
-		If $\bff$ is uniformly Lipschitz continuous in $\bz$ and continuous in $t$, then
-		\[
-			\frac{d \log p(\bz(t), t)}{d t} = - \text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right).
-		\]
-		\[
-			\log p(\bz(t_1), t_1) = \log p(\bz(t_0), t_0) - \int_{t_0}^{t_1} \text{tr}  \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) dt.
-		\]
+	\begin{block}{Motivation}
+		The distributions $p(\bx | \bz, \btheta)$ and $p(\bz)$ could be quite simple.
 	\end{block}
-	It means that if we have the value $\bz_0 = \bz(t_0)$ then the solution of the ODE will give us the density at the moment $t_1$.
-	\myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}   
 \end{frame}
 %=======
-\begin{frame}{Continuous-in-time Normalizing Flows}
-	\begin{block}{Forward transform + log-density}
+\begin{frame}{Latent variable models (LVM)}
+	\[
+	\log p(\bx | \btheta) = \log \int p(\bx | \bz, \btheta) p(\bz) d\bz \rightarrow \max_{\btheta}
+	\]
+	\vspace{-0.6cm}
+	\begin{block}{Examples}
+		\begin{minipage}[t]{0.45\columnwidth}
+			\textit{Mixture of gaussians} \\
+			\vspace{-0.5cm}
+			\begin{figure}
+				\centering
+				\includegraphics[width=0.75\linewidth]{figs/mixture_of_gaussians}
+			\end{figure}
+			\vspace{-0.5cm}
+			\begin{itemize}
+				\item $p(\bx | z, \btheta) = \cN(\bmu_z, \bSigma_z)$
+				\item $p(z) = \text{Categorical}(\bpi)$
+			\end{itemize}
+		\end{minipage}%
+		\begin{minipage}[t]{0.53\columnwidth}
+			\textit{PCA model} \\
+			\vspace{-0.5cm}
+			\begin{figure}
+				\centering
+				\includegraphics[width=.7\linewidth]{figs/pca}
+			\end{figure}
+			\vspace{-0.3cm}
+			\begin{itemize}
+				\item $p(\bx | \bz, \btheta) = \cN(\bW \bz + \bmu, \sigma^2 \bI)$
+				\item $p(\bz) = \cN(0, \bI)$
+			\end{itemize}
+		\end{minipage}
+	\end{block}
+	\myfootnote{Bishop\,C. Pattern Recognition and Machine Learning, 2006}
+\end{frame}
+%=======
+\begin{frame}{Maximum likelihood estimation for LVM}
+	\begin{block}{MLE for extended problem}
 		\vspace{-0.7cm}
-		\begin{align*}
-				\bx &= \bz + \int_{t_0}^{t_1} \bff_{\btheta}(\bz(t), t) dt \\
-				\log p(\bx | \btheta) &= \log p(\bz) - \int_{t_0}^{t_1} \text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) dt
-		\end{align*}
-		Here $p(\bx | \btheta) = p(\bz(t_1), t_1)$, $p(\bz) = p(\bz(t_0), t_0)$.
+		\begin{multline*}
+			\vspace{-0.5cm}
+			\btheta^* = \argmax_{\btheta} p(\bX, \bZ | \btheta) = \argmax_{\btheta} \prod_{i=1}^n p(\bx_i, \bz_i | \btheta) = \\ = \argmax_{\btheta} \sum_{i=1}^n \log p(\bx_i, \bz_i | \btheta).
+		\end{multline*}
+		\vspace{-0.5cm}
 	\end{block}
-	\begin{itemize}
-		\item \textbf{Discrete-in-time NF}: evaluation of determinant of the Jacobian costs $O(m^3)$ (we need invertible $\bff$).
-		\item \textbf{Continuous-in-time NF}: getting the trace of the Jacobian costs $O(m^2)$ (we need smooth $\bff$).
-	\end{itemize}
-	\begin{block}{Why $O(m^2)$?}
-		$\text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t))}{\partial \bz(t)} \right)$ costs $O(m^2)$ ($m$ evaluations of $\bff$), since we have to compute a derivative for each diagonal element. It is possible to reduce cost from $O(m^2)$ to $O(m)$!
+	However, $\bZ$ is unknown.
+	\begin{block}{MLE for original problem}
+		\vspace{-0.7cm}
+		\begin{multline*}
+			\btheta^* = \argmax_{\btheta} \log p(\bX| \btheta) = \argmax_{\btheta} \sum_{i=1}^n \log p(\bx_i | \btheta) = \\ =  \argmax_{\btheta}  \sum_{i=1}^n \log \int p(\bx_i, \bz_i | \btheta) d \bz_i = \\ = \argmax_{\btheta} \sum_{i=1}^n \log \int p(\bx_i| \bz_i, \btheta) p(\bz_i) d\bz_i.
+		\end{multline*}
 	\end{block}
-	\myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}   
+	
 \end{frame}
 %=======
-\begin{frame}{Continuous-in-time Normalizing Flows}
-	\begin{block}{Hutchinson's trace estimator}
-		If $\bepsilon \in \bbR^m$ is a random variable with $\mathbb{E} [\bepsilon] = 0$ and $\text{cov} (\bepsilon) = \bI$, then
-		\vspace{-0.3cm}
-		\begin{multline*}
-		    \text{tr}(\mathbf{A}) = \text{tr}\left(\mathbf{A} \cdot {\color{olive}\bI} \right) = \text{tr}\left(\mathbf{A} \cdot {\color{olive}\mathbb{E}_{p(\bepsilon)} \left[ \bepsilon \bepsilon^T \right]} \right) = \\ 
-		    =  \mathbb{E}_{p(\bepsilon)} \left[  \text{tr}\left(  \mathbf{A}  \bepsilon \bepsilon^T \right) \right] =  \mathbb{E}_{p(\bepsilon)} \left[ {\color{violet} \bepsilon^T \mathbf{A}} \bepsilon  \right]
-		\end{multline*}
-		\vspace{-0.6 cm}
+\begin{frame}{Naive approach}
+	\begin{figure}
+		\includegraphics[width=.75\linewidth]{figs/lvm_diagram}
+	\end{figure}
+	\begin{block}{Monte-Carlo estimation}
+		\vspace{-0.7cm}
+		\[
+			p(\bx | \btheta) = \int p(\bx | \bz, \btheta) p(\bz) d\bz = \bbE_{p(\bz)} p(\bx | \bz, \btheta) \approx \frac{1}{K} \sum_{k=1}^{K} p(\bx | \bz_k, \btheta),
+		\]
+		\vspace{-0.5cm} \\
+		where $\bz_k \sim p(\bz)$. \\
+		\textbf{Challenge:} to cover the space properly, the number of samples grows exponentially with respect to dimensionality of $\bz$. 
 	\end{block}
-	Jacobian vector products ${\color{violet}\bv^T \frac{\partial f}{\partial \bz}}$ can be computed for approximately the same cost as evaluating $\bff$ (\texttt{torch.autograd.functional.jvp}).
-	\begin{block}{FFJORD density estimation}
+	\myfootnotewithlink{https://jmtomczak.github.io/blog/4/4\_VAE.html}{image credit: https://jmtomczak.github.io/blog/4/4\_VAE.html}
+\end{frame}
+%=======
+\section{Variational lower bound (ELBO)}
+%=======
+\begin{frame}{Variational lower bound (ELBO)}
+	\begin{block}{Derivation 1 (inequality)}
+		\vspace{-0.7cm}
+		\begin{multline*}
+			\log p(\bx| \btheta) 
+			= \log \int p(\bx, \bz | \btheta) d\bz = \log \int \frac{q(\bz)}{q(\bz)} p(\bx, \bz | \btheta) d\bz = \\
+			= \log \bbE_{q} \left[\frac{p(\bx, \bz| \btheta)}{q(\bz)} \right] \geq \bbE_{q} \log \frac{p(\bx, \bz| \btheta)}{q(\bz)} = \cL_{q, \btheta}(\bx)
+		\end{multline*}
+		\vspace{-0.7cm}
+	\end{block}
+	\begin{block}{Derivation 2 (equality)}
+		\vspace{-0.7cm}
+		\begin{multline*}
+			\cL_{q, \btheta}(\bx) = \int q(\bz) \log \frac{p(\bx, \bz | \btheta)}{q(\bz)}d\bz = 
+			\int q(\bz) \log \frac{p(\bz|\bx, \btheta)p(\bx| \btheta)}{q(\bz)}d\bz = \\
+			= \int q(\bz) \log p(\bx| \btheta) d\bz + \int q(\bz) \log \frac{p(\bz|\bx, \btheta)}{q(\bz)}d\bz = \\
+			= \log p(\bx| \btheta) - KL(q(\bz) || p(\bz|\bx, \btheta))
+		\end{multline*}
+	\end{block}
+	\vspace{-0.7cm}
+	\begin{block}{Variational decomposition}
+		\[
+			\log p(\bx| \btheta) = \cL_{q, \btheta}(\bx) + KL(q(\bz) || p(\bz|\bx, \btheta)) \geq \cL_{q, \btheta}(\bx).
+		\]
+	\end{block}
+\end{frame}
+%=======
+\begin{frame}{Variational lower bound (ELBO)}
+	\vspace{-0.3cm}
+	\begin{align*}
+		\cL_{q, \btheta}(\bx) &= \int q(\bz) \log \frac{\color{violet}p(\bx, \bz | \btheta)}{\color{teal}q(\bz)}d\bz = \\ 
+		&= \int q(\bz) \log {\color{violet}p(\bx | \bz, \btheta)} d\bz + \int q(\bz) \log \frac{\color{violet}p(\bz)}{\color{teal}q(\bz)}d\bz \\ 
+		&= \mathbb{E}_{q} \log p(\bx | \bz, \btheta) - KL (q(\bz) || p(\bz))
+	\end{align*}
+	\vspace{-0.5cm}
+	\begin{block}{Log-likelihood decomposition}
 		\vspace{-0.8cm}
 		\begin{multline*}
-		    \log p(\bz(t_1)) = \log p(\bz(t_0)) - \int_{t_0}^{t_1} \text{tr}  \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) dt = \\ = \log p(\bz(t_0)) - \mathbb{E}_{p(\bepsilon)} \int_{t_0}^{t_1} \left[ {\color{violet}\bepsilon^T \frac{\partial \bff}{\partial \bz}} \bepsilon \right] dt.
+			\log p(\bx| \btheta) = {\color{olive}\cL_{q, \btheta}(\bx)} + KL(q(\bz) || p(\bz|\bx, \btheta)) \\ = {\color{olive}\mathbb{E}_{q} \log p(\bx | \bz, \btheta) - KL (q(\bz) || p(\bz))} + KL(q(\bz) || p(\bz|\bx, \btheta)).
 		\end{multline*}
+		\vspace{-0.7cm}
 	\end{block}
-	\myfootnotewithlink{https://arxiv.org/abs/1810.01367}{Grathwohl W. et al. FFJORD: Free-form Continuous Dynamics for Scalable Reversible Generative Models, 2018} 
+	\begin{itemize}
+		\item Instead of maximizing incomplete likelihood, maximize ELBO
+		\[
+		\max_{\btheta} p(\bx | \btheta) \quad \rightarrow \quad \max_{q, \btheta} \cL_{q, \btheta}(\bx)
+		\]
+		\item Maximization of ELBO by \textbf{variational} distribution $q$ is equivalent to minimization of KL
+		\[
+		\argmax_q \cL_{q, \btheta}(\bx) \equiv \argmin_q KL(q(\bz) || p(\bz|\bx, \btheta)).
+		\]
+	\end{itemize}
+\end{frame}
+%=======
+\section{EM-algorithm}
+%=======
+\begin{frame}{EM-algorithm}
+	\vspace{-0.5cm}
+	\begin{multline*}
+		\cL_{q, \btheta}(\bx)  =  \mathbb{E}_{q} \log p(\bx | \bz, \btheta) - KL (q(\bz) || p(\bz)) = \\ = \bbE_q \left[ \log p(\bx | \bz, \btheta) - \log \frac{q(\bz)}{p(\bz)} \right]d\bz \rightarrow \max_{q, \btheta}.
+	\end{multline*}
+	\vspace{-0.5cm}
+	\begin{block}{Block-coordinate optimization}
+		\begin{itemize}
+			\item Initialize $\btheta^*$;
+			\item \textbf{E-step} ($\cL_{q, \btheta}(\bx) \rightarrow \max_q$)
+			\vspace{-0.2cm}
+			\begin{multline*}
+				q^*(\bz) = \argmax_q \cL_{q, \btheta^*}(\bx) = \\
+				= \argmin_q KL(q(\bz) || p(\bz | \bx, \btheta^*)) = p(\bz| \bx, \btheta^*);
+			\end{multline*}
+			\item \textbf{M-step} ($\cL_{q, \btheta}(\bx) \rightarrow \max_{\btheta}$)
+			\vspace{-0.2cm}
+			\[
+			\btheta^* = \argmax_{\btheta} \cL_{q^*, \btheta}(\bx);
+			\]
+			\vspace{-0.2cm}
+			\item Repeat E-step and M-step until convergence.
+		\end{itemize}
+	\end{block}
+\end{frame}
+%=======
+\begin{frame}{EM-algorithm illustration}
+	\begin{minipage}[t]{0.45\columnwidth}
+		\begin{figure}
+			\includegraphics[width=0.9\linewidth]{figs/em_bishop1}
+		\end{figure}
+	\end{minipage}%
+	\begin{minipage}[t]{0.55\columnwidth}
+		\begin{figure}
+			\includegraphics[width=0.85\linewidth]{figs/em_bishop2}
+		\end{figure}
+	\end{minipage}
+	\begin{figure}
+		\includegraphics[width=.55\linewidth]{figs/em_bishop3}
+	\end{figure}
+	
+	\myfootnote{Bishop\,C. Pattern Recognition and Machine Learning, 2006}
 \end{frame}
 %=======
 \begin{frame}{Summary}
 	\begin{itemize}
-		\item The RealNVP coupling layer is an effective type of NF (special case of AR NF) that has fast inference and generation modes.
+		\item Flow duality connects data space and latent space via forward and reverse KL formulations. 
 		\vfill
-		\item Continuous-in-time NF uses neural ODE to define continuous dynamic $\bz(t)$. It has less functional restrictions.
-		\vfill 
-		\item Kolmogorov-Fokker-Planck theorem allows to calculate $\log p(\bz, t)$ at arbitrary moment $t$.
+		\item Bayesian framework is a generalization of most common machine learning tasks.
 		\vfill
-		\item FFJORD model makes such kind of NF scalable.
+		\item LVM introduces latent representation of observed samples to make model more interpretative.
+		\vfill
+		\item LVM maximizes variational evidence lower bound (ELBO) to find MLE for the parameters.
+		\vfill
+		\item The general variational EM algorithm maximizes ELBO objective for LVM model to find MLE for parameters $\btheta$.	
 	\end{itemize}
 \end{frame}
 \end{document} 
