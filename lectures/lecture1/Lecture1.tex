@@ -88,61 +88,42 @@
 	\myfootnotewithlink{https://arxiv.org/abs/1812.04948}{Karras T., Laine S., Aila T. A style-based generator architecture for generative adversarial networks, 2018}
 \end{frame}
 %=======
-\begin{frame}{VQ-VAE-2 -- high quality generation without GANs}
-    \begin{figure}
-        \centering
-        \includegraphics[width=0.7\linewidth]{figs/vq_vae.png}
-    \end{figure}
-\myfootnotewithlink{https://arxiv.org/abs/1906.00446}{Razavi A., Oord A., Vinyals O. Generating Diverse High-Fidelity Images with VQ-VAE-2, 2019}
-\end{frame}
-%=======
-\begin{frame}{Language modelling at scale}
-	\begin{figure}
-		\includegraphics[width=0.7\linewidth]{figs/nlp_models}
-	\end{figure}
-	\vspace{-0.3cm}
-	\begin{figure}
-		\includegraphics[width=0.55\linewidth]{figs/nlp_models2}
-	\end{figure}
-\myfootnote{\href{http://jalammar.github.io/illustrated-gpt2}{image credit: http://jalammar.github.io/illustrated-gpt2} \\
-\href{https://huggingface.co/blog/hf-bitsandbytes-integration}{image credit: https://huggingface.co/blog/hf-bitsandbytes-integration}}
-\end{frame}
-%=======
-\begin{frame}{Language modelling at scale}
+\begin{frame}{Language modeling at scale}
 	\begin{figure}
 		\includegraphics[width=0.85\linewidth]{figs/LLM-Evolutionary-Tree}
 	\end{figure}
 \myfootnotewithlink{https://blog.biocomm.ai/2023/05/14/open-source-proliferation-llm-evolutionary-tree/}{image credit: https://blog.biocomm.ai/2023/05/14/open-source-proliferation-llm-evolutionary-tree/}
 \end{frame}
 %=======
-\begin{frame}{DDPM - diffusion model}
+\begin{frame}{Denoising Diffusion Probabilistic Model}
 	\begin{figure}
 		\includegraphics[width=\linewidth]{figs/diffusion_models}
 	\end{figure}
 	\myfootnotewithlink{https://arxiv.org/abs/2105.05233}{Dhariwal P., Nichol A. Diffusion Models Beat GANs on Image Synthesis, 2021}
 \end{frame}
 %=======
-\begin{frame}{Stable Diffusion - awesome text-to-image results}
+\begin{frame}{Midjourney - awesome text-to-image results}
 	\begin{figure}
-		\includegraphics[width=\linewidth]{figs/stable_diffusion}
+		\includegraphics[width=\linewidth]{figs/midjourney}
 	\end{figure}
-	\myfootnote{\href{https://arxiv.org/abs/2112.10752}{Rombach R., et al. High-Resolution Image Synthesis with Latent Diffusion Models, 2021} \\
-	\href{https://github.com/CompVis/stable-diffusion}{https://github.com/CompVis/stable-diffusion} \\
-	\href{https://laion.ai/blog/laion-5b/}{LAION-5B dataset}}
+	\myfootnotewithlink{https://www.midjourney.com/explore}{image credit: https://www.midjourney.com/explore}
 \end{frame}
 %=======
-\begin{frame}{Shedevrum - Yandex generative model}
-	
-		\begin{minipage}[t]{0.5\columnwidth}
-			\begin{figure}
-				\includegraphics[width=\linewidth]{figs/shedevrum1}
-			\end{figure}
-		\end{minipage}%
-		\begin{minipage}[t]{0.5\columnwidth}
-			\begin{figure}
-				\includegraphics[width=\linewidth]{figs/shedevrum2}
-			\end{figure}
-		\end{minipage}
+\begin{frame}{Stable Diffusion 3 -- flow matching}
+		\begin{figure}
+			\includegraphics[width=\linewidth]{figs/sd3_1}
+		\end{figure}
+		\begin{figure}
+			\includegraphics[width=\linewidth]{figs/sd3_2}
+		\end{figure}
+		\myfootnotewithlink{https://stability.ai/news/stable-diffusion-3}{image credit: https://stability.ai/news/stable-diffusion-3}
+\end{frame}
+%=======
+\begin{frame}{Sora -- video generation}
+		\begin{figure}
+			\includegraphics[width=\linewidth]{figs/sora}
+		\end{figure}
+		\myfootnotewithlink{https://openai.com/index/sora}{image credit: https://openai.com/index/sora}
 \end{frame}
 %=======
 \section{Problem statement}
@@ -249,13 +230,14 @@
 	\begin{block}{Conditional model}
 		In practice the popular task is to create a conditional model~$\pi(\bx | \by)$. 
 		\begin{itemize}
-		\item $\by$ -- class label, $\bx$ -- image $\Rightarrow$ image conditional model.
-		\item $\by$ -- text prompt, $\bx$ -- image $\Rightarrow$ text-to-image model.
-		\item $\by$ -- image, $\bx$ -- image $\Rightarrow$ image-to-image model.
-		\item $\by$ -- image, $\bx$ -- text $\Rightarrow$ image-to-text model (image captioning).
-		\item $\by$ -- sound, $\bx$ -- text $\Rightarrow$ speech-to-text model (automatic speech recognition).
-		\item $\by$ -- English text, $\bx$ -- Russian text $\Rightarrow$ sequence-to-sequence model (machine translation).
-		\item $\by = \emptyset$, $\bx$ -- image $\Rightarrow$ image unconditional model.
+			\item $\by = \emptyset$, $\bx$ -- image $\Rightarrow$ image unconditional model.
+			\item $\by$ -- class label, $\bx$ -- image $\Rightarrow$ image conditional model.
+			\item $\by$ -- text prompt, $\bx$ -- image $\Rightarrow$ text-to-image model.
+			\item $\by$ -- image, $\bx$ -- image $\Rightarrow$ image-to-image model.
+			\item $\by$ -- image, $\bx$ -- text $\Rightarrow$ image-to-text model (image captioning).
+			\item $\by$ -- English text, $\bx$ -- Russian text $\Rightarrow$ sequence-to-sequence model (machine translation).
+			\item $\by$ -- sound, $\bx$ -- text $\Rightarrow$ speech-to-text model (automatic speech recognition).
+			\item $\by$ -- text, $\bx$ -- sound $\Rightarrow$ text-to-speech model.
 		\end{itemize}
 	\end{block}
 \end{frame}
@@ -409,10 +391,13 @@
     Let $\bx = (x_1, \dots, x_m)$, $\bx_{1:j} = (x_1, \dots, x_j)$. Then 
     \[
         p(\bx | \btheta) = \prod_{j=1}^m p(x_j | \bx_{1:j - 1}, \btheta); \quad 
-        \log p(\bx | \btheta) = \sum_{j=1}^m \log p(x_j | \bx_{1:j - 1}, \btheta).
+        \log p(\bx | \btheta) = {\color{violet}\sum_{j=1}^m \log p(x_j | \bx_{1:j - 1}, \btheta)}.
     \]
     \end{block}
-	\textbf{Example:} $p(x_1, x_2, x_3) = p(x_2) \cdot p(x_1 | x_2) \cdot p(x_3 | x_1, x_2)$.
+    \vspace{-0.5cm}
+	 \[
+	     \btheta^* =  \argmax_{\btheta} \sum_{i=1}^n \left[{\color{violet} \sum_{j=1}^m \log p(x_j | \bx_{1:j - 1}, \btheta)}\right]
+	 \]
 \end{frame}
 %=======
 \begin{frame}{Autoregressive models}
@@ -428,8 +413,8 @@
     		\item sample $\hat{x}_m \sim p(x_m | \hat{\bx}_{1:m-1}, \btheta)$;
     		\item new generated object is $\hat{\bx} = (\hat{x}_1, \hat{x}_2, \dots, \hat{x}_m)$.
     	\end{itemize}
-        \item Each conditional $p(x_j | \bx_{1:j - 1}, \btheta)$ could be modelled by neural network.
-        \item Modelling all conditional distributions separately is infeasible and we would obtain separate models. To extend to high dimensions we could share parameters $\btheta$ across conditionals.
+        \item Each conditional $p(x_j | \bx_{1:j - 1}, \btheta)$ could be modeled by neural network.
+        \item Modeling all conditional distributions separately is infeasible. Shared parameters $\btheta$ across conditionals allow to avoid this problem.
 
     \end{itemize}
 \end{frame}
@@ -464,6 +449,17 @@
 		\end{minipage}
 	\end{block}
 	 \myfootnotewithlink{https://jmtomczak.github.io/blog/2/2\_ARM.html}{image credit: https://jmtomczak.github.io/blog/2/2\_ARM.html}
+\end{frame}
+%=======
+\begin{frame}{Autoregressive models: LLM}
+	\[
+		p(x_j | \bx_{1:j - 1}, \btheta) = p(x_j | \bx_{j - d:j - 1}, \btheta), \quad d \text{ is a model context}.
+	\]
+	 \begin{figure}
+		   \centering
+		   \includegraphics[width=1.0\linewidth]{figs/llm_modeling}
+	 \end{figure}
+	 \myfootnotewithlink{https://jmtomczak.github.io/blog/20/20\_llms.html}{image credit: https://jmtomczak.github.io/blog/20/20\_llms.html}
 \end{frame}
 %=======
 \begin{frame}{Autoregressive models: PixelCNN}
