@@ -16,6 +16,103 @@
 	\tableofcontents
 \end{frame}
 %=======
+\begin{frame}{Recap of previous lecture}
+	\vspace{-0.5cm}
+	\[
+		d\bx = \mathbf{f}(\bx, t) dt + g(t) d \bw - \text{SDE with probability path} p(\bx, t)
+	\]
+	\vspace{-0.5cm}
+	\begin{block}{Probability flow ODE}
+		There exists ODE with identical probability path $p(\bx, t)$ of the form
+		\vspace{-0.3cm}
+		\[
+			d\bx = \left[\mathbf{f}(\bx, t) -\frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p(\bx, t) \right] dt
+		\]
+		\vspace{-0.3cm}
+	\end{block}
+	\begin{figure}
+		\includegraphics[width=0.75\linewidth]{figs/probability_flow}
+	\end{figure}
+	\myfootnotewithlink{https://arxiv.org/abs/2011.13456}{Song Y., et al. Score-Based Generative Modeling through Stochastic Differential Equations, 2020}
+\end{frame}
+%=======
+\begin{frame}{Recap of previous lecture}
+	\vspace{-0.3cm}
+	\[
+		d\bx = \mathbf{f}(\bx, t) dt, \quad \bx(t + dt) = \bx(t) + \mathbf{f}(\bx, t) dt
+	\]
+	\vspace{-0.5cm}
+	\begin{block}{Reverse ODE}
+		Let $\tau = 1 - t$ ($d\tau = -dt$).
+		\vspace{-0.3cm}
+		\[
+			d\bx = - \bff(\bx, 1 - \tau) d \tau
+		\]
+	\end{block}
+	\vspace{-0.5cm}
+	\begin{block}{Reverse SDE}
+		There exists the reverse SDE for the SDE $d\bx = \mathbf{f}(\bx, t) dt + g(t) d \bw$ that has the following form
+		\vspace{-0.3cm}
+		\[
+			d\bx = \left(\mathbf{f}(\bx, t) {\color{violet}- g^2(t) \frac{\partial \log p(\bx, t)}{\partial \bx}}\right) dt + g(t) d \bw, \quad dt < 0
+		\] 
+	\end{block}
+	\vspace{-0.5cm}
+	\begin{block}{Sketch of the proof}
+		\begin{itemize}
+			\item Convert initial SDE to probability flow ODE.
+			\item Revert probability flow ODE.
+			\item Convert reverse probability flow ODE to reverse SDE.
+		\end{itemize}
+	\end{block}
+	\myfootnotewithlink{https://arxiv.org/abs/2011.13456}{Song Y., et al. Score-Based Generative Modeling through Stochastic Differential Equations, 2020}
+\end{frame}
+%=======
+\begin{frame}{Recap of previous lecture}
+	\vspace{-0.5cm}
+	\begin{align*}
+		d\bx &= \mathbf{f}(\bx, t) dt + g(t) d \bw - \text{SDE} \\
+		d\bx &= \left[\mathbf{f}(\bx, t) -\frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p(\bx, t) \right] dt - \text{probability flow ODE} \\
+		d\bx &= \left(\mathbf{f}(\bx, t) - g^2(t) \frac{\partial \log p(\bx, t)}{\partial \bx}\right) dt + g(t) d \bw - \text{reverse SDE}
+	\end{align*}
+	\vspace{-0.5cm}
+	\begin{itemize}
+		\item We got the way to transform one distribution to another via SDE with some probability path $p(\bx, t)$.
+		\item We are able to revert this process with the score function.
+	\end{itemize}
+	\vspace{-0.3cm}
+	\begin{figure}
+		\includegraphics[width=0.9\linewidth]{figs/sde}
+	\end{figure}
+	\myfootnotewithlink{https://arxiv.org/abs/2011.13456}{Song Y., et al. Score-Based Generative Modeling through Stochastic Differential Equations, 2020}
+\end{frame}
+%=======
+\begin{frame}{Recap of previous lecture}
+	\vspace{-0.3cm}
+	\[
+		d\bx = \mathbf{f}(\bx, t) dt + g(t) d \bw
+	\]
+	\vspace{-0.3cm}
+	\begin{block}{Variance Exploding SDE (NCSN)}
+		\vspace{-0.5cm}
+		\[
+			d \bx = \sqrt{\frac{ d [\sigma^2(t)]}{dt}} \cdot d \bw, \quad \bff(\bx, t) = 0, \quad g(t) = \sqrt{\frac{ d [\sigma^2(t)]}{dt}} 
+		\]
+		Variance grows since $\sigma(t)$ is a monotonically increasing function.
+	\end{block}
+	\begin{block}{Variance Preserving SDE (DDPM)}
+		\vspace{-0.3cm}
+		\[
+			d \bx = - \frac{1}{2} \beta(t) \bx(t) dt + \sqrt{\beta(t)} \cdot d \bw
+		\]
+		\[
+			\bff(\bx, t) = - \frac{1}{2} \beta(t) \bx(t) , \quad g(t) = \sqrt{\beta(t)} 
+		\]
+		Variance is preserved if $\bx(0)$ has a unit variance.
+	\end{block}
+	\myfootnotewithlink{https://arxiv.org/abs/2011.13456}{Song Y., et al. Score-Based Generative Modeling through Stochastic Differential Equations, 2020}
+\end{frame}
+%=======
 \begin{frame}{Summary}
 	\begin{itemize}
 		\item
