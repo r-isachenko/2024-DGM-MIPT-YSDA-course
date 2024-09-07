@@ -113,6 +113,64 @@
 	\myfootnotewithlink{https://arxiv.org/abs/2011.13456}{Song Y., et al. Score-Based Generative Modeling through Stochastic Differential Equations, 2020}
 \end{frame}
 %=======
+\section{Flow Matching}
+%=======
+\begin{frame}{Flow Matching}
+	Let consider ODE dynamic in time interval $t \in [0, 1]$ with boundaries $\bx(0) \sim p(\bx)$, $\bx(1) \sim \pi(\bx)$. Here $p(\bx)$ is a base distribution ($\cN(0, \bI)$) and $\pi(\bx)$ is a true data distribution.
+	\[
+		d \bx = \bu (\bx, t) dt
+	\]
+	$\bu (\bx, t): \bbR^m \times [0, 1] \rightarrow \bbR^m$ is a vector field.
+	\[
+		\frac{\partial p(\bx, t)}{\partial t} = - \text{div}\left(\bu(\bx, t) p(\bx, t)\right) 
+	\]
+	
+	If we know the true vector field $\bu (\bx, t)$, then KFP equation gives us the way to compute the density $p(\bx, t)$.
+	\begin{block}{Flow Matching}
+		\[
+			\bbE_{t \sim U[0, 1]} \bbE_{\bx \sim p(\bx, t)}\| \bu(\bx, t) - \bu_{\btheta}(\bx, t) \|^2 \rightarrow \min_{\btheta}
+		\]
+	\end{block}
+	\myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
+\end{frame}
+%=======
+\begin{frame}{Flow Matching}
+	There exists infinite number of possible $\bu(\bx, t)$ between $\pi(\bx)$ and $p(\bx)$.
+	\begin{minipage}[t]{0.45\columnwidth}
+		\begin{figure}
+			\centering
+			\includegraphics[width=\linewidth]{figs/non_uniqueness1}
+		\end{figure}
+	\end{minipage}%
+	\begin{minipage}[t]{0.53\columnwidth}
+		\begin{figure}
+			\centering
+			\includegraphics[width=\linewidth]{figs/non_uniqueness2}
+		\end{figure}
+	\end{minipage}
+	\myfootnotewithlink{https://mlg.eng.cam.ac.uk/blog/2024/01/20/flow-matching.html}{image credit: https://mlg.eng.cam.ac.uk/blog/2024/01/20/flow-matching.html}
+\end{frame}
+%=======
+\begin{frame}{Flow Matching}
+	\begin{figure}
+		\centering
+		\includegraphics[width=\linewidth]{figs/diff_cond_path}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=\linewidth]{figs/ot_cond_path}
+	\end{figure}
+	\myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
+\end{frame}
+%=======
+\begin{frame}{Flow Matching}
+	\begin{figure}
+		\centering
+		\includegraphics[width=\linewidth]{figs/trajectories}
+	\end{figure}
+	\myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
+\end{frame}
+%=======
 \begin{frame}{Summary}
 	\begin{itemize}
 		\item
