@@ -603,10 +603,10 @@
 	\end{block}
 	\begin{minipage}[t]{0.6\columnwidth}
 		\begin{itemize}
-			\item Let $\bz(t_0)$ will be a random variable with some density function $p(\bz(t_0))$.
-		 	\item Then $\bz(t_1)$ will be also a random variable with some other density function $p(\bz(t_1))$.
-			\item We could say that we have the joint density function $p(\bz(t), t)$.
-			\item What is the difference between $p(\bz(t), t)$ and $p(\bz, t)$?
+			\item $\bz(t_0)$ is a random variable with the density function $p(\bz(t_0))$.
+		 	\item $\bz(t_1)$ is a random variable with the density function $p(\bz(t_1))$.
+			\item$p_t(\bz) = p(\bz, t)$ is the joint density function (probability path). \\ {\color{gray}What is the difference between $p_t(\bz(t))$ and $p_t(\bz)$?}
+			\item Let consider time interval $[t_0, t_1] = [0, 1]$ without loss of generality.
 		\end{itemize}
 	\end{minipage}%
 	\begin{minipage}[t]{0.4\columnwidth}	
@@ -619,7 +619,7 @@
 \end{frame}
 %=======
 \begin{frame}{Continuous-in-time Normalizing Flows}
-	Let say that $p(\bz, t_0)$ is the base distribution (e.x. standard Normal) and $p(\bz, t_1)$ is the desired model distribution $p(\bx | \btheta)$.
+	Let say that $p_0(\bz)$ is the base distribution ($\cN(0, \bI)$) and $p_1(\bz)$ is the desired model distribution $p(\bx | \btheta)$.
 	\begin{block}{Theorem (Picard)}
 		If $\bff$ is uniformly Lipschitz continuous in $\bz$ and continuous in $t$, then the ODE has a \textbf{unique} solution.
 	\end{block}
@@ -627,10 +627,10 @@
 	\begin{block}{Forward and inverse transforms}
 		\vspace{-0.7cm}
 		\begin{align*}
-			\bx &= \bz(t_1) = \bz(t_0) + \int_{t_0}^{t_1} \bff_{\btheta}(\bz(t), t) dt \\
-			\bz &= \bz(t_0) = \bz(t_1) + \int_{t_1}^{t_0} \bff_{\btheta}(\bz(t), t) dt
+			\bx &= \bz(1) = \bz(0) + \int_{0}^{1} \bff_{\btheta}(\bz(t), t) dt \\
+			\bz &= \bz(0) = \bz(1) + \int_{1}^{0} \bff_{\btheta}(\bz(t), t) dt
 		\end{align*}
-		\vspace{-0.7cm}
+		\vspace{-0.5cm}
 	\end{block}
 	\textbf{Note:} Unlike discrete-in-time NF, $\bff$ does not need to be bijective (uniqueness guarantees bijectivity).
 	\myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}   

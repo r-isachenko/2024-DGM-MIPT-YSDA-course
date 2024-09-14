@@ -151,8 +151,8 @@
 	\begin{block}{Continuous-in-time dynamic (neural ODE)}
 		\vspace{-0.7cm}
 		\begin{align*}
-		   \frac{d \bz(t)}{dt} &= \bff_{\btheta}(\bz(t), t); \quad \text{with initial condition }\bz(t_0) = \bz_0. \\
-		   \bz(t_1) &= \int^{t_1}_{t_0} \bff_{\btheta}(\bz(t), t) d t  + \bz_0 \approx \text{ODESolve}(\bz(t_0), \bff_{\btheta}, t_0,t_1).
+		   \frac{d \bz(t)}{dt} &= \bff_{\btheta}(\bz(t), t); \quad \text{with initial condition }\bz(0) = \bz_0. \\
+		   \bz(t_1) &= \int^{1}_{0} \bff_{\btheta}(\bz(t), t) d t  + \bz_0 \approx \text{ODESolve}(\bz(0), \bff_{\btheta}, t_0=0, t_1=1).
 		\end{align*}
 		\vspace{-0.7cm}
 	\end{block}	
@@ -168,8 +168,8 @@
 	\end{block}
 		\vspace{-0.7cm}
 		\begin{align*}
-			\bx &= \bz(t_1) = \bz(t_0) + \int_{t_0}^{t_1} \bff_{\btheta}(\bz(t), t) dt \\
-			\bz &= \bz(t_0) = \bz(t_1) + \int_{t_1}^{t_0} \bff_{\btheta}(\bz(t), t) dt
+			\bx &= \bz(1) = \bz(0) + \int_{0}^{1} \bff_{\btheta}(\bz(t), t) dt \\
+			\bz &= \bz(0) = \bz(1) + \int_{1}^{0} \bff_{\btheta}(\bz(t), t) dt
 		\end{align*}
 	\myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}   
 \end{frame}
@@ -183,7 +183,7 @@
 \begin{frame}{Continuous-in-time Normalizing Flows}
 	\begin{block}{What do we need?}
 		\begin{itemize}
-			\item We need the way to compute $p(\bz, t)$ at any moment $t$.
+			\item We need the way to compute $p_t(\bz)$ at any moment $t$.
 			\item We need the way to find the optimal parameters $\btheta$ of the dynamic $\bff_{\btheta}$.
 		\end{itemize}
 	\end{block}
@@ -191,13 +191,13 @@
 	\begin{block}{Theorem (Kolmogorov-Fokker-Planck: special case)}
 		If $\bff$ is uniformly Lipschitz continuous in $\bz$ and continuous in $t$, then
 		\[
-			\frac{d \log p(\bz(t), t)}{d t} = - \text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right).
+			\frac{d \log p_t(\bz(t))}{d t} = - \text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right).
 		\]
 		\[
-			\log p(\bz(t_1), t_1) = \log p(\bz(t_0), t_0) - \int_{t_0}^{t_1} \text{tr}  \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) dt.
+			\log p_1(\bz(1)) = \log p_0(\bz(0)) - \int_{0}^{1} \text{tr}  \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) dt.
 		\]
 	\end{block}
-	It means that if we have the value $\bz_0 = \bz(t_0)$ then the solution of the ODE will give us the density at the moment $t_1$.
+	It means that if we have the value $\bz_0 = \bz(0)$ then the solution of the ODE will give us the density at the moment $t=1$.
 	\myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}   
 \end{frame}
 %=======
@@ -205,10 +205,10 @@
 	\begin{block}{Forward transform + log-density}
 		\vspace{-0.7cm}
 		\begin{align*}
-				\bx &= \bz + \int_{t_0}^{t_1} \bff_{\btheta}(\bz(t), t) dt \\
-				\log p(\bx | \btheta) &= \log p(\bz) - \int_{t_0}^{t_1} \text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) dt
+				\bx &= \bz + \int_{0}^{1} \bff_{\btheta}(\bz(t), t) dt \\
+				\log p(\bx | \btheta) &= \log p(\bz) - \int_{0}^{1} \text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) dt
 		\end{align*}
-		Here $p(\bx | \btheta) = p(\bz(t_1), t_1)$, $p(\bz) = p(\bz(t_0), t_0)$.
+		Here $p(\bx | \btheta) = p_1(\bz)$, $p(\bz) = p_0(\bz)$.
 	\end{block}
 	\begin{itemize}
 		\item \textbf{Discrete-in-time NF}: evaluation of determinant of the Jacobian costs $O(m^3)$ (we need invertible $\bff$).
@@ -236,7 +236,7 @@
 	\begin{block}{FFJORD density estimation}
 		\vspace{-0.8cm}
 		\begin{multline*}
-		    \log p(\bz(t_1)) = \log p(\bz(t_0)) - \int_{t_0}^{t_1} \text{tr}  \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) dt = \\ = \log p(\bz(t_0)) - \mathbb{E}_{p(\bepsilon)} \int_{t_0}^{t_1} \left[ {\color{violet}\bepsilon^T \frac{\partial \bff}{\partial \bz}} \bepsilon \right] dt.
+		    \log p_1(\bz(1)) = \log p_0(\bz(0)) - \int_{0}^{1} \text{tr}  \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) dt = \\ = \log p_0(\bz(0)) - \mathbb{E}_{p(\bepsilon)} \int_{0}^{1} \left[ {\color{violet}\bepsilon^T \frac{\partial \bff}{\partial \bz}} \bepsilon \right] dt.
 		\end{multline*}
 	\end{block}
 	\myfootnotewithlink{https://arxiv.org/abs/1810.01367}{Grathwohl W. et al. FFJORD: Free-form Continuous Dynamics for Scalable Reversible Generative Models, 2018} 
@@ -252,16 +252,16 @@
 	 			 \frac{d \bz(t)}{dt} = \bff_{\btheta}(\bz(t), t) 	 
 	 		\]
 	 		\[
-	 			 \bx = \bz + \int_{t_0}^{t_1} \bff_{\btheta}(\bz(t), t) dt 
+	 			 \bx = \bz + \int_{0}^{1} \bff_{\btheta}(\bz(t), t) dt 
 			\]
 		\end{minipage}% 
 		\begin{minipage}[t]{0.6\columnwidth}
 			\vspace{-0.4cm}
 			\[
-					\frac{d \log p(\bz(t), t)}{d t} = - \text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) 
+					\frac{d \log p_t(\bz(t))}{d t} = - \text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) 
 	 		\]
 	 		\[
-					\log p(\bx | \btheta) = \log p(\bz) - \int_{t_0}^{t_1} \text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) dt
+					\log p(\bx | \btheta) = \log p(\bz) - \int_{0}^{1} \text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) dt
 			\]
 		\end{minipage}
 		}
@@ -272,10 +272,10 @@
 	\begin{block}{Forward pass (Loss function)}
 		\vspace{-0.3cm}
 		\[
-			\bz = \bx + \int_{t_1}^{t_0} \bff_{\btheta}(\bz(t), t) dt, \quad L(\bz) = - \log p(\bx | \btheta)
+			\bz = \bx + \int_{1}^{0} \bff_{\btheta}(\bz(t), t) dt, \quad L(\bz) = - \log p(\bx | \btheta)
 		\]
 		\[
-			L(\bz) = - \log p(\bz) + \int_{t_0}^{t_1} \text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) dt
+			L(\bz) = - \log p(\bz) + \int_{0}^{1} \text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) dt
 		\]
 	\end{block}
 	\myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}     
@@ -303,8 +303,8 @@
 		\vspace{-0.6cm}
 		{\small
 		\begin{align*}
-			\frac{\partial L}{\partial \btheta(t_1)} &= \ba_{\btheta}(t_1) =  - \int_{t_0}^{t_1} \ba_{\bz}(t)^T \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \btheta(t)} dt + 0\\
-			\frac{\partial L}{\partial \bz(t_1)} &= \ba_{\bz}(t_1) =  - \int_{t_0}^{t_1} \ba_{\bz}(t)^T \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} dt + \frac{\partial L}{\partial \bz(t_0)}\\
+			\frac{\partial L}{\partial \btheta(1)} &= \ba_{\btheta}(1) =  - \int_{0}^{1} \ba_{\bz}(t)^T \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \btheta(t)} dt + 0\\
+			\frac{\partial L}{\partial \bz(1)} &= \ba_{\bz}(1) =  - \int_{0}^{1} \ba_{\bz}(t)^T \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} dt + \frac{\partial L}{\partial \bz(0)}\\
 		\end{align*}
 		}
 		\vspace{-1.3cm}
@@ -317,7 +317,7 @@
 	\begin{block}{Forward pass}
 		\vspace{-0.3cm}
 		\[
-		\bz = \bz(t_0) = \int^{t_1}_{t_0} \bff_{\btheta}(\bz(t), t) d t  + \bx \quad \Rightarrow \quad \text{ODE Solver}
+		\bz = \bz(0) = \int^{1}_{0} \bff_{\btheta}(\bz(t), t) d t  + \bx \quad \Rightarrow \quad \text{ODE Solver}
 		\]
 		\vspace{-0.4cm}
 	\end{block}
@@ -327,9 +327,9 @@
 			\left.
 			{\footnotesize 
 				\begin{aligned}
-					\frac{\partial L}{\partial \btheta(t_1)} &= \ba_{\btheta}(t_1) =  - \int_{t_0}^{t_1} \ba_{\bz}(t)^T \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \btheta(t)} dt + 0 \\
-					\frac{\partial L}{\partial \bz(t_1)} &= \ba_{\bz}(t_1) =  - \int_{t_0}^{t_1} \ba_{\bz}(t)^T \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} dt + \frac{\partial L}{\partial \bz(t_0)} \\
-					\bz(t_1) &= - \int^{t_0}_{t_1} \bff_{\btheta}(\bz(t), t) d t  + \bz_0.
+					\frac{\partial L}{\partial \btheta(1)} &= \ba_{\btheta}(1) =  - \int_{0}^{1} \ba_{\bz}(t)^T \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \btheta(t)} dt + 0 \\
+					\frac{\partial L}{\partial \bz(1)} &= \ba_{\bz}(1) =  - \int_{0}^{1} \ba_{\bz}(t)^T \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} dt + \frac{\partial L}{\partial \bz(0)} \\
+					\bz(1) &= - \int^{0}_{1} \bff_{\btheta}(\bz(t), t) d t  + \bz_0.
 				\end{aligned}
 			}
 			\right\rbrace
@@ -345,19 +345,20 @@
 \section{SDE basics}
 %=======
 \begin{frame}{Ordinary differential equation (ODE)}
-	\begin{block}{Continuous-in-time Normalizing Flows}
-		\vspace{-0.3cm}
-		\[
-  			\frac{d \bz(t)}{dt} = \bff_{\btheta}(\bz(t), t); \quad \text{with initial condition }\bz(t_0) = \bz_0
-		\]
+	\vspace{-0.5cm}
+	\begin{block}{Neural ODE}
 		\vspace{-0.5cm}
+		\begin{align*}
+  \frac{d \bz(t)}{dt} &= \bff_{\btheta}(\bz(t), t); \quad \text{with initial condition }\bz(t_0) = \bz_0
+		\end{align*}
+		\vspace{-0.8cm}
 	\end{block}
 	\begin{minipage}[t]{0.6\columnwidth}
 		\begin{itemize}
-			\item Let $\bz(t_0)$ will be a random variable with some density function $p(\bz(t_0))$.
-		 	\item Then $\bz(t_1)$ will be also a random variable with some other density function $p(\bz(t_1))$.
-			\item We could say that we have the joint density function $p(\bz(t), t)$.
-			\item What is the difference between $p(\bz(t), t)$ and $p(\bz, t)$?
+			\item $\bz(t_0)$ is a random variable with the density function $p(\bz(t_0))$.
+		 	\item $\bz(t_1)$ is a random variable with the density function $p(\bz(t_1))$.
+			\item$p_t(\bz) = p(\bz, t)$ is the joint density function (probability path). \\ {\color{gray}What is the difference between $p_t(\bz(t))$ and $p_t(\bz)$?}
+			\item Let consider time interval $[t_0, t_1] = [0, 1]$ without loss of generality.
 		\end{itemize}
 	\end{minipage}%
 	\begin{minipage}[t]{0.4\columnwidth}	
@@ -366,7 +367,7 @@
 			\includegraphics[width=\linewidth]{figs/cnf_flow.png}
 		\end{figure}
 	\end{minipage}
-	\myfootnotewithlink{https://arxiv.org/abs/1810.01367}{Grathwohl W. et al. FFJORD: Free-form Continuous Dynamics for Scalable Reversible Generative Models, 2018}  
+	\myfootnotewithlink{https://arxiv.org/abs/1810.01367}{Grathwohl W. et al. FFJORD: Free-form Continuous Dynamics for Scalable Reversible Generative Models, 2018} 
 \end{frame}
 %=======
 \begin{frame}{Ordinary differential equation (ODE)}
@@ -387,7 +388,7 @@
 			\frac{d \log p(\bz(t), t)}{d t} = - \text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right).
 		\]
 	\end{block}
-	It means that if we have the value $\bz_0 = \bz(t_0)$ then the solution of the ODE will give us the density at the moment $t_1$.
+	It means that if we have the value $\bz_0 = \bz(0)$ then the solution of the ODE will give us the density at the moment $t=1$.
 	\myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}   
 \end{frame}
 %=======
@@ -433,9 +434,9 @@
 		\vspace{-0.7cm}
 	\end{block}
 	\begin{itemize}
-		\item At each moment $t$ we have the density $p(\bx(t), t)$.
+		\item At each moment $t$ we have the density $p_t(\bx) = p(\bx, t)$.
 		\item $p: \bbR^m \times [0, 1] \rightarrow \bbR_+$ is a \textbf{probability path} between $p_0(\bx)$ and $p_1(\bx)$.
-		\item How to get the distribution path $p(\bx, t)$ for $\bx(t)$?
+		\item How to get the distribution path $p_t(\bx)$ for $\bx(t)$?
 	\end{itemize}
 \end{frame}
 %=======
@@ -446,20 +447,20 @@
 	\]
 	\vspace{-0.4cm}
  	\begin{block}{Theorem (Kolmogorov-Fokker-Planck)}
- 		Evolution of the distribution $p(\bx, t)$ is given by the following equation:
+ 		Evolution of the distribution $p_t(\bx)$ is given by the following equation:
  		\vspace{-0.2cm}
  		\[
- 			\frac{\partial p(\bx, t)}{\partial t} = - \text{div}\left(\bff(\bx, t) p(\bx, t)\right) + \frac{1}{2}g^2(t) \Delta_{\bx}p(\bx, t)
+ 			\frac{\partial p_t(\bx)}{\partial t} = - \text{div}\left(\bff(\bx, t) p_t(\bx)\right) + \frac{1}{2}g^2(t) \Delta_{\bx}p_t(\bx)
  		\]
  		Here
  		\[
  			\text{div} (\bv) = \sum_{i=1}^m \frac{\partial v_i(\bx)}{\partial x_i} = \text{tr}\left( \frac{\partial \bv(\bx)}{\partial \bx}  \right)
  		\]
  		\[
- 			\Delta_{\bx}p(\bx, t) = \sum_{i=1}^m \frac{\partial^2 p(\bx, t)}{\partial x_i^2} = \text{tr}\left( \frac{\partial^2 p(\bx, t)}{\partial \bx^2}  \right)
+ 			\Delta_{\bx}p_t(\bx) = \sum_{i=1}^m \frac{\partial^2 p_t(\bx)}{\partial x_i^2} = \text{tr}\left( \frac{\partial^2 p_t(\bx)}{\partial \bx^2}  \right)
  		\]
  		\[
- 			\frac{\partial p(\bx, t)}{\partial t} = \text{tr}\left(- \frac{\partial}{\partial \bx} \bigl[ \mathbf{f}(\bx, t) p(\bx, t)\bigr] + \frac{1}{2} g^2(t) \frac{\partial^2 p(\bx, t)}{\partial \bx^2} \right)
+ 			\frac{\partial p_t(\bx)}{\partial t} = \text{tr}\left(- \frac{\partial}{\partial \bx} \bigl[ \mathbf{f}(\bx, t) p_t(\bx)\bigr] + \frac{1}{2} g^2(t) \frac{\partial^2 p_t(\bx)}{\partial \bx^2} \right)
  		\]
  	\end{block}
 \end{frame}
@@ -468,14 +469,14 @@
  	\begin{block}{Theorem (Kolmogorov-Fokker-Planck)}
  		\vspace{-0.2cm}
  		\[
- 			\frac{\partial p(\bx, t)}{\partial t} = \text{tr}\left(- \frac{\partial}{\partial \bx} \bigl[ \mathbf{f}(\bx, t) p(\bx, t)\bigr] + \frac{1}{2} g^2(t) \frac{\partial^2 p(\bx, t)}{\partial \bx^2} \right)
+ 			\frac{\partial p_t(\bx)}{\partial t} = \text{tr}\left(- \frac{\partial}{\partial \bx} \bigl[ \mathbf{f}(\bx, t) p_t(\bx)\bigr] + \frac{1}{2} g^2(t) \frac{\partial^2 p_t(\bx)}{\partial \bx^2} \right)
  		\]
  	\end{block}
  	 \begin{itemize}
  	 	\item KFP theorem uniquely defines the SDE.
  		 \item This is the generalization of KFP theorem that we used in continuous-in-time NF:
  	 	\[
- 	 		\frac{d \log p(\bx(t), t)}{d t} = - \text{tr} \left( \frac{\partial \bff(\bx, t)}{\partial \bx} \right).
+ 	 		\frac{d \log p_t(\bx(t))}{d t} = - \text{tr} \left( \frac{\partial \bff(\bx, t)}{\partial \bx} \right).
  	 	\]
  	 \end{itemize}
 	\vspace{-0.3cm}
@@ -483,7 +484,7 @@
  		\vspace{-0.6cm}
  		\begin{align*}
  			d\bx &= {\color{violet}\mathbf{f}(\bx, t)} dt + {\color{teal}g(t)} d \bw \\
- 			d \bx &= {\color{violet}\frac{1}{2} \frac{\partial}{\partial \bx} \log p(\bx, t)} d t + {\color{teal} 1 } \cdot d \bw
+ 			d \bx &= {\color{violet}\frac{1}{2} \frac{\partial}{\partial \bx} \log p_t(\bx)} d t + {\color{teal} 1 } \cdot d \bw
  		\end{align*}
  		\vspace{-0.3cm}
  	\end{block}
@@ -492,17 +493,17 @@
 %=======
 \begin{frame}{Langevin SDE (special case)}
 	\[
-		d \bx = \frac{1}{2} \frac{\partial}{\partial \bx} \log p(\bx, t) d t + 1 \cdot d \bw
+		d \bx = \frac{1}{2} \frac{\partial}{\partial \bx} \log p_t(\bx) d t + 1 \cdot d \bw
 	\]
 	\begin{multline*}
-		\frac{\partial p(\bx, t)}{\partial t} =  \text{tr} \left(- \frac{\partial}{\partial \bx}\left[ {\color{olive}p(\bx, t) \frac{1}{2} \frac{\partial}{\partial \bx} \log p(\bx, t)} \right]  + \frac{1}{2} \frac{\partial^2 p(\bx, t)}{\partial \bx^2} \right) = \\
-		= \text{tr} \left(- \frac{\partial}{\partial \bx}\left[ {\color{olive}\frac{1}{2} \frac{\partial}{\partial \bx} p(\bx, t) } \right]  + \frac{1}{2} \frac{\partial^2 p(\bx, t)}{\partial \bx^2} \right) = 0
+		\frac{\partial p_t(\bx)}{\partial t} =  \text{tr} \left(- \frac{\partial}{\partial \bx}\left[ {\color{olive}p_t(\bx) \frac{1}{2} \frac{\partial}{\partial \bx} \log p_t(\bx)} \right]  + \frac{1}{2} \frac{\partial^2 p_t(\bx)}{\partial \bx^2} \right) = \\
+		= \text{tr} \left(- \frac{\partial}{\partial \bx}\left[ {\color{olive}\frac{1}{2} \frac{\partial}{\partial \bx} p_t(\bx) } \right]  + \frac{1}{2} \frac{\partial^2 p_t(\bx)}{\partial \bx^2} \right) = 0
 	\end{multline*}
-	The density $p(\bx, t) = \text{const}(t)$! \\ If $\bx(0) \sim p_0(\bx)$, then $\bx(t) \sim p_0(\bx)$.
+	The density $p_t(\bx) = \text{const}(t)$! \\ If $\bx(0) \sim p_0(\bx)$, then $\bx(t) \sim p_0(\bx)$.
 	\begin{block}{Discretized Langevin SDE}
 		\vspace{-0.3cm}
 		\[
-			\bx_{t + 1} - \bx_t = \frac{\eta}{2} \cdot \frac{\partial}{\partial \bx} \log p(\bx, t) + \sqrt{\eta} \cdot \bepsilon, \quad \eta \approx dt.
+			\bx_{t + 1} - \bx_t = \frac{\eta}{2} \cdot \frac{\partial}{\partial \bx} \log p_t(\bx) + \sqrt{\eta} \cdot \bepsilon, \quad \eta \approx dt.
 		\]
 		\vspace{-0.4cm}
 	\end{block}

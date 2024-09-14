@@ -19,14 +19,14 @@
 \begin{frame}{Recap of previous lecture}
 	\vspace{-0.5cm}
 	\[
-		d\bx = \mathbf{f}(\bx, t) dt + g(t) d \bw - \text{SDE with probability path} p(\bx, t)
+		d\bx = \mathbf{f}(\bx, t) dt + g(t) d \bw - \text{SDE with the probability path } p_t(\bx)
 	\]
 	\vspace{-0.5cm}
 	\begin{block}{Probability flow ODE}
-		There exists ODE with identical probability path $p(\bx, t)$ of the form
+		There exists ODE with identical the probability path $p_t(\bx)$ of the form
 		\vspace{-0.3cm}
 		\[
-			d\bx = \left[\mathbf{f}(\bx, t) -\frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p(\bx, t) \right] dt
+			d\bx = \left[\mathbf{f}(\bx, t) -\frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p_t(\bx) \right] dt
 		\]
 		\vspace{-0.3cm}
 	\end{block}
@@ -54,7 +54,7 @@
 		There exists the reverse SDE for the SDE $d\bx = \mathbf{f}(\bx, t) dt + g(t) d \bw$ that has the following form
 		\vspace{-0.3cm}
 		\[
-			d\bx = \left(\mathbf{f}(\bx, t) {\color{violet}- g^2(t) \frac{\partial \log p(\bx, t)}{\partial \bx}}\right) dt + g(t) d \bw, \quad dt < 0
+			d\bx = \left(\mathbf{f}(\bx, t) {\color{violet}- g^2(t) \frac{\partial \log p_t(\bx)}{\partial \bx}}\right) dt + g(t) d \bw, \quad dt < 0
 		\] 
 	\end{block}
 	\vspace{-0.5cm}
@@ -72,12 +72,12 @@
 	\vspace{-0.5cm}
 	\begin{align*}
 		d\bx &= \mathbf{f}(\bx, t) dt + g(t) d \bw - \text{SDE} \\
-		d\bx &= \left[\mathbf{f}(\bx, t) -\frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p(\bx, t) \right] dt - \text{probability flow ODE} \\
-		d\bx &= \left(\mathbf{f}(\bx, t) - g^2(t) \frac{\partial \log p(\bx, t)}{\partial \bx}\right) dt + g(t) d \bw - \text{reverse SDE}
+		d\bx &= \left[\mathbf{f}(\bx, t) -\frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p_t(\bx) \right] dt - \text{probability flow ODE} \\
+		d\bx &= \left(\mathbf{f}(\bx, t) - g^2(t) \frac{\partial \log p_t(\bx)}{\partial \bx}\right) dt + g(t) d \bw - \text{reverse SDE}
 	\end{align*}
 	\vspace{-0.5cm}
 	\begin{itemize}
-		\item We got the way to transform one distribution to another via SDE with some probability path $p(\bx, t)$.
+		\item We got the way to transform one distribution to another via SDE with some probability path $p_t(\bx)$.
 		\item We are able to revert this process with the score function.
 	\end{itemize}
 	\vspace{-0.3cm}
@@ -116,19 +116,19 @@
 \section{Flow Matching}
 %=======
 \begin{frame}{Flow Matching}
-	Let consider ODE dynamic in time interval $t \in [0, 1]$ with boundaries $\bx(0) \sim p(\bx)$, $\bx(1) \sim \pi(\bx)$. Here $p(\bx)$ is a base distribution ($\cN(0, \bI)$) and $\pi(\bx)$ is a true data distribution.
+	Let consider ODE dynamic $x_t = x(t)$ in time interval $t \in [0, 1]$ with boundaries $\bx_0 \sim p_0(\bx) = p(\bx)$, $\bx_1 \sim p_1(\bx) =  \pi(\bx)$. Here $p(\bx)$ is a base distribution ($\cN(0, \bI)$) and $\pi(\bx)$ is a true data distribution.
 	\[
 		d \bx = \bu (\bx, t) dt
 	\]
 	$\bu (\bx, t): \bbR^m \times [0, 1] \rightarrow \bbR^m$ is a vector field.
 	\[
-		\frac{\partial p(\bx, t)}{\partial t} = - \text{div}\left(\bu(\bx, t) p(\bx, t)\right) 
+		\frac{\partial p_t(\bx)}{\partial t} = - \text{div}\left(\bu(\bx, t) p_t(\bx)\right) 
 	\]
 	
-	If we know the true vector field $\bu (\bx, t)$, then KFP equation gives us the way to compute the density $p(\bx, t)$.
+	If we know the true vector field $\bu (\bx, t)$, then KFP equation gives us the way to compute the density $p_t(\bx)$.
 	\begin{block}{Flow Matching}
 		\[
-			\bbE_{t \sim U[0, 1]} \bbE_{\bx \sim p(\bx, t)}\| \bu(\bx, t) - \bu_{\btheta}(\bx, t) \|^2 \rightarrow \min_{\btheta}
+			\bbE_{t \sim U[0, 1]} \bbE_{\bx \sim p_t(\bx)}\left\| \bu(\bx, t) - \bu_{\btheta}(\bx, t) \right\|^2 \rightarrow \min_{\btheta}
 		\]
 	\end{block}
 	\myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
