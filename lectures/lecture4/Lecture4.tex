@@ -143,85 +143,7 @@
 	\tableofcontents
 \end{frame}
 %=======
-\section{EM-algorithm}
-%=======
-\subsection{Amortized inference}
-%=======
-\begin{frame}{Amortized variational inference}
-	\begin{block}{E-step}
-		\vspace{-0.3cm}
-		\[
-		q(\bz) = \argmax_q \cL_{q, \btheta^*}(\bx) = \argmin_q KL(q || p) =
-		p(\bz| \bx, \btheta^*).
-		\]
-		\vspace{-0.3cm}
-		\begin{itemize}
-			\item $q(\bz)$ approximates true posterior distribution $p(\bz| \bx, \btheta^*)$, that is why it is called \textbf{variational posterior};
-			\item $p(\bz| \bx, \btheta^*)$ could be \textbf{intractable};
-			\item $q(\bz)$ is different for each object $\bx$.
-		\end{itemize}
-		\vspace{-0.3cm}
-	\end{block}
-	\begin{block}{Idea}
-		Restrict a family of all possible distributions $q(\bz)$ to a parametric class $q(\bz|\bx, \bphi)$ conditioned on samples $\bx$ with parameters $\bphi$.
-	\end{block}
-	
-	\textbf{Variational Bayes}
-	\begin{itemize}
-		\item E-step
-		\[
-			\bphi_k = \bphi_{k-1} + \left.\eta \cdot \nabla_{\bphi} \cL_{\bphi, \btheta_{k-1}}(\bx)\right|_{\bphi=\bphi_{k-1}}
-		\]
-		\item M-step
-		\[
-			\btheta_k = \btheta_{k-1} + \left.\eta \cdot \nabla_{\btheta} \cL_{\bphi_k, \btheta}(\bx)\right|_{\btheta=\btheta_{k-1}}
-		\]
-	\end{itemize}
-\end{frame}
-%=======
-\begin{frame}{Variational EM illustration}
-	\begin{itemize}
-		\item E-step
-		\[
-			\bphi_k = \bphi_{k-1} + \left.\eta \nabla_{\bphi} \cL_{\bphi, \btheta_{k-1}}(\bx)\right|_{\bphi=\bphi_{k-1}}
-		\]
-		\item M-step
-		\[
-			\btheta_k = \btheta_{k-1} + \left.\eta \nabla_{\btheta} \cL_{\bphi_k, \btheta}(\bx)\right|_{\btheta=\btheta_{k-1}}
-		\]
-	\end{itemize}
-	\begin{figure}
-		\includegraphics[width=\linewidth]{figs/em_bishop4}
-	\end{figure}
-		
-	\myfootnote{Bishop\,C. Deep Learning: Foundations and Concepts, 2024}
-\end{frame}
-%=======
-\begin{frame}{Variational EM-algorithm}
-	\begin{block}{ELBO}
-		\vspace{-0.5cm}
-		\[
-		\log p(\bx| \btheta) = \cL_{\bphi, \btheta}(\bx) + KL(q(\bz | \bx, \bphi) || p(\bz|\bx, \btheta)) \geq \cL_{\bphi, \btheta}(\bx).
-		\]
-		\vspace{-0.5cm}
-	\end{block}
-	\begin{itemize}
-		\item \textbf{E-step}
-		\[
-		\bphi_k = \bphi_{k-1} + \left.\eta \cdot \nabla_{\bphi} \cL_{\bphi, \btheta_{k-1}}(\bx)\right|_{\bphi=\bphi_{k-1}},
-		\]
-		where $\bphi$~-- parameters of variational posterior distribution $q(\bz | \bx, \bphi)$.
-		\item \textbf{M-step}
-		\[
-		\btheta_k = \btheta_{k-1} + \left.\eta \cdot \nabla_{\btheta} \cL_{\bphi_k, \btheta}(\bx)\right|_{\btheta=\btheta_{k-1}},
-		\]
-		where $\btheta$~-- parameters of the generative distribution $p(\bx | \bz, \btheta)$.
-	\end{itemize}
-	Now all that is left is to obtain gradients: $\nabla_{\bphi} \cL_{\bphi, \btheta}(\bx)$, $\nabla_{\btheta} \cL_{\bphi, \btheta}(\bx)$.  \\
-	\textbf{Challenge:} Number of samples $n$ could be huge (we need derive the \textbf{unbiased} stochastic gradients).
-\end{frame}
-%=======
-\subsection{ELBO gradients, reparametrization trick}
+\section{ELBO gradients, reparametrization trick}
 %=======
 \begin{frame}{ELBO gradients, (M-step, $\nabla_{\btheta} \cL_{\bphi, \btheta}(\bx)$)}
 	\[
@@ -575,8 +497,6 @@
 %=======
 \begin{frame}{Summary}
 	\begin{itemize}
-		\item Amortized variational inference allows to efficiently compute the stochastic gradients for ELBO using Monte-Carlo estimation.
-		\vfill
 		\item The reparametrization trick gets unbiased gradients w.r.t to the variational posterior distribution $q(\bz | \bx, \bphi)$.
 		\vfill
 		\item The VAE model is an LVM with two neural network: stochastic encoder $q(\bz | \bx, \bphi)$ and stochastic decoder $p(\bx | \bz, \btheta)$.

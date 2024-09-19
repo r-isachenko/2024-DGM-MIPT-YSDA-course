@@ -73,7 +73,7 @@
 	\begin{block}{MLE problem for autoregressive model}
 		\vspace{-0.3cm}
 		\[
-		\btheta^* = \argmax_{\btheta} \sum_{i=1}^n \sum_{j=1}^m \log p(x_{ij} | \bx_{i, 1:j - 1}\btheta).
+		\btheta^* = \argmax_{\btheta} \sum_{i=1}^n \sum_{j=1}^m \log p(x_{ij} | \bx_{i, 1:j - 1}, \btheta).
 		\]
 		\vspace{-0.5cm}
 	\end{block}
@@ -390,21 +390,21 @@
 	{\small
 		\[
 		p(\bx | \btheta) = \prod_{j=1}^m p(x_j | \bx_{1:j - 1}, \btheta), \quad
-		p(x_j | \bx_{1:j - 1}, \btheta) = \mathcal{N} \left(\mu_j(\bx_{1:j-1}), \sigma^2_j (\bx_{1:j-1})\right).
+		p(x_j | \bx_{1:j - 1}, \btheta) = \mathcal{N} \left(\mu_{j, \btheta}(\bx_{1:j-1}), \sigma^2_{j, \btheta} (\bx_{1:j-1})\right).
 		\]
 	}
 	\vspace{-0.5cm}
 	\begin{block}{Sampling}
 		\vspace{-0.3cm}
 		\[
-		x_j = \sigma_j (\bx_{1:j-1}) \cdot z_j + \mu_j(\bx_{1:j-1}), \quad z_j \sim \mathcal{N}(0, 1).
+		x_j = \sigma_{j, \btheta} (\bx_{1:j-1}) \cdot z_j + \mu_{j, \btheta}(\bx_{1:j-1}), \quad z_j \sim \mathcal{N}(0, 1).
 		\]
 		\vspace{-0.7cm}
 	\end{block}
 	\begin{block}{Inverse transform}
 		\vspace{-0.3cm}
 		\[
-		z_j = \left(x_j - \mu_j(\bx_{1:j-1}) \right) \cdot \frac{1}{\sigma_j (\bx_{1:j-1}) }.
+		z_j = \left(x_j - \mu_{j, \btheta}(\bx_{1:j-1}) \right) \cdot \frac{1}{\sigma_{j, \btheta} (\bx_{1:j-1}) }.
 		\]
 		\vspace{-0.4cm}
 	\end{block}
@@ -419,8 +419,8 @@
 \begin{frame}{Gaussian autoregressive NF}
 	\vspace{-0.5cm}
 	\begin{align*}
-		\bx &= \bg_{\btheta}(\bz) \quad \Rightarrow \quad {\color{violet} x_j} = \sigma_j ({\color{violet} \bx_{1:j-1}}) \cdot {\color{teal} z_j} + \mu_j({\color{violet} \bx_{1:j-1}}). \\
-		\bz &= \bff_{\btheta}(\bx) \quad \Rightarrow \quad {\color{teal} z_j} = \left({\color{violet}x_j} - \mu_j({\color{violet}\bx_{1:j-1}}) \right) \cdot \frac{1}{ \sigma_j ({\color{violet}\bx_{1:j-1}})}.
+		\bx &= \bg_{\btheta}(\bz) \quad \Rightarrow \quad {\color{violet} x_j} = \sigma_{j, \btheta} ({\color{violet} \bx_{1:j-1}}) \cdot {\color{teal} z_j} + \mu_{j, \btheta}({\color{violet} \bx_{1:j-1}}). \\
+		\bz &= \bff_{\btheta}(\bx) \quad \Rightarrow \quad {\color{teal} z_j} = \left({\color{violet}x_j} - \mu_{j, \btheta}({\color{violet}\bx_{1:j-1}}) \right) \cdot \frac{1}{ \sigma_{j, \btheta} ({\color{violet}\bx_{1:j-1}})}.
 	\end{align*}
 	Generation function $\bg_{\btheta}(\bz)$ is \textbf{sequential}. \\ Inference function $\bff_{\btheta}(\bx)$ is \textbf{not sequential}.
 
@@ -442,8 +442,8 @@
 \begin{frame}{Gaussian autoregressive NF}
 	\vspace{-0.5cm}
 	\begin{align*}
-		\bx &= \bg_{\btheta}(\bz) \quad \Rightarrow \quad {\color{violet} x_j} = \sigma_j ({\color{violet} \bx_{1:j-1}}) \cdot {\color{teal} z_j} + \mu_j({\color{violet} \bx_{1:j-1}}). \\
-		\bz &= \bff_{\btheta}(\bx) \quad \Rightarrow \quad {\color{teal} z_j} = \left({\color{violet}x_j} - \mu_j({\color{violet}\bx_{1:j-1}}) \right) \cdot \frac{1}{ \sigma_j ({\color{violet}\bx_{1:j-1}})}.
+		\bx &= \bg_{\btheta}(\bz) \quad \Rightarrow \quad {\color{violet} x_j} = \sigma_{j, \btheta} ({\color{violet} \bx_{1:j-1}}) \cdot {\color{teal} z_j} + \mu_{j, \btheta}({\color{violet} \bx_{1:j-1}}). \\
+		\bz &= \bff_{\btheta}(\bx) \quad \Rightarrow \quad {\color{teal} z_j} = \left({\color{violet}x_j} - \mu_{j, \btheta}({\color{violet}\bx_{1:j-1}}) \right) \cdot \frac{1}{ \sigma_{j, \btheta} ({\color{violet}\bx_{1:j-1}})}.
 	\end{align*}
 	
 	\begin{itemize}
@@ -455,7 +455,7 @@
 	\begin{minipage}[t]{0.65\columnwidth}
 		\begin{block}{Forward transform: $\bff_{\btheta}(\bx)$}
 			\[
-				z_j = (x_j - \mu_j(\bx_{1:j-1})) \cdot \frac{1}{\sigma_j (\bx_{1:j-1}) }
+				z_j = (x_j - \mu_{j, \btheta}(\bx_{1:j-1})) \cdot \frac{1}{\sigma_{j, \btheta} (\bx_{1:j-1}) }
 			\]
 			\vspace{-0.4cm}
 		\end{block}
@@ -470,7 +470,7 @@
 	\begin{minipage}[t]{0.65\columnwidth}
 		\begin{block}{Inverse transform: $\bg_{\btheta}(\bz)$}
 			\[
-			x_j = \sigma_j (\bx_{1:j-1}) \cdot z_j + \mu_j(\bx_{1:j-1})
+			x_j = \sigma_{j, \btheta} (\bx_{1:j-1}) \cdot z_j + \mu_{j, \btheta}(\bx_{1:j-1})
 			\]
 		\end{block}
 	\end{minipage}%
@@ -535,15 +535,15 @@
 		\begin{pmatrix}
 			\bI_d & 0_{d \times m - d} \\
 			\frac{\partial \bz_2}{\partial \bx_1} & \frac{\partial \bz_2}{\partial \bx_2}
-		\end{pmatrix} = \prod_{j=1}^{m - d} \frac{1}{\sigma_j(\bx_1)}.
+		\end{pmatrix} = \prod_{j=1}^{m - d} \frac{1}{\sigma_{j, \btheta}(\bx_1)}.
 		\]
 		\vspace{-0.5cm}
 	\end{block}
 	\begin{block}{Gaussian AR NF}
 		\vspace{-0.6cm}
 		\begin{align*}
-			\bx &= \bg_{\btheta}(\bz) \quad \Rightarrow \quad {\color{violet}x_j} = \sigma_j ({\color{violet}\bx_{1:j-1}}) \cdot {\color{teal} z_j} + \mu_j({\color{violet}\bx_{1:j-1}}). \\
-			\bz &= \bff_{\btheta}(\bx) \quad \Rightarrow \quad {\color{teal} z_j} = \left({\color{violet} x_j} - \mu_j({\color{violet}\bx_{1:j-1}}) \right) \cdot \frac{1}{\sigma_j ({\color{violet} \bx_{1:j-1}}) }.
+			\bx &= \bg_{\btheta}(\bz) \quad \Rightarrow \quad {\color{violet}x_j} = \sigma_{j, \btheta} ({\color{violet}\bx_{1:j-1}}) \cdot {\color{teal} z_j} + \mu_{j, \btheta}({\color{violet}\bx_{1:j-1}}). \\
+			\bz &= \bff_{\btheta}(\bx) \quad \Rightarrow \quad {\color{teal} z_j} = \left({\color{violet} x_j} - \mu_{j, \btheta}({\color{violet}\bx_{1:j-1}}) \right) \cdot \frac{1}{\sigma_{j, \btheta} ({\color{violet} \bx_{1:j-1}}) }.
 		\end{align*}
 		\vspace{-0.5cm}
 	\end{block}
@@ -559,20 +559,6 @@
 		\includegraphics[width=0.9\linewidth]{figs/glow_faces.png}
 	\end{figure}
 	\myfootnotewithlink{https://arxiv.org/abs/1807.03039}{Kingma D. P., Dhariwal P. Glow: Generative Flow with Invertible 1x1 Convolutions, 2018}
-\end{frame}
-%=======
-\begin{frame}{Venn diagram for Normalizing flows}
-	
-	\begin{figure}
-		\centering
-		\includegraphics[width=\linewidth]{figs/venn_diagram}
-	\end{figure}
-	\begin{itemize}
-		\item $\cI$ -- invertible functions.
-		\item $\cF$ -- continuously differentiable functions whose Jacobian is lower triangular.
-		\item $\cM$ -- invertible functions from $\cF$.
-	\end{itemize}
-	\myfootnotewithlink{https://arxiv.org/abs/1907.07945}{Song Y., Meng C., Ermon S. Mintnet: Building invertible neural networks with masked convolutions, 2019}
 \end{frame}
 %=======
 \begin{frame}{Summary}
