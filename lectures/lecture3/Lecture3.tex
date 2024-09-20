@@ -248,27 +248,32 @@
 %=======
 \begin{frame}{Bayesian framework}
 	\begin{block}{Bayes theorem}
+		\vspace{-0.3cm}
 		\[
-			p(\bt | \bx) = \frac{p(\bx | \bt) p(\bt)}{p(\bx)} = \frac{p(\bx | \bt) p(\bt)}{\int p(\bx | \bt) p(\bt) d \bt} 
+			p(\btheta| \bx) = \frac{p(\bx | \btheta) p(\btheta)}{p(\bx)} = \frac{p(\bx | \btheta) p(\btheta)}{\int p(\bx | \btheta) p(\btheta) d \btheta} 
 		\]
+		\vspace{-0.3cm}
 		\begin{itemize}
-			\item $\bx$ -- observed variables, $\bt$ -- unobserved variables (latent variables/parameters);
-			\item $p(\bx | \bt)$ -- likelihood;
-			\item $p(\bx) = \int p(\bx | \bt) p(\bt) d \bt$ -- evidence;
-			\item $p(\bt)$ -- prior distribution, $p(\bt | \bx)$ -- posterior distribution.
+			\item $\bx$ -- observed variables, $\btheta$ -- unobserved variables (latent variables/parameters);
+			\item $p(\bx | \btheta)$ -- likelihood;
+			\item $p(\bx) = \int p(\bx | \btheta) p(\btheta) d \btheta$ -- evidence;
+			\item $p(\btheta)$ -- prior distribution, $p(\btheta| \bx)$ -- posterior distribution.
 		\end{itemize}
 	\end{block}
 	\begin{block}{Meaning}
-		We have unobserved variables $\bt$ and some prior knowledge about them $p(\bt)$. Then, the data $\bx$ has been observed. 
-		Posterior distribution $p(\bt | \bx)$ summarizes the knowledge after the observations.
+		\begin{itemize}
+			\item We have unobserved variables $\btheta$ and some prior knowledge about them $p(\btheta)$.
+			\item Then, the data $\bx$ has been observed. 
+			\item Posterior distribution $p(\btheta| \bx)$ summarizes the knowledge after the observations $\bx$.
+		\end{itemize} 
 	\end{block}
 \end{frame}
 %=======
 \begin{frame}{Bayesian framework}
-	Let consider the case, where the unobserved variables $\bt$ is our model parameters $\btheta$.
+	Let consider the case, where the unobserved variables $\btheta$ are the model parameters (we treat model parameters $\btheta$ as random variables).
 	\begin{itemize}
 		\item $\bX = \{\bx_i\}_{i=1}^n$ -- observed samples;
-		\item $p(\btheta)$ -- prior parameters distribution (we treat model parameters $\btheta$ as random variables).
+		\item $p(\btheta)$ -- prior distribution.
 	\end{itemize}
 	\begin{block}{Posterior distribution}
 		\[
@@ -276,12 +281,12 @@
 		\]
 		\vspace{-0.2cm}
 	\end{block}
-	If evidence $p(\bX)$ is intractable (due to multidimensional integration), we can't get posterior distribution and perform the exact inference.
+	If evidence $p(\bX)$ is intractable (due to multidimensional integration), we can't get posterior distribution.
     \begin{block}{Maximum a posteriori (MAP) estimation}
-    \vspace{-0.2cm}
-    \[
-        \btheta^* = \argmax_{\btheta} p(\btheta | \bX) = \argmax_{\btheta} \bigl(\log p(\bX | \btheta) + \log p(\btheta) \bigr)
-    \]
+	    \vspace{-0.2cm}
+	    \[
+	        \btheta^* = \argmax_{\btheta} p(\btheta | \bX) = \argmax_{\btheta} \bigl(\log p(\bX | \btheta) + \log p(\btheta) \bigr)
+	    \]
     \end{block}
 \end{frame}
 %=======
@@ -346,30 +351,17 @@
 	\myfootnote{Bishop\,C. Pattern Recognition and Machine Learning, 2006}
 \end{frame}
 %=======
-\begin{frame}{Maximum likelihood estimation for LVM}
-	\begin{block}{MLE for extended problem}
-		\vspace{-0.7cm}
-		\begin{multline*}
-			\vspace{-0.5cm}
-			\btheta^* = \argmax_{\btheta} p(\bX, \bZ | \btheta) = \argmax_{\btheta} \prod_{i=1}^n p(\bx_i, \bz_i | \btheta) = \\ = \argmax_{\btheta} \sum_{i=1}^n \log p(\bx_i, \bz_i | \btheta).
-		\end{multline*}
-		\vspace{-0.5cm}
-	\end{block}
-	However, $\bZ$ is unknown.
-	\begin{block}{MLE for original problem}
-		\vspace{-0.7cm}
-		\begin{multline*}
-			\btheta^* = \argmax_{\btheta} \log p(\bX| \btheta) = \argmax_{\btheta} \sum_{i=1}^n \log p(\bx_i | \btheta) = \\ =  \argmax_{\btheta}  \sum_{i=1}^n \log \int p(\bx_i, \bz_i | \btheta) d \bz_i = \\ = \argmax_{\btheta} \sum_{i=1}^n \log \int p(\bx_i| \bz_i, \btheta) p(\bz_i) d\bz_i.
-		\end{multline*}
-	\end{block}
-	
-\end{frame}
-%=======
-\begin{frame}{Naive approach}
+\begin{frame}{MLE for LVM}
+	\vspace{-0.3cm}
+	\[
+		\sum_{i=1}^n \log p(\bx_i | \btheta) = \sum_{i=1}^n \log \int p(\bx_i| \bz_i, \btheta) p(\bz_i) d\bz_i \rightarrow \max_{\btheta}.
+	\]
+	\vspace{-0.3cm}
 	\begin{figure}
-		\includegraphics[width=.75\linewidth]{figs/lvm_diagram}
+		\includegraphics[width=.65\linewidth]{figs/lvm_diagram}
 	\end{figure}
-	\begin{block}{Monte-Carlo estimation}
+	\vspace{-0.3cm}
+	\begin{block}{Naive approach}
 		\vspace{-0.7cm}
 		\[
 			p(\bx | \btheta) = \int p(\bx | \bz, \btheta) p(\bz) d\bz = \bbE_{p(\bz)} p(\bx | \bz, \btheta) \approx \frac{1}{K} \sum_{k=1}^{K} p(\bx | \bz_k, \btheta),
@@ -383,31 +375,48 @@
 %=======
 \section{Variational lower bound (ELBO)}
 %=======
-\begin{frame}{Variational lower bound (ELBO)}
-	\begin{block}{Derivation 1 (inequality)}
+\begin{frame}{ELBO derivation I}
+	\begin{block}{Inequality derivation}
 		\vspace{-0.7cm}
 		\begin{multline*}
 			\log p(\bx| \btheta) 
 			= \log \int p(\bx, \bz | \btheta) d\bz = \log \int \frac{q(\bz)}{q(\bz)} p(\bx, \bz | \btheta) d\bz = \\
 			= \log \bbE_{q} \left[\frac{p(\bx, \bz| \btheta)}{q(\bz)} \right] \geq \bbE_{q} \log \frac{p(\bx, \bz| \btheta)}{q(\bz)} = \cL_{q, \btheta}(\bx)
 		\end{multline*}
-		\vspace{-0.7cm}
+		\vspace{-0.3cm}
 	\end{block}
-	\begin{block}{Derivation 2 (equality)}
+	Here $q(\bz)$ is an arbitrary distribution ($\int q(\bz) d\bz = 1$).
+	\begin{block}{Variational lower bound (ELBO)}
+		\[
+			 \cL_{q, \btheta}(\bx) = \bbE_{q} \log \frac{p(\bx, \bz| \btheta)}{q(\bz)}  \leq \log p(\bx| \btheta) 
+		\]
+		This inequality holds for every distribution $q(\bz)$.
+	\end{block}
+\end{frame}
+%=======
+\begin{frame}{ELBO derivation II}
+	\vspace{-0.3cm}
+	\[
+		{\color{teal}p(\bz|\bx, \btheta) = \frac{p(\bx, \bz | \btheta)}{p(\bx| \btheta)}}
+	\]
+	\vspace{-0.4cm}
+	\begin{block}{Equality derivation}
 		\vspace{-0.7cm}
 		\begin{multline*}
-			\cL_{q, \btheta}(\bx) = \int q(\bz) \log \frac{p(\bx, \bz | \btheta)}{q(\bz)}d\bz = 
-			\int q(\bz) \log \frac{p(\bz|\bx, \btheta)p(\bx| \btheta)}{q(\bz)}d\bz = \\
+			\cL_{q, \btheta}(\bx) = \int q(\bz) \log \frac{\color{teal}p(\bx, \bz | \btheta)}{q(\bz)}d\bz = \\ 
+			= \int q(\bz) \log \frac{\color{teal}p(\bz|\bx, \btheta)p(\bx| \btheta)}{q(\bz)}d\bz = \\
 			= \int q(\bz) \log p(\bx| \btheta) d\bz + \int q(\bz) \log \frac{p(\bz|\bx, \btheta)}{q(\bz)}d\bz = \\
 			= \log p(\bx| \btheta) - KL(q(\bz) || p(\bz|\bx, \btheta))
 		\end{multline*}
 	\end{block}
 	\vspace{-0.7cm}
 	\begin{block}{Variational decomposition}
+		\vspace{-0.2cm}
 		\[
-			\log p(\bx| \btheta) = \cL_{q, \btheta}(\bx) + KL(q(\bz) || p(\bz|\bx, \btheta)) \geq \cL_{q, \btheta}(\bx).
+			\log p(\bx| \btheta) = \cL_{q, \btheta}(\bx) + {\color{violet}KL(q(\bz) || p(\bz|\bx, \btheta))} \geq \cL_{q, \btheta}(\bx).
 		\]
 	\end{block}
+	Here ${\color{violet}KL(q(\bz) || p(\bz|\bx, \btheta)) \geq 0}$.
 \end{frame}
 %=======
 \begin{frame}{Variational lower bound (ELBO)}
