@@ -201,7 +201,7 @@
 			\log p(\bx| \btheta) = \cL_{\bphi, \btheta}(\bx) + KL(q(\bz | \bx, \bphi) || p(\bz|\bx, \btheta)) \geq \cL_{\bphi, \btheta}(\bx).
 		\]
 		\[
-		 	\cL_{q, \btheta}(\bx) = \mathbb{E}_{q} \log p(\bx | \bz, \btheta) - KL (q(\bz) || p(\bz))
+		 	\cL_{q, \btheta}(\bx) = \mathbb{E}_{q} \log p(\bx | \bz, \btheta) - KL(q(\bz | \bx, \bphi) || p(\bz))
 		\]
 		\vspace{-0.5cm}
 	\end{block}
@@ -227,7 +227,7 @@
 \begin{frame}{ELBO gradients, (M-step, $\nabla_{\btheta} \cL_{\bphi, \btheta}(\bx)$)}
 	\vspace{-0.3cm}
 	\[
-	 	\cL_{q, \btheta}(\bx) = \mathbb{E}_{q} \log p(\bx | \bz, \btheta) - KL (q(\bz) || p(\bz))
+	 	\cL_{q, \btheta}(\bx) = \mathbb{E}_{q} \log p(\bx | \bz, \btheta) - KL (q(\bz | \bx, \bphi) || p(\bz))
 	\]
 	\vspace{-0.5cm}
 	\begin{block}{M-step: $\nabla_{\btheta} \cL_{\bphi, \btheta}(\bx)$}
@@ -235,7 +235,7 @@
 		\begin{multline*}
 			\nabla_{\btheta} \cL_{\bphi, \btheta}(\bx)
 			= {\color{olive}\nabla_{\btheta}} \int q(\bz|\bx, \bphi) \log p(\bx|\bz, \btheta) d \bz =  \\
-%			= \int q(\bz|\bx, \bphi) {\color{olive}\nabla_{\btheta}} \log p(\bx|\bz, \btheta) d \bz \approx  \\
+			= \int q(\bz|\bx, \bphi) {\color{olive}\nabla_{\btheta}} \log p(\bx|\bz, \btheta) d \bz \approx  \\
 			\approx \nabla_{\btheta}\log p(\bx|\bz^*, \btheta), \quad \bz^* \sim q(\bz|\bx, \bphi).
 		\end{multline*}
 		\vspace{-0.9cm}
@@ -255,46 +255,66 @@
 	\begin{block}{E-step: $\nabla_{\bphi} \cL_{\bphi, \btheta}(\bx)$}
 		Difference from M-step: density function $q(\bz| \bx, \bphi)$ depends on the parameters $\bphi$, it is impossible to use the Monte-Carlo estimation:
 		\begin{align*}
-			\nabla_{\bphi} \cL_{\bphi, \btheta}(\bx) &= \nabla_{\bphi} \int q(\bz | \bx, \bphi) \left[\log p(\bx | \bz, \btheta) - \log \frac{q(\bz| \bx, \bphi)}{p(\bz)} \right] d \bz \\
-			& \neq  \int q(\bz | \bx, \bphi) \nabla_{\bphi} \left[\log p(\bx | \bz, \btheta) - \log \frac{q(\bz| \bx, \bphi)}{p(\bz)} \right] d \bz 
+			\nabla_{\bphi} \cL_{\bphi, \btheta}(\bx) &= {\color{olive}\nabla_{\bphi}} \int q(\bz | \bx, \bphi)\log p(\bx | \bz, \btheta) d \bz - \nabla_{\bphi} KL(q(\bz | \bx, \bphi) || p(\bz)) \\
+			& {\color{violet}\neq} \int q(\bz | \bx, \bphi) {\color{olive}\nabla_{\bphi}} \log p(\bx | \bz, \btheta) d \bz - \nabla_{\bphi} KL(q(\bz | \bx, \bphi) || p(\bz))
 		\end{align*}
 	\end{block}
 	\vspace{-0.5cm}
 	\begin{block}{Reparametrization trick (LOTUS trick)} 
-		\begin{itemize}
-			\item $r(x) = \mathcal{N}(0, 1)$, $y = \sigma \cdot x + \mu$, $p(y|\btheta) = \mathcal{N}(\mu, \sigma^2)$, $\btheta = [\mu, \sigma]$.
-			
-			\item $\bepsilon^* \sim r(\bepsilon), \quad \bz = \bg_{\bphi}(\bx, \bepsilon), \quad \bz \sim q(\bz | \bx, \bphi)$
-			\vspace{-0.3cm}
-			\begin{multline*}
-				\nabla_{\bphi}\int q(\bz|\bx, \bphi) \bff(\bz) d\bz = \left. \nabla_{\bphi}\int r(\bepsilon)  \bff(\bz) d\bepsilon \right|_{\bz = \bg_{\bphi}(\bx, \bepsilon)} \\ = \int r(\bepsilon) \nabla_{\bphi} \bff(\bg_{\bphi}(\bx, \bepsilon)) d\bepsilon \approx \nabla_{\bphi} \bff(\bg_{\bphi}(\bx, \bepsilon^*))
-			\end{multline*}
-		\end{itemize}
+		Suppose that $\bz \sim q(\bz | \bx, \bphi)$ is a random variable that is induced by the random variable $\bepsilon \sim p(\bepsilon)$ using the deterministic transform $\bz = \bg_{\bphi}(\bx, \bepsilon)$. Then
+		\[
+			\bbE_{\bz \sim q(\bz | \bx, \bphi)} \bff(\bz) = \bbE_{\bepsilon \sim r(\bepsilon)} \bff(\bg_{\bphi}(\bx, \bepsilon))
+		\]
+		Note that LHS takes the expectation by the parametric distribution $q(\bz | \bx, \bphi)$ and the RHS uses non-parametric distribution $p(\bepsilon)$.
+	\end{block}
+\end{frame}
+%=======
+\begin{frame}{ELBO gradients, (E-step, $\nabla_{\bphi} \cL_{\bphi, \btheta}(\bx)$)}
+	\begin{block}{Reparametrization trick (LOTUS trick)} 
+		\vspace{-0.7cm}
+		\begin{multline*}
+			\nabla_{\bphi}\int q(\bz|\bx, \bphi) \bff(\bz) d\bz = {\color{olive}\nabla_{\bphi}} \int p(\bepsilon)  \bff(\bg_{\bphi}(\bx, \bepsilon)) d\bepsilon  \\ = \int p(\bepsilon) {\color{olive}\nabla_{\bphi}} \bff(\bg_{\bphi}(\bx, \bepsilon)) d\bepsilon \approx \nabla_{\bphi} \bff(\bg_{\bphi}(\bx, \bepsilon^*)),
+		\end{multline*}
+		\vspace{-0.5cm} \\
+		where $\bepsilon^* \sim p(\bepsilon)$.
+
+	\end{block}
+	\begin{block}{Variational assumption} 
+		\vspace{-0.3cm}
+		\[
+			p(\bepsilon) = \mathcal{N}(0, \bI); \quad \bz = \bg_{\bphi}(\bx, \bepsilon) = \bsigma_{\bphi}(\bx) \odot \bepsilon + \bmu_{\bphi}(\bx);
+		\]
+		\[
+			q(\bz| \bx, \bphi) = \cN (\bmu_{\bphi}(\bx), \bsigma^2_{\bphi}(\bx)).
+		\]
+		Here $\bmu_{\bphi}(\cdot), \bsigma_{\bphi}(\cdot)$ are parameterized functions (outputs of neural network). \\
+		We will say that $q(\bz| \bx, \bphi) = \text{NN}_e(\bx, \bphi)$ is the \textbf{encoder}.
 	\end{block}
 \end{frame}
 %=======
 \begin{frame}{ELBO gradient (E-step, $\nabla_{\bphi} \cL_{\bphi, \btheta}(\bx)$)}
-	\vspace{-0.5cm}
-	\begin{multline*}
-		\nabla_{\bphi} \cL_{\bphi, \btheta}(\bx) = \nabla_{\bphi}\int q(\bz|\bx, \bphi) \log p(\bx| \bz, \btheta)  d\bz - \nabla_{\bphi} \text{KL}(q(\bz | \bx, \bphi) || p(\bz))
-		\\ = \int r(\bepsilon) \nabla_{\bphi} \log p(\bx | \bg_{\bphi}(\bx, \bepsilon), \btheta) d\bepsilon  - \nabla_{\bphi} \text{KL}(q(\bz | \bx, \bphi) || p(\bz))
-		\\ \approx \nabla_{\bphi} \log p(\bx | \bg_{\bphi}(\bx, \bepsilon^*), \btheta)  - \nabla_{\bphi} \text{KL}(q(\bz | \bx, \bphi) || p(\bz))
-	\end{multline*}
-	\vspace{-0.5cm}
-	\begin{block}{Variational assumption}
-		\vspace{-0.3cm}
-		\[
-			r(\bepsilon) = \mathcal{N}(0, \bI); \quad  q(\bz| \bx, \bphi) = \mathcal{N} (\bmu_{\bphi}(\bx), \bsigma^2_{\bphi}(\bx)).
-		\]
-		\[
-			\bz = \bg_{\bphi}(\bx, \bepsilon) = \bsigma_{\bphi}(\bx) \odot \bepsilon + \bmu_{\bphi}(\bx).
-		\]
-		Here $\bmu_{\bphi}(\cdot), \bsigma_{\bphi}(\cdot)$ are parameterized functions (outputs of neural network).
+	\vspace{-0.3cm}
+	\[
+		\nabla_{\bphi} \cL_{\bphi, \btheta}(\bx) = {\color{violet}\nabla_{\bphi} \int q(\bz | \bx, \bphi)\log p(\bx | \bz, \btheta) d \bz} - {\color{teal}\nabla_{\bphi} KL(q(\bz | \bx, \bphi) || p(\bz))}
+	\]
+	\vspace{-0.3cm}
+	\begin{block}{Reconstruction term}
+		\vspace{-0.7cm}
+		\begin{multline*}
+			 {\color{violet}\nabla_{\bphi} \int q(\bz | \bx, \bphi)\log p(\bx | \bz, \btheta) d \bz} = \int p(\bepsilon) \nabla_{\bphi} \log p(\bx | \bg_{\bphi}(\bx, \bepsilon), \btheta) d\bepsilon \approx \\
+			 \approx \nabla_{\bphi} \log p\left(\bx | \bsigma_{\bphi}(\bx) \odot \bepsilon^* + \bmu_{\bphi}(\bx), \btheta\right), \quad \text{where } \bepsilon^* \sim \cN(0, \bI)
+		\end{multline*}
+		\vspace{-0.5cm} \\
+		Let the generative distibution $p(\bx | \bz, \btheta)$ be the neural network. \\
+		We will say that $p(\bx | \bz, \btheta) = \text{NN}_d(\bz, \btheta)$ is the \textbf{decoder}.
 	\end{block}
-	\begin{itemize}
-		\item $p(\bz)$ -- prior distribution on latent variables $\bz$. We could specify any distribution that we want. Let say $p(\bz) = \cN (0, \bI)$.
-		\item $p(\bx | \bz, \btheta)$ - generative distibution. Since it is a parameterized function let it be neural network with parameters $\btheta$.
-	\end{itemize}
+	\begin{block}{KL term}
+		$p(\bz)$ is the prior distribution on the latent variables $\bz$. Let assume $p(\bz) = \cN (0, \bI)$.
+		\[
+			{\color{teal}\nabla_{\bphi} KL(q(\bz | \bx, \bphi) || p(\bz))} = \nabla_{\bphi} KL\left( \cN (\bmu_{\bphi}(\bx), \bsigma^2_{\bphi}(\bx)) || \cN (0, \bI) \right)
+		\]
+		This expression has analytical formula.
+	\end{block}
 \end{frame}
 %=======
 \section{Variational autoencoder (VAE)}
