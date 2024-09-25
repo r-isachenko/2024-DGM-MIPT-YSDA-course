@@ -143,7 +143,7 @@
 	\tableofcontents
 \end{frame}
 %=======
-\subsection{EM-algorithm}
+\section{EM-algorithm}
 %=======
 \subsection{Amortized inference}
 %=======
@@ -154,29 +154,26 @@
 		q(\bz) = \argmax_q \cL_{q, \btheta^*}(\bx) = \argmin_q KL(q || p) =
 		p(\bz| \bx, \btheta^*).
 		\]
-		\vspace{-0.3cm}
+		\vspace{-0.3cm} \\
+		$q(\bz)$ approximates true posterior distribution $p(\bz| \bx, \btheta^*)$, that is why it is called \textbf{variational posterior}.
 		\begin{itemize}
-			\item $q(\bz)$ approximates true posterior distribution $p(\bz| \bx, \btheta^*)$, that is why it is called \textbf{variational posterior};
-			\item $p(\bz| \bx, \btheta^*)$ could be \textbf{intractable};
-			\item $q(\bz)$ is different for each object $\bx$.
+			\item {\color{violet}$p(\bz| \bx, \btheta^*)$ could be \textbf{intractable}};
+			\item {\color{teal}$q(\bz)$ is different for each object $\bx$}.
 		\end{itemize}
-		\vspace{-0.3cm}
 	\end{block}
-	\begin{block}{Idea}
-		Restrict a family of all possible distributions $q(\bz)$ to a parametric class $q(\bz|\bx, \bphi)$ conditioned on samples $\bx$ with parameters $\bphi$.
+	\begin{block}{Variational Bayes}
+		Restrict a family of all possible distributions $q(\bz)$ to a parametric class $q(\bz|\bx, \bphi)$  {\color{teal}conditioned on samples $\bx$}  {\color{violet}with parameters $\bphi$}.
+		\begin{itemize}
+			\item E-step
+			\[
+				\bphi_k = \bphi_{k-1} + \left.\eta \cdot \nabla_{\bphi} \cL_{\bphi, \btheta_{k-1}}(\bx)\right|_{\bphi=\bphi_{k-1}}
+			\]
+			\item M-step
+			\[
+				\btheta_k = \btheta_{k-1} + \left.\eta \cdot \nabla_{\btheta} \cL_{\bphi_k, \btheta}(\bx)\right|_{\btheta=\btheta_{k-1}}
+			\]
+		\end{itemize}
 	\end{block}
-	
-	\textbf{Variational Bayes}
-	\begin{itemize}
-		\item E-step
-		\[
-			\bphi_k = \bphi_{k-1} + \left.\eta \cdot \nabla_{\bphi} \cL_{\bphi, \btheta_{k-1}}(\bx)\right|_{\bphi=\bphi_{k-1}}
-		\]
-		\item M-step
-		\[
-			\btheta_k = \btheta_{k-1} + \left.\eta \cdot \nabla_{\btheta} \cL_{\bphi_k, \btheta}(\bx)\right|_{\btheta=\btheta_{k-1}}
-		\]
-	\end{itemize}
 \end{frame}
 %=======
 \begin{frame}{Variational EM illustration}
@@ -201,38 +198,44 @@
 	\begin{block}{ELBO}
 		\vspace{-0.5cm}
 		\[
-		\log p(\bx| \btheta) = \cL_{\bphi, \btheta}(\bx) + KL(q(\bz | \bx, \bphi) || p(\bz|\bx, \btheta)) \geq \cL_{\bphi, \btheta}(\bx).
+			\log p(\bx| \btheta) = \cL_{\bphi, \btheta}(\bx) + KL(q(\bz | \bx, \bphi) || p(\bz|\bx, \btheta)) \geq \cL_{\bphi, \btheta}(\bx).
+		\]
+		\[
+		 	\cL_{q, \btheta}(\bx) = \mathbb{E}_{q} \log p(\bx | \bz, \btheta) - KL (q(\bz) || p(\bz))
 		\]
 		\vspace{-0.5cm}
 	\end{block}
 	\begin{itemize}
 		\item \textbf{E-step}
+		\vspace{-0.3cm}
 		\[
-		\bphi_k = \bphi_{k-1} + \left.\eta \cdot \nabla_{\bphi} \cL_{\bphi, \btheta_{k-1}}(\bx)\right|_{\bphi=\bphi_{k-1}},
+			\bphi_k = \bphi_{k-1} + \left.\eta \cdot \nabla_{\bphi} \cL_{\bphi, \btheta_{k-1}}(\bx)\right|_{\bphi=\bphi_{k-1}},
 		\]
-		where $\bphi$~-- parameters of variational posterior distribution $q(\bz | \bx, \bphi)$.
+		\vspace{-0.3cm} \\
+		where $\bphi$~-- parameters of the variational posterior distribution $q(\bz | \bx, \bphi)$.
 		\item \textbf{M-step}
 		\[
-		\btheta_k = \btheta_{k-1} + \left.\eta \cdot \nabla_{\btheta} \cL_{\bphi_k, \btheta}(\bx)\right|_{\btheta=\btheta_{k-1}},
+			\btheta_k = \btheta_{k-1} + \left.\eta \cdot \nabla_{\btheta} \cL_{\bphi_k, \btheta}(\bx)\right|_{\btheta=\btheta_{k-1}},
 		\]
 		where $\btheta$~-- parameters of the generative distribution $p(\bx | \bz, \btheta)$.
 	\end{itemize}
-	Now all that is left is to obtain gradients: $\nabla_{\bphi} \cL_{\bphi, \btheta}(\bx)$, $\nabla_{\btheta} \cL_{\bphi, \btheta}(\bx)$.  \\
-	\textbf{Challenge:} Number of samples $n$ could be huge (we need derive the \textbf{unbiased} stochastic gradients).
+	Now all that is left is to obtain \textbf{unbiased} Monte Carlo estimates of the gradients: $\nabla_{\bphi} \cL_{\bphi, \btheta}(\bx)$, $\nabla_{\btheta} \cL_{\bphi, \btheta}(\bx)$. 
 \end{frame}
 %=======
 \subsection{ELBO gradients, reparametrization trick}
 %=======
 \begin{frame}{ELBO gradients, (M-step, $\nabla_{\btheta} \cL_{\bphi, \btheta}(\bx)$)}
+	\vspace{-0.3cm}
 	\[
-	\cL_{\bphi, \btheta}(\bx)  = \mathbb{E}_{q(\bz | \bx, \bphi)} \left[\log p(\bx | \bz, \btheta) - \log \frac{q(\bz | \bx, \bphi)}{p(\bz)} \right] \rightarrow \max_{\bphi, \btheta}.
-	\]	
+	 	\cL_{q, \btheta}(\bx) = \mathbb{E}_{q} \log p(\bx | \bz, \btheta) - KL (q(\bz) || p(\bz))
+	\]
 	\vspace{-0.5cm}
 	\begin{block}{M-step: $\nabla_{\btheta} \cL_{\bphi, \btheta}(\bx)$}
 		\vspace{-0.7cm}
 		\begin{multline*}
 			\nabla_{\btheta} \cL_{\bphi, \btheta}(\bx)
-			= \int q(\bz|\bx, \bphi) \nabla_{\btheta}\log p(\bx|\bz, \btheta) d \bz \approx  \\
+			= {\color{olive}\nabla_{\btheta}} \int q(\bz|\bx, \bphi) \log p(\bx|\bz, \btheta) d \bz =  \\
+%			= \int q(\bz|\bx, \bphi) {\color{olive}\nabla_{\btheta}} \log p(\bx|\bz, \btheta) d \bz \approx  \\
 			\approx \nabla_{\btheta}\log p(\bx|\bz^*, \btheta), \quad \bz^* \sim q(\bz|\bx, \bphi).
 		\end{multline*}
 		\vspace{-0.9cm}
@@ -240,7 +243,7 @@
 	\begin{block}{Naive Monte-Carlo estimation}
 		\vspace{-0.7cm}
 		\[
-		p(\bx | \btheta) = \int p(\bx | \bz, \btheta) p(\bz) d\bz \approx \frac{1}{K} \sum_{k=1}^{K} p(\bx | \bz_k, \btheta), \quad \bz_k \sim p(\bz).
+			p(\bx | \btheta) = \int p(\bx | \bz, \btheta) p(\bz) d\bz \approx \frac{1}{K} \sum_{k=1}^{K} p(\bx | \bz_k, \btheta), \quad \bz_k \sim p(\bz).
 		\]
 		\vspace{-0.5cm} 
 	\end{block}
@@ -371,24 +374,6 @@
 	\end{block}
 \end{frame}
 %=======
-\begin{frame}{Variational autoencoder (VAE)}
-	\begin{minipage}[t]{0.55\columnwidth}
-		\begin{itemize}
-			\item VAE learns stochastic mapping between $\bx$-space, from complicated distribution $\pi(\bx)$, and a latent $\bz$-space, with simple distribution. 
-			\item The generative model learns a joint distribution $p(\bx, \bz | \btheta) = p(\bz) p(\bx |\bz, \btheta)$, with a prior distribution $p(\bz)$, and a stochastic decoder $p(\bx|\bz, \btheta)$. 
-			\item The stochastic encoder $q(\bz|\bx, \bphi)$ (inference model), approximates the true but intractable posterior $p(\bz|\bx, \btheta)$ of the generative model.
-		\end{itemize}
-	\end{minipage}%
-	\begin{minipage}[t]{0.45\columnwidth}
-		\begin{figure}[h]
-			\centering
-			\includegraphics[width=\linewidth]{figs/vae_scheme}
-		\end{figure}
-	\end{minipage}
-	
-	\myfootnotewithlink{https://arxiv.org/abs/1906.02691}{Kingma D. P., Welling M. An introduction to variational autoencoders, 2019}
-\end{frame}
-%=======
 \begin{frame}{Variational Autoencoder}
 	\[
 	\cL_{\bphi, \btheta}(\bx)  = \mathbb{E}_{q(\bz | \bx, \bphi)} \left[\log p(\bx | \bz, \btheta) - \log \frac{q(\bz | \bx, \bphi)}{p(\bz)} \right] \rightarrow \max_{\bphi, \btheta}.
@@ -416,6 +401,24 @@
 	\end{figure}
 	
 	\myfootnotewithlink{https://arxiv.org/pdf/2403.18103}{Chan S. Tutorial on Diffusion Models for Imaging and Vision, 2024}
+\end{frame}
+%=======
+\begin{frame}{Variational autoencoder (VAE)}
+	\begin{minipage}[t]{0.55\columnwidth}
+		\begin{itemize}
+			\item VAE learns stochastic mapping between $\bx$-space, from complicated distribution $\pi(\bx)$, and a latent $\bz$-space, with simple distribution. 
+			\item The generative model learns a joint distribution $p(\bx, \bz | \btheta) = p(\bz) p(\bx |\bz, \btheta)$, with a prior distribution $p(\bz)$, and a stochastic decoder $p(\bx|\bz, \btheta)$. 
+			\item The stochastic encoder $q(\bz|\bx, \bphi)$ (inference model), approximates the true but intractable posterior $p(\bz|\bx, \btheta)$ of the generative model.
+		\end{itemize}
+	\end{minipage}%
+	\begin{minipage}[t]{0.45\columnwidth}
+		\begin{figure}[h]
+			\centering
+			\includegraphics[width=\linewidth]{figs/vae_scheme}
+		\end{figure}
+	\end{minipage}
+	
+	\myfootnotewithlink{https://arxiv.org/abs/1906.02691}{Kingma D. P., Welling M. An introduction to variational autoencoders, 2019}
 \end{frame}
 %=======
 \section{Normalizing flows as VAE model}
