@@ -292,7 +292,7 @@
 	\begin{block}{Gaussian conditional probability path}
 		\vspace{-0.4cm}
 		\[
-			p_t(\bx | \bx_1) = \cN\left(\bmu_t(\bx_1), \bsigma_t^2(\bx_1)\right); \quad \bx_t = \bmu_t(\bx_1) +  \bsigma_t^2(\bx_1) \bx_0.
+			p_t(\bx | \bx_1) = \cN\left(\bmu_t(\bx_1), \bsigma_t^2(\bx_1)\right); \quad \bx_t = \bmu_t(\bx_1) +  \bsigma_t^2(\bx_1) \odot \bx_0.
 		\]
 		\vspace{-0.6cm}
 	\end{block}
@@ -300,9 +300,19 @@
 \end{frame}
 %=======
 \begin{frame}{Flow Matching}
+	\begin{block}{Gaussian conditional probability path}
+		\vspace{-0.4cm}
+		\[
+			p_t(\bx | \bx_1) = \cN\left(\bmu_t(\bx_1), \bsigma_t^2(\bx_1)\right); \quad \bx_t = \bmu_t(\bx_1) +  \bsigma_t^2(\bx_1) \bx_0.
+		\]
+		\[
+			p_0(\bx | \bx_1) = p_0(\bx) \quad p_1(\bx | \bx_1) = \delta(\bx - \bx_1)
+		\]
+		\vspace{-0.6cm}
+	\end{block}
 	\begin{figure}
 		\centering
-		\includegraphics[width=\linewidth]{figs/heatmap_with_cond_traj-v3}
+		\includegraphics[width=0.8\linewidth]{figs/heatmap_with_cond_traj-v3}
 	\end{figure}
 	\myfootnotewithlink{https://mlg.eng.cam.ac.uk/blog/2024/01/20/flow-matching.html}{image credit: https://mlg.eng.cam.ac.uk/blog/2024/01/20/flow-matching.html}
 \end{frame}
@@ -326,7 +336,10 @@
 			\bsigma_t(\bx_1) = (1 - t).
 		\end{cases}
 		\quad \Rightarrow \quad 
-		 \bx_t = t \bx_1 + (1 - t) \bx_0
+		\begin{cases}
+			p_t(\bx | \bx_1) = \cN\left(t \bx_1, (1-t)^2\right); \\
+		 	\bx_t = t \bx_1 + (1 - t) \bx_0. \\
+		 \end{cases}
 	\]
 	\[
 		\bu(\bx, \bx_1, t) =  \bmu_t'(\bx_1) + \frac{\bsigma_t'(\bx_1)}{\bsigma_t(\bx_1)} \odot (\bx - \bmu_t(\bx_1))
@@ -344,6 +357,7 @@
 			\bbE_{t \sim U[0, 1]} \bbE_{\bz \sim p(\bz)} \bbE_{\bx \sim p_t(\bx | \bz)}\left\| \bu(\bx, \bz, t) - \bu_{\btheta}(\bx, t) \right\|^2 = \\
 			 \bbE_{t \sim U[0, 1]} \bbE_{\bx_1 \sim \pi(\bx)} \bbE_{\bx_0 \sim p(\bx)}\left\| (\bx_1 - \bx_0) - \bu_{\btheta}(\bx, t) \right\|^2  \rightarrow \min_{\btheta}
 		\end{multline*}
+		We fit straight lines between noise distribution $p(\bx)$ and the data distribution $\pi(\bx)$.
 		\vspace{-0.3cm}
 	\end{block}	
 	\myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
@@ -370,26 +384,91 @@
 \end{frame}
 %=======
 \begin{frame}{Flow Matching}
-	\begin{figure}
-		\centering
-		\includegraphics[width=\linewidth]{figs/diff_cond_path}
-	\end{figure}
-	\begin{figure}
-		\centering
-		\includegraphics[width=\linewidth]{figs/ot_cond_path}
-	\end{figure}
+	\begin{block}{Flow matching probability path}
+		\vspace{-0.3cm}
+		\[
+			p_t(\bx | \bx_1) = \cN\left(t \bx_1, (1-t)^2\right); \quad \bu(\bx, \bx_1, t) = \frac{\bx_1  - \bx}{1-t}
+		\]
+		\vspace{-0.3cm}
+	\end{block}
+	\begin{block}{Variance Exploding SDE probability path}
+		\vspace{-0.3cm}
+		\[
+			d \bx = \sqrt{\frac{ d [\sigma^2(t)]}{dt}} \cdot d \bw;
+			\quad \Rightarrow \quad
+			\begin{cases}
+				p_t(\bx | \bx_1) = \cN\left(\bx_1, \sigma^2_{1-t}  \bI\right) \\
+				\bu(\bx, \bx_1, t) = - \frac{\sigma'_{1-t}}{\sigma_{1-t}} \cdot (\bx - \bx_1)
+			\end{cases}
+		\]
+		\vspace{-0.3cm}
+	\end{block}
+	\begin{block}{Variance Preserving SDE probability path}
+		\vspace{-0.3cm}
+		{\small
+		\[
+			d \bx = - \frac{1}{2} \beta(t) \bx(t) dt + \sqrt{\beta(t)} d \bw;
+			\, \Rightarrow \,
+			\begin{cases}
+				p_t(\bx | \bx_1) = \cN\left(\alpha_{1-t}  \bx_1, (1 - \alpha^2_{1-t}  \bI \right) \\
+				\bu(\bx, \bx_1, t) = \frac{\alpha'_{1-t}}{1 - \alpha^2_{1-t}}\cdot \left(\alpha_{1-t}  \bx - \bx_1\right)
+			\end{cases}
+		\]
+		}
+		Here $\alpha_t = \exp\left({-\frac{1}{2} \int_0^t \beta(s) ds} \right)$.
+	\end{block}
+	\myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
+\end{frame}
+%=======
+\begin{frame}{Flow Matching}
+	\begin{block}{Diffusion vector field}
+		\begin{figure}
+			\centering
+			\includegraphics[width=\linewidth]{figs/diff_cond_path}
+		\end{figure}
+	\end{block}
+	\begin{block}{Flow matching vector field}
+		\begin{figure}
+			\raggedleft
+			\includegraphics[width=0.77\linewidth]{figs/ot_cond_path}
+		\end{figure}
+	\end{block}
 	\myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
 \end{frame}
 %=======
 \begin{frame}{Flow Matching}
 	\begin{figure}
 		\centering
-		\includegraphics[width=\linewidth]{figs/trajectories}
+		\includegraphics[width=0.7\linewidth]{figs/trajectories}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=\linewidth]{figs/2d-generation}
 	\end{figure}
 	\myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
 \end{frame}
 %=======
 \subsection{Pair conditioning}
+%=======
+\begin{frame}{Flow Matching}
+	\begin{figure}
+		\centering
+		\includegraphics[width=\linewidth]{figs/rectified_flow}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=\linewidth]{figs/star_fig}
+	\end{figure}
+	\myfootnotewithlink{https://arxiv.org/abs/2209.03003}{Liu X., et al. Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow, 2022}
+\end{frame}
+%=======
+\begin{frame}{Flow Matching}
+	\begin{figure}
+		\centering
+		\includegraphics[width=\linewidth]{figs/combined_vp}
+	\end{figure}
+	\myfootnotewithlink{https://arxiv.org/abs/2209.03003}{Liu X., et al. Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow, 2022}
+\end{frame}
 %=======
 \begin{frame}{Summary}
 	\begin{itemize}

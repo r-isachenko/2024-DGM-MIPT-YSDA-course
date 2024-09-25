@@ -355,8 +355,8 @@
 	\begin{block}{Denoising score matching}
 		\vspace{-0.7cm}
 		\begin{align*}
-			\bx_t &= \bx + \sigma_t \cdot \bepsilon_t, \quad p(\bx | \sigma_t) = \cN(\bx, \sigma_t^2 \cdot \bI) \\
-			\bx_{t-1} &= \bx + \sigma_{t-1} \cdot \bepsilon_{t-1}, \quad p(\bx | \sigma_{t-1}) = \cN(\bx, \sigma_{t-1}^2 \cdot \bI)
+			\bx_t &= \bx + \sigma_t \cdot \bepsilon_t, & p(\bx_t | \bx, \sigma_t) &= \cN(\bx, \sigma_t^2 \cdot \bI) \\
+			\bx_{t-1} &= \bx + \sigma_{t-1} \cdot \bepsilon_{t-1}, & p(\bx_{t-1} | \bx, \sigma_{t-1}) &= \cN(\bx, \sigma_{t-1}^2 \cdot \bI)
 		\end{align*}
 	\end{block}
 	\vspace{-1.0cm}
