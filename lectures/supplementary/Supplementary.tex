@@ -1148,6 +1148,86 @@
 	\myfootnotewithlink{https://arxiv.org/abs/1907.07945}{Song Y., Meng C., Ermon S. Mintnet: Building invertible neural networks with masked convolutions, 2019}
 \end{frame}
 %=======
+\begin{frame}{VAE vs Normalizing flows}
+	\begin{table}[]
+		\begin{tabular}{l|c|c}
+			& \textbf{VAE} & \textbf{NF} \\ \hline
+			\textbf{Objective} & ELBO $\cL$ & Forward KL/MLE \\ \hline
+			\textbf{Encoder} & \shortstack{stochastic \\ $\bz \sim q (\bz | \bx, \bphi)$} &  \shortstack{\\ deterministic \\ $\bz = \bff_{\btheta}(\bx)$ \\ $q(\bz | \bx, \btheta) = \delta(\bz - \bff_{\btheta}(\bx))$}  \\ \hline
+			\textbf{Decoder} & \shortstack{stochastic \\ $\bx \sim p (\bx | \bz, \btheta)$} & \shortstack{\\ deterministic \\ $\bx = \bg_{\btheta}(\bz)$ \\ $ p(\bx | \bz, \btheta) = \delta(\bx - \bg_{\btheta}(\bz))$} \\ \hline
+			\textbf{Parameters}  & $\bphi, \btheta$ & $\btheta \equiv \bphi$\\ 
+		\end{tabular}
+	\end{table}
+	\begin{block}{Theorem}
+		MLE for normalizing flow is equivalent to maximization of ELBO for VAE model with deterministic encoder and decoder:
+		\vspace{-0.3cm}
+		\[
+			p(\bx | \bz, \btheta) = \delta (\bx - \bff^{-1}_{\btheta}(\bz)) = \delta (\bx - \bg_{\btheta}(\bz));
+		\]
+		\[
+			q(\bz | \bx, \btheta) = \delta (\bz - \bff_{\btheta}(\bx)).
+		\]
+	\end{block}
+	\myfootnotewithlink{https://arxiv.org/abs/2007.02731}{Nielsen D., et al. SurVAE Flows: Surjections to Bridge the Gap between VAEs and Flows, 2020}
+\end{frame}
+%=======
+\begin{frame}{Normalizing flow as VAE}
+	\begin{block}{Proof}
+		\begin{enumerate}
+			\item Dirac delta function property 
+			\[
+				\bbE_{\delta(\bx - \by)} \bff(\bx) = \int \delta(\bx - \by) \bff(\bx) d \bx = \bff(\by).
+			\]
+			\item CoV theorem and Bayes theorem:
+			\[
+				p(\bx | \btheta) = p(\bz) |\det (\bJ_\bff)|;
+			\]
+			\[
+				p(\bz | \bx, \btheta) = \frac{p(\bx | \bz, \btheta) p(\bz)}{p(\bx | \btheta)}; \quad \Rightarrow \quad p(\bx | \bz, \btheta) = p(\bz | \bx, \btheta) |\det (\bJ_\bff)|.
+			\]
+			\item Log-likelihood decomposition
+			\[
+				\log p(\bx | \btheta) = \cL_{\btheta}(\bx) + {\color{olive}KL(q(\bz | \bx, \btheta) || p(\bz | \bx, \btheta))} = \cL_{\btheta}(\bx).
+			\]
+		\end{enumerate}
+	\end{block}
+	\myfootnotewithlink{https://arxiv.org/abs/2007.02731}{Nielsen D., et al. SurVAE Flows: Surjections to Bridge the Gap between VAEs and Flows, 2020}
+\end{frame}
+%=======
+\begin{frame}{Normalizing flow as VAE}
+	\begin{block}{Proof}
+		ELBO objective:
+		\vspace{-0.5cm}
+		\begin{multline*}
+			\cL  = \bbE_{q(\bz | \bx, \btheta)} \left[\log p(\bx | \bz, \btheta) - \log \frac{q(\bz | \bx, \btheta)}{p(\bz)} \right]  \\
+			= \bbE_{q(\bz | \bx, \btheta)} \left[{\color{violet}\log \frac{p(\bx | \bz, \btheta)}{q(\bz | \bx, \btheta)}} + {\color{teal}\log p(\bz)} \right].
+		\end{multline*}
+		\vspace{-0.6cm}
+		\begin{enumerate}
+			\item  Dirac delta function property:
+			\vspace{-0.3cm}
+			\[
+				{\color{teal}\bbE_{q(\bz | \bx, \btheta)} \log p(\bz)} = \int \delta (\bz - \bff_{\btheta}(\bx)) \log p(\bz) d \bz = \log p(f_{\btheta}(\bx)).
+			\]
+			\vspace{-0.6cm}
+			\item CoV theorem and Bayes theorem:
+			\vspace{-0.2cm}
+			{ \small
+			\[ 
+				{\color{violet}\bbE_{q(\bz | \bx, \btheta)} \log \frac{p(\bx | \bz, \btheta)}{q(\bz | \bx, \btheta)}} = \bbE_{q(\bz | \bx, \btheta)} \log \frac{p(\bz | \bx, \btheta) |\det (\bJ_\bff)|}{q(\bz | \bx, \btheta)} = \log |\det \bJ_\bff|.
+			\]
+			}
+			\vspace{-0.6cm}
+			\item Log-likelihood decomposition
+			\vspace{-0.3cm}
+			\[
+				\log p(\bx | \btheta) = \cL_{\btheta}(\bx) = \log p(f_{\btheta}(\bx)) +  \log |\det \bJ_\bff|.
+			\]
+		\end{enumerate}
+	\end{block}
+	\myfootnotewithlink{https://arxiv.org/abs/2007.02731}{Nielsen D., et al. SurVAE Flows: Surjections to Bridge the Gap between VAEs and Flows, 2020}
+\end{frame}
+%=======
 \subsection{Residual Flows (planar flows)}
 %=======
 \begin{frame}{Residual Flows}

@@ -39,22 +39,18 @@
 \end{frame}
 %=======
 \begin{frame}{Recap of previous lecture}
-	\begin{block}{Bayes theorem}
+	\begin{block}{Posterior distribuiton (Bayes theorem)}
 		\[
-			p(\bt | \bx) = \frac{p(\bx | \bt) p(\bt)}{p(\bx)} = \frac{p(\bx | \bt) p(\bt)}{\int p(\bx | \bt) p(\bt) d \bt} 
+			p(\btheta | \bx) = \frac{p(\bx | \btheta) p(\btheta)}{p(\bx)} = \frac{p(\bx | \btheta) p(\btheta)}{\int p(\bx | \btheta) p(\btheta) d \btheta} 
 		\]
 		\begin{itemize}
-			\item $\bx$ -- observed variables, $\bt$ -- unobserved variables (latent variables/parameters);
-			\item $p(\bx | \bt)$ -- likelihood;
-			\item $p(\bx) = \int p(\bx | \bt) p(\bt) d \bt$ -- evidence;
-			\item $p(\bt)$ -- prior distribution, $p(\bt | \bx)$ -- posterior distribution.
+			\item $\bx$ -- observed variables;
+			\item $\btheta$ -- unobserved variables (latent variables/parameters);
+			\item $p(\bx | \btheta)$ -- likelihood;
+			\item $p(\bx) = \int p(\bx | \btheta) p(\btheta) d \btheta$ -- evidence;
+			\item $p(\btheta)$ -- prior distribution;
+			\item $p(\btheta | \bx)$ -- posterior distribution.
 		\end{itemize}
-	\end{block}
-	\begin{block}{Posterior distribution}
-		\[
-		p(\btheta | \bX) = \frac{p(\bX | \btheta) p(\btheta)}{p(\bX)} = \frac{p(\bX | \btheta) p(\btheta)}{\int p(\bX | \btheta) p(\btheta) d \btheta} 
-		\]
-		\vspace{-0.2cm}
 	\end{block}
 \end{frame}
 %=======
@@ -369,10 +365,10 @@
 \end{frame}
 %=======
 \begin{frame}{Variational autoencoder (VAE)}
-	\begin{block}{Final EM-algorithm}
+	\begin{block}{Training (EM-algorithm)}
 		\begin{itemize}
-			\item pick random sample $\bx_i, i \sim U[1, n]$.
-			\item compute the objective:
+			\item pick random sample $\bx_i, i \sim \text{Uniform}\{1, n\}$ (or batch).
+			\item compute the objective (using reparametrization trick):
 			\vspace{-0.3cm}
 			\[
 				\bepsilon^* \sim r(\bepsilon); \quad \bz^* = \bg_{\bphi}(\bx, \bepsilon^*);
@@ -380,18 +376,16 @@
 			\[
 				\cL_{\bphi, \btheta}(\bx) \approx  \log p(\bx | \bz^*, \btheta) - KL(q(\bz^* | \bx, \bphi) || p(\bz^*)).
 			\]
-			\item compute a stochastic gradients w.r.t. $\bphi$ and $\btheta$
-			\begin{align*}
-				\nabla_{\bphi} \cL_{\bphi, \btheta}(\bx) &\approx \nabla_{\bphi} \log p(\bx | \bg_{\bphi}(\bx, \bepsilon^*), \btheta)  - \nabla_{\bphi} \text{KL}(q(\bz | \bx, \bphi) || p(\bz)); \\
-				\nabla_{\btheta} \cL_{\bphi, \btheta}(\bx) &\approx \nabla_{\btheta} \log p(\bx|\bz^*, \btheta).
-			\end{align*}
-			\item update $\btheta, \bphi$ according to the selected optimization method (SGD, Adam, etc):
-			\begin{align*}
-				\bphi &:= \bphi + \eta \cdot \nabla_{\bphi} \cL_{\bphi, \btheta}(\bx), \\
-				\btheta &:= \btheta + \eta \cdot \nabla_{\btheta} \cL_{\bphi, \btheta}(\bx).
-			\end{align*}
+			\item make gradient step using stochastic gradients w.r.t. $\bphi$ and $\btheta$ via autograd
 		\end{itemize}
 	\end{block}
+	\begin{block}{Inference}
+		\begin{itemize}
+			\item sample $\bz^*$ from the prior distribution $p(\bz)$ ($\cN(0, \bI)$);
+			\item sample from the decoder $p(\bx | \bz^*, \btheta)$.
+		\end{itemize}
+	\end{block}
+	\textbf{Note:} you do not need the encoder $q(\bz | \bx, \bphi)$ during the generation.
 \end{frame}
 %=======
 \begin{frame}{Variational Autoencoder}
@@ -460,65 +454,8 @@
 			p(\bx | \bz, \btheta) = \delta (\bx - \bff^{-1}_{\btheta}(\bz)) = \delta (\bx - \bg_{\btheta}(\bz));
 		\]
 		\[
-			q(\bz | \bx, \btheta) = p(\bz | \bx, \btheta) = \delta (\bz - \bff_{\btheta}(\bx)).
+			q(\bz | \bx, \btheta) = \delta (\bz - \bff_{\btheta}(\bx)).
 		\]
-	\end{block}
-	\myfootnotewithlink{https://arxiv.org/abs/2007.02731}{Nielsen D., et al. SurVAE Flows: Surjections to Bridge the Gap between VAEs and Flows, 2020}
-\end{frame}
-%=======
-\begin{frame}{Normalizing flow as VAE}
-	\begin{block}{Proof}
-		\begin{enumerate}
-			\item Dirac delta function property 
-			\[
-				\bbE_{\delta(\bx - \by)} \bff(\bx) = \int \delta(\bx - \by) \bff(\bx) d \bx = \bff(\by).
-			\]
-			\item CoV theorem and Bayes theorem:
-			\[
-				p(\bx | \btheta) = p(\bz) |\det (\bJ_\bff)|;
-			\]
-			\[
-				p(\bz | \bx, \btheta) = \frac{p(\bx | \bz, \btheta) p(\bz)}{p(\bx | \btheta)}; \quad \Rightarrow \quad p(\bx | \bz, \btheta) = p(\bz | \bx, \btheta) |\det (\bJ_\bff)|.
-			\]
-			\item Log-likelihood decomposition
-			\[
-				\log p(\bx | \btheta) = \cL_{\btheta}(\bx) + {\color{olive}KL(q(\bz | \bx, \btheta) || p(\bz | \bx, \btheta))} = \cL_{\btheta}(\bx).
-			\]
-		\end{enumerate}
-	\end{block}
-	\myfootnotewithlink{https://arxiv.org/abs/2007.02731}{Nielsen D., et al. SurVAE Flows: Surjections to Bridge the Gap between VAEs and Flows, 2020}
-\end{frame}
-%=======
-\begin{frame}{Normalizing flow as VAE}
-	\begin{block}{Proof}
-		ELBO objective:
-		\vspace{-0.5cm}
-		\begin{multline*}
-			\cL  = \bbE_{q(\bz | \bx, \btheta)} \left[\log p(\bx | \bz, \btheta) - \log \frac{q(\bz | \bx, \btheta)}{p(\bz)} \right]  \\
-			= \bbE_{q(\bz | \bx, \btheta)} \left[{\color{violet}\log \frac{p(\bx | \bz, \btheta)}{q(\bz | \bx, \btheta)}} + {\color{teal}\log p(\bz)} \right].
-		\end{multline*}
-		\vspace{-0.6cm}
-		\begin{enumerate}
-			\item  Dirac delta function property:
-			\vspace{-0.3cm}
-			\[
-				{\color{teal}\bbE_{q(\bz | \bx, \btheta)} \log p(\bz)} = \int \delta (\bz - \bff_{\btheta}(\bx)) \log p(\bz) d \bz = \log p(f_{\btheta}(\bx)).
-			\]
-			\vspace{-0.6cm}
-			\item CoV theorem and Bayes theorem:
-			\vspace{-0.2cm}
-			{ \small
-			\[ 
-				{\color{violet}\bbE_{q(\bz | \bx, \btheta)} \log \frac{p(\bx | \bz, \btheta)}{q(\bz | \bx, \btheta)}} = \bbE_{q(\bz | \bx, \btheta)} \log \frac{p(\bz | \bx, \btheta) |\det (\bJ_\bff)|}{q(\bz | \bx, \btheta)} = \log |\det \bJ_\bff|.
-			\]
-			}
-			\vspace{-0.6cm}
-			\item Log-likelihood decomposition
-			\vspace{-0.3cm}
-			\[
-				\log p(\bx | \btheta) = \cL_{\btheta}(\bx) = \log p(f_{\btheta}(\bx)) +  \log |\det \bJ_\bff|.
-			\]
-		\end{enumerate}
 	\end{block}
 	\myfootnotewithlink{https://arxiv.org/abs/2007.02731}{Nielsen D., et al. SurVAE Flows: Surjections to Bridge the Gap between VAEs and Flows, 2020}
 \end{frame}
