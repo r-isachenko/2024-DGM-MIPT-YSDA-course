@@ -176,11 +176,11 @@
 	\begin{itemize}
 		\item E-step
 		\[
-			\bphi_k = \bphi_{k-1} + \left.\eta \nabla_{\bphi} \cL_{\bphi, \btheta_{k-1}}(\bx)\right|_{\bphi=\bphi_{k-1}}
+			\bphi_k = \bphi_{k-1} + \left.\eta \cdot \nabla_{\bphi} \cL_{\bphi, \btheta_{k-1}}(\bx)\right|_{\bphi=\bphi_{k-1}}
 		\]
 		\item M-step
 		\[
-			\btheta_k = \btheta_{k-1} + \left.\eta \nabla_{\btheta} \cL_{\bphi_k, \btheta}(\bx)\right|_{\btheta=\btheta_{k-1}}
+			\btheta_k = \btheta_{k-1} + \left.\eta \cdot \nabla_{\btheta} \cL_{\bphi_k, \btheta}(\bx)\right|_{\btheta=\btheta_{k-1}}
 		\]
 	\end{itemize}
 	\begin{figure}
@@ -259,7 +259,7 @@
 	\begin{block}{Reparametrization trick (LOTUS trick)} 
 		Suppose that $\bz \sim q(\bz | \bx, \bphi)$ is a random variable that is induced by the random variable $\bepsilon \sim p(\bepsilon)$ using the deterministic transform $\bz = \bg_{\bphi}(\bx, \bepsilon)$. Then
 		\[
-			\bbE_{\bz \sim q(\bz | \bx, \bphi)} \bff(\bz) = \bbE_{\bepsilon \sim r(\bepsilon)} \bff(\bg_{\bphi}(\bx, \bepsilon))
+			\bbE_{\bz \sim q(\bz | \bx, \bphi)} \bff(\bz) = \bbE_{\bepsilon \sim p(\bepsilon)} \bff(\bg_{\bphi}(\bx, \bepsilon))
 		\]
 		Note that LHS takes the expectation by the parametric distribution $q(\bz | \bx, \bphi)$ and the RHS uses non-parametric distribution $p(\bepsilon)$.
 	\end{block}
@@ -371,7 +371,7 @@
 			\item compute the objective (using reparametrization trick):
 			\vspace{-0.3cm}
 			\[
-				\bepsilon^* \sim r(\bepsilon); \quad \bz^* = \bg_{\bphi}(\bx, \bepsilon^*);
+				\bepsilon^* \sim p(\bepsilon); \quad \bz^* = \bg_{\bphi}(\bx, \bepsilon^*);
 			\]
 			\[
 				\cL_{\bphi, \btheta}(\bx) \approx  \log p(\bx | \bz^*, \btheta) - KL(q(\bz^* | \bx, \bphi) || p(\bz^*)).
@@ -389,15 +389,24 @@
 \end{frame}
 %=======
 \begin{frame}{Variational Autoencoder}
-	\[
-	\cL_{\bphi, \btheta}(\bx)  = \mathbb{E}_{q(\bz | \bx, \bphi)} \left[\log p(\bx | \bz, \btheta) - \log \frac{q(\bz | \bx, \bphi)}{p(\bz)} \right] \rightarrow \max_{\bphi, \btheta}.
-	\]	
 	\vspace{-0.3cm}
-	\begin{figure}[h]
-		\centering
-		\includegraphics[width=.65\linewidth]{figs/VAE}
-	\end{figure}
-	\myfootnotewithlink{http://ijdykeman.github.io/ml/2016/12/21/cvae.html}{image credit: http://ijdykeman.github.io/ml/2016/12/21/cvae.html}
+	\[
+	 	\cL_{q, \btheta}(\bx) = \mathbb{E}_{q} \log p(\bx | \bz, \btheta) - KL (q(\bz | \bx, \bphi) || p(\bz))
+	\]
+	\vspace{-0.5cm}
+	\begin{minipage}[t]{0.6\columnwidth}
+		\begin{figure}[h]
+			\centering
+			\includegraphics[width=\linewidth]{figs/VAE}
+		\end{figure}
+	\end{minipage}%
+	\begin{minipage}[t]{0.4\columnwidth}
+		\begin{figure}[h]
+			\centering
+			\includegraphics[width=\linewidth]{figs/vae_scheme}
+		\end{figure}
+	\end{minipage}
+	\myfootnote{\href{http://ijdykeman.github.io/ml/2016/12/21/cvae.html}{image credit: http://ijdykeman.github.io/ml/2016/12/21/cvae.html} \\ \href{https://arxiv.org/abs/1906.02691}{Kingma D. P., Welling M. An introduction to variational autoencoders, 2019}}
 \end{frame}
 %=======
 \begin{frame}{Variational autoencoder (VAE)}
@@ -416,26 +425,6 @@
 	
 	\myfootnotewithlink{https://arxiv.org/pdf/2403.18103}{Chan S. Tutorial on Diffusion Models for Imaging and Vision, 2024}
 \end{frame}
-%=======
-\begin{frame}{Variational autoencoder (VAE)}
-	\begin{minipage}[t]{0.55\columnwidth}
-		\begin{itemize}
-			\item VAE learns stochastic mapping between $\bx$-space, from complicated distribution $\pi(\bx)$, and a latent $\bz$-space, with simple distribution. 
-			\item The generative model learns a joint distribution $p(\bx, \bz | \btheta) = p(\bz) p(\bx |\bz, \btheta)$, with a prior distribution $p(\bz)$, and a stochastic decoder $p(\bx|\bz, \btheta)$. 
-			\item The stochastic encoder $q(\bz|\bx, \bphi)$ (inference model), approximates the true but intractable posterior $p(\bz|\bx, \btheta)$ of the generative model.
-		\end{itemize}
-	\end{minipage}%
-	\begin{minipage}[t]{0.45\columnwidth}
-		\begin{figure}[h]
-			\centering
-			\includegraphics[width=\linewidth]{figs/vae_scheme}
-		\end{figure}
-	\end{minipage}
-	
-	\myfootnotewithlink{https://arxiv.org/abs/1906.02691}{Kingma D. P., Welling M. An introduction to variational autoencoders, 2019}
-\end{frame}
-%=======
-\section{Normalizing flows as VAE model}
 %=======
 \begin{frame}{VAE vs Normalizing flows}
 	\begin{table}[]
@@ -537,7 +526,7 @@
 	\begin{itemize}
 		\item Amortized variational inference allows to efficiently compute the stochastic gradients for ELBO using Monte-Carlo estimation.
 		\vfill
-		\item The reparametrization trick gets unbiased gradients w.r.t to the variational posterior distribution $q(\bz | \bx, \bphi)$.
+		\item The reparametrization trick gets unbiased gradients w.r.t. the variational posterior distribution $q(\bz | \bx, \bphi)$.
 		\vfill
 		\item The VAE model is an LVM with two neural network: stochastic encoder $q(\bz | \bx, \bphi)$ and stochastic decoder $p(\bx | \bz, \btheta)$.
 		\vfill
