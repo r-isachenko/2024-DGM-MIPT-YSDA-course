@@ -43,8 +43,8 @@
 \begin{frame}{Recap of previous lecture}
 	\vspace{-0.3cm}
 	\[
-		\cL_{\bphi, \btheta}(\bx)  = \mathbb{E}_{q(\bz | \bx, \bphi)} \left[\log p(\bx | \bz, \btheta) - \log \frac{q(\bz | \bx, \bphi)}{p(\bz)} \right] \rightarrow \max_{\bphi, \btheta}.
-	\]	
+		\cL_{\bphi, \btheta}(\bx)  = \mathbb{E}_{q(\bz | \bx, \bphi)} \log p(\bx | \bz , \btheta) - KL(q(\bz| \bx, \bphi) || p(\bz)) \rightarrow \max_{\bphi, \btheta}.
+	\]
 	\vspace{-0.3cm}
 	\begin{block}{M-step: $\nabla_{\btheta}\cL_{\bphi, \btheta}(\bx)$, Monte Carlo estimation}
 		\vspace{-0.8cm}
@@ -58,17 +58,16 @@
 	\begin{block}{E-step: $\nabla_{\bphi}\cL_{\bphi, \btheta}(\bx)$, reparametrization trick}
 		\vspace{-0.8cm}
 		\begin{multline*}
-			\nabla_{\bphi}\cL_{\bphi, \btheta}(\bx) = \int r(\bepsilon) \nabla_{\bphi} \log p(\bx | \bg_{\bphi}(\bx, \bepsilon), \btheta) d\bepsilon  - \nabla_{\bphi} \text{KL}
+			\nabla_{\bphi}\cL_{\bphi, \btheta}(\bx) = \int p(\bepsilon) \nabla_{\bphi} \log p(\bx | \bg_{\bphi}(\bx, \bepsilon), \btheta) d\bepsilon  - \nabla_{\bphi} \text{KL}
 			\\ \approx \nabla_{\bphi} \log p(\bx | \bg_{\bphi}(\bx, \bepsilon^*), \btheta)  - \nabla_{\bphi} \text{KL}
 		\end{multline*}
 		\vspace{-0.5cm}
 	\end{block}
-	\vspace{-0.5cm}
-	
+	\vspace{-0.3cm}
 	\begin{block}{Variational assumption}
 		\vspace{-0.3cm}
 		\[
-			r(\bepsilon) = \mathcal{N}(0, \bI); \quad  q(\bz| \bx, \bphi) = \mathcal{N} (\bmu_{\bphi}(\bx), \bsigma^2_{\bphi}(\bx)).
+			p(\bepsilon) = \mathcal{N}(0, \bI); \quad  q(\bz| \bx, \bphi) = \mathcal{N} (\bmu_{\bphi}(\bx), \bsigma^2_{\bphi}(\bx)).
 		\]
 		\[
 			\bz = \bg_{\bphi}(\bx, \bepsilon) = \bsigma_{\bphi}(\bx) \odot \bepsilon + \bmu_{\bphi}(\bx).
@@ -77,50 +76,48 @@
 \end{frame}
 %=======
 \begin{frame}{Recap of previous lecture}
-	\begin{block}{Final EM-algorithm}
+	\begin{block}{Training (EM-algorithm)}
 		\begin{itemize}
-			\item pick random sample $\bx_i, i \sim U[1, n]$.
-			\item compute the objective:
+			\item pick random sample $\bx_i, i \sim \text{Uniform}\{1, n\}$ (or batch).
+			\item compute the objective (using reparametrization trick):
 			\vspace{-0.3cm}
 			\[
-			\bepsilon^* \sim r(\bepsilon); \quad \bz^* = \bg_{\bphi}(\bx, \bepsilon^*);
+				\bepsilon^* \sim p(\bepsilon); \quad \bz^* = \bg_{\bphi}(\bx, \bepsilon^*);
 			\]
 			\[
-			\cL_{\bphi, \btheta}(\bx) \approx  \log p(\bx | \bz^*, \btheta) - KL(q(\bz^* | \bx, \bphi) || p(\bz^*)).
+				\cL_{\bphi, \btheta}(\bx) \approx  \log p(\bx | \bz^*, \btheta) - KL(q(\bz^* | \bx, \bphi) || p(\bz^*)).
 			\]
-			\item compute a stochastic gradients w.r.t. $\bphi$ and $\btheta$
-			\begin{align*}
-				\nabla_{\bphi}\cL_{\bphi, \btheta}(\bx) &\approx \nabla_{\bphi} \log p(\bx | \bg_{\bphi}(\bx, \bepsilon^*), \btheta)  - \nabla_{\bphi} \text{KL}(q(\bz | \bx, \bphi) || p(\bz)); \\
-				\nabla_{\btheta}\cL_{\bphi, \btheta}(\bx) &\approx \nabla_{\btheta} \log p(\bx|\bz^*, \btheta).
-			\end{align*}
-			\item update $\btheta, \bphi$ according to the selected optimization method (SGD, Adam):
-			\begin{align*}
-				\bphi &:= \bphi + \eta \cdot \nabla_{\bphi}\cL_{\bphi, \btheta}(\bx), \\
-				\btheta &:= \btheta + \eta \cdot \nabla_{\btheta}\cL_{\bphi, \btheta}(\bx).
-			\end{align*}
+			\item make gradient step using stochastic gradients w.r.t. $\bphi$ and $\btheta$ via autograd
 		\end{itemize}
 	\end{block}
+	\begin{block}{Inference}
+		\begin{itemize}
+			\item sample $\bz^*$ from the prior distribution $p(\bz)$ ($\cN(0, \bI)$);
+			\item sample from the decoder $p(\bx | \bz^*, \btheta)$.
+		\end{itemize}
+	\end{block}
+	\textbf{Note:} you do not need the encoder $q(\bz | \bx, \bphi)$ during the generation.
 \end{frame}
 %=======
 \begin{frame}{Recap of previous lecture}
-	\begin{minipage}[t]{0.55\columnwidth}
-		\begin{block}{Variational autoencoder (VAE)}
-		    \begin{itemize}
-			    \item VAE learns stochastic mapping between $\bx$-space, from $\pi(\bx)$, and a latent $\bz$-space, with simple distribution. 
-			    \item The generative model learns  distribution $p(\bx, \bz | \btheta) = p(\bz) p(\bx |\bz, \btheta)$, with a prior distribution $p(\bz)$, and a stochastic decoder $p(\bx|\bz, \btheta)$. 
-			    \item The stochastic encoder $q(\bz|\bx, \bphi)$ (inference model), approximates the true but intractable posterior $p(\bz|\bx, \btheta)$.
-		    \end{itemize}
-	    \end{block}
+	\vspace{-0.3cm}
+	\[
+	 	\cL_{q, \btheta}(\bx) = \mathbb{E}_{q} \log p(\bx | \bz, \btheta) - KL (q(\bz | \bx, \bphi) || p(\bz))
+	\]
+	\vspace{-0.5cm}
+	\begin{minipage}[t]{0.6\columnwidth}
+		\begin{figure}[h]
+			\centering
+			\includegraphics[width=\linewidth]{figs/VAE}
+		\end{figure}
 	\end{minipage}%
-	\begin{minipage}[t]{0.45\columnwidth}
-		\vspace{0.7cm}
+	\begin{minipage}[t]{0.4\columnwidth}
 		\begin{figure}[h]
 			\centering
 			\includegraphics[width=\linewidth]{figs/vae_scheme}
 		\end{figure}
 	\end{minipage}
-	
-	\myfootnotewithlink{https://arxiv.org/abs/1906.02691}{Kingma D. P., Welling M. An introduction to variational autoencoders, 2019}
+	\myfootnote{\href{http://ijdykeman.github.io/ml/2016/12/21/cvae.html}{image credit: http://ijdykeman.github.io/ml/2016/12/21/cvae.html} \\ \href{https://arxiv.org/abs/1906.02691}{Kingma D. P., Welling M. An introduction to variational autoencoders, 2019}}
 \end{frame}
 %=======
 \begin{frame}{Recap of previous lecture}
