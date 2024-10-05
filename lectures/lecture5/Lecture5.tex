@@ -213,7 +213,7 @@
 	\begin{itemize}
 		\item Let our encoder outputs continuous representation $\bz_e = \text{NN}_{e, \bphi}(\bx) \in \bbR^{C}$.
 		\item Quantization will give us the deterministic mapping from the encoder output $\bz_e$ to its quantized representation $\bz_q$.
-		\item Let use the dictionary elements $\be_c$ in the generative distribution $p(\bx | \be_c, \btheta)$ (decoder).
+		\item Let use the dictionary elements $\be_c$ in the decoder distribution~$p(\bx | \be_c, \btheta)$ (instead of $p(\bx | c, \btheta)$).
 	\end{itemize}
 	\begin{block}{Deterministic variational posterior}
 		\vspace{-0.3cm}
@@ -228,14 +228,21 @@
 		\]
 	\end{block}	
 	\vspace{-0.4cm}
-	Generalization to the spatial dimension: $\bc \in \{1, \dots, K\}^{W \times H}$
-	\[
-		q(\bc | \bx, \bphi) = \prod_{i=1}^W \prod_{j=1}^H q(c_{ij} | \bx, \bphi); \quad p(\bc) = \prod_{i=1}^W \prod_{j=1}^H \text{Uniform}\{1, \dots, K\}.
-	\]
+	\textbf{Note:} KL term (regularizer) does not affect the ELBO objective.
 	\myfootnotewithlink{https://arxiv.org/abs/1711.00937}{Oord A., Vinyals O., Kavukcuoglu K. Neural Discrete Representation Learning, 2017} 
 \end{frame}
 %=======
-\begin{frame}{Vector Quantized VAE (VQ-VAE)}
+\begin{frame}{Vector Quantized VAE (VQ-VAE): forward}
+	\begin{block}{Deterministic variational posterior}
+		\vspace{-0.3cm}
+		\[
+			q(c = k^* | \bx, \bphi) = \begin{cases}
+				1 , \quad \text{for } k^* = \argmin_k \| \bz_e - \be_k \|; \\
+				0, \quad \text{otherwise}.
+		\end{cases}
+		\]
+	\vspace{-0.5cm}
+	\end{block}	
 	\begin{block}{ELBO}
 		\vspace{-0.6cm}
 		\[
@@ -243,34 +250,51 @@
 		\]
 		where $\bz_q = \be_{k^*}$, $k^* = \argmin_k \| \bz_e - \be_k \|$.
 	\end{block}
+	\vspace{-0.3cm} 
 	\begin{figure}
 		\centering
 		\includegraphics[width=0.85\linewidth]{figs/vqvae}
 	\end{figure}
+	\vspace{-0.3cm} 
 	\textbf{Problem:} $\argmin$ is not differentiable.
-	\begin{block}{Straight-through gradient estimation}
-		\vspace{-0.6cm}
+	\myfootnotewithlink{https://arxiv.org/abs/1711.00937}{Oord A., Vinyals O., Kavukcuoglu K. Neural Discrete Representation Learning, 2017} 
+\end{frame}
+%=======
+\begin{frame}{Vector Quantized VAE (VQ-VAE): backward}
+	\begin{block}{ELBO}
+		\vspace{-0.5cm}
 		\[
-		\frac{\partial \log p(\bx | \bz_q , \btheta)}{\partial \bphi} = \frac{\partial \log p(\bx | \bz_q, \btheta)}{\partial \bz_q} \cdot {\color{red}\frac{\partial \bz_q}{\partial \bphi}} \approx \frac{\partial \log p(\bx | \bz_q, \btheta)}{\partial \bz_q} \cdot \frac{\partial \bz_e}{\partial \bphi}
+			\cL_{\bphi, \btheta}(\bx)  =  \log p(\bx | \bz_q, \btheta) - \log K, \quad \bz_q = \be_{k^*}, k^* = \argmin_k \| \bz_e - \be_k \|.
 		\]
+		\vspace{-0.5cm}
+	\end{block}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.85\linewidth]{figs/vqvae}
+	\end{figure}
+	\vspace{-0.3cm}
+	\begin{block}{Straight-through gradient estimation}
+		\vspace{-0.5cm}
+		\begin{multline*}
+		\frac{\partial \log p(\bx | \bz_q , \btheta)}{\partial \bphi} = \frac{\partial \log p(\bx | \bz_q, \btheta)}{\partial \bz_q} \cdot {\color{red}\frac{\partial \bz_q}{\partial \bphi}} = \\
+		\frac{\partial \log p(\bx | \bz_q, \btheta)}{\partial \bz_q} \cdot {\color{red}\frac{\partial \bz_q}{\partial \bz_e}} \cdot \frac{\partial \bz_e}{\partial \bphi} \approx \frac{\partial \log p(\bx | \bz_q, \btheta)}{\partial \bz_q} \cdot \frac{\partial \bz_e}{\partial \bphi}
+		\end{multline*}
 	\end{block}
 	\myfootnotewithlink{https://arxiv.org/abs/1711.00937}{Oord A., Vinyals O., Kavukcuoglu K. Neural Discrete Representation Learning, 2017} 
 \end{frame}
 %=======
 \begin{frame}{Vector Quantized VAE-2  (VQ-VAE-2)}
-	\begin{block}{Samples 1024x1024}
-		\vspace{-0.2cm}
-		\begin{figure}
-			\centering
-			\includegraphics[width=0.63\linewidth]{figs/vqvae2_faces}
-		\end{figure}
-	\end{block}
+	Generalization to the spatial dimension: $\bc \in \{1, \dots, K\}^{W \times H}$
+	\vspace{-0.3cm}
+	\[
+		q(\bc | \bx, \bphi) = \prod_{i=1}^W \prod_{j=1}^H q(c_{ij} | \bx, \bphi); \quad p(\bc) = \prod_{i=1}^W \prod_{j=1}^H \text{Uniform}\{1, \dots, K\}.
+	\]
 	\vspace{-0.6cm}
 	\begin{block}{Samples diversity}
 		\vspace{-0.2cm}
 		\begin{figure}
 			\centering
-			\includegraphics[width=0.65\linewidth]{figs/vqvae2_diversity}
+			\includegraphics[width=1.0\linewidth]{figs/vqvae2_diversity}
 		\end{figure}
 	\end{block}
 	\myfootnotewithlink{https://arxiv.org/abs/1906.00446}{Razavi A., Oord A., Vinyals O. Generating Diverse High-Fidelity Images with VQ-VAE-2, 2019} 
@@ -280,10 +304,10 @@
 %=======
 \begin{frame}{Discrete probabilistic VAE encoder}
 	\begin{itemize}
-		\item VQ-VAE has deterministic variational posterior (it allows to get rid of discrete sampling and reparametrization trick).
-		\item There is no uncertainty in the encoder output. 
+		\item VQ-VAE has the deterministic variational posterior $q(c | \bx, \bphi)$ to avoid the discrete sampling and the reparametrization trick.
+		\item There is no uncertainty in the encoder output (KL term does not regularize the ELBO). 
 	\end{itemize}
-	\begin{block}{How to make the model with probabilistic encoder?}
+	\begin{block}{How to make the model with the probabilistic encoder?}
 		\begin{itemize}
 			\item Variational posterior $q(c | \bx, \bphi) = \text{Categorical}(\bpi_{\bphi}(\bx))$ (encoder) outputs discrete probabilities vector $\bpi_{\bphi}(\bx) = \text{Softmax}(\text{NN}_{e, \bphi}(\bx))$.
 			\item We sample $c^*$ from $q(c | \bx, \bphi)$ (reparametrization trick analogue).
@@ -409,10 +433,10 @@
 		\]
 		\vspace{-0.5cm}
 		\begin{itemize}
-			\item $q_{\text{agg}}(\bz | \bphi) = \frac{1}{n} \sum_{i=1}^n q(\bz | \bx_i, \bphi)$ -- \textbf{aggregated} variational posterior distribution.
-			\item $\bbI_{q} [\bx, \bz]$ -- mutual information between $\bx$ and $\bz$ under empirical data distribution and distribution $q(\bz | \bx, \bphi)$.
+			\item $q_{\text{agg}}(\bz | \bphi) = \frac{1}{n} \sum_{i=1}^n q(\bz | \bx_i, \bphi)$ is the \textbf{aggregated} variational posterior distribution.
+			\item $\bbI_{q} [\bx, \bz]$ is the mutual information between $\bx$ and $\bz$ under the data distribution $\pi(\bx)$ and the distribution $q(\bz | \bx, \bphi)$.
 			\item  {\color{violet} First term} pushes $q_{\text{agg}}(\bz | \bphi)$ towards the prior $p(\bz)$.
-			\item {\color{teal}Second term} reduces the amount of	information about $\bx$ stored in $\bz$. 
+			\item {\color{teal}Second term} reduces the amount of information about $\bx$ stored in $\bz$. 
 		\end{itemize}
 	\end{block}
 	\myfootnotewithlink{http://approximateinference.org/accepted/HoffmanJohnson2016.pdf}{Hoffman M. D., Johnson M. J. ELBO surgery: yet another way to carve up the variational evidence lower bound, 2016}
@@ -474,7 +498,7 @@
 		\[
 			\log p(\bx | \btheta) =\cL_{\bphi, \btheta}(\bx) + KL(q(\bz | \bx, \bphi) || p(\bz | \bx, \btheta)).
 		\]
-		\vspace{-0.7cm}
+		\vspace{-0.5cm}
 	\end{block}
 	\begin{itemize}
 		\item $q(\bz | \bx, \bphi) = \mathcal{N}(\bmu_{\bphi}(\bx), \bsigma^2_{\bphi}(\bx))$ is a unimodal distribution. 

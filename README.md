@@ -33,9 +33,9 @@ The course is accompanied by practical tasks that allow you to understand the pr
 |  |  | <b>Seminar 3:</b> Planar and Radial Flows. Forward vs Reverse KL. Latent Variable Models (LVM). Variational lower bound (ELBO). Variational EM-algorithm. | [slides](seminars/seminar3/seminar3.ipynb) |
 | 4 | October, 1 | <b>Lecture 4:</b> Amortized inference, ELBO gradients, reparametrization trick. Variational Autoencoder (VAE). NF as VAE model. Discrete VAE latent representations. | [slides](lectures/lecture4/Lecture4.pdf) |
 |  |  | <b>Seminar 4:</b> RealNVP. | [slides](seminars/seminar4/real_nvp_notes.ipynb) |
-<!---
-| 5 | October, 8 | <b>Lecture 5:</b> Vector quantization, straight-through gradient estimation (VQ-VAE). Gumbel-softmax trick (DALL-E). ELBO surgery and optimal VAE prior. NF-based VAE prior. | [slides](lectures/lecture5/Lecture5.pdf) |
+| 5 | October, 8 | <b>Lecture 5:</b> Vector quantization, straight-through gradient estimation (VQ-VAE). Gumbel-softmax trick (DALL-E). ELBO surgery and optimal VAE prior. Learnable VAE prior. | [slides](lectures/lecture5/Lecture5.pdf) |
 |  |  | <b>Seminar 5:</b> Gaussian Mixture Model (GMM). GMM and MLE. ELBO and EM-algorithm. GMM via EM-algorithm. Variational EM algorithm for GMM. | [slides](seminars/seminar5/seminar5.ipynb) |
+<!---
 | 6 | October, 15 | <b>Lecture 6:</b> Likelihood-free learning. GAN optimality theorem. Wasserstein distance. Wasserstein GAN (WGAN). | [slides](lectures/lecture6/Lecture6.pdf) |
 |  |  | <b>Seminar 6:</b>  VAE: Implementation hints. Vanilla 2D VAE coding. VAE on Binarized MNIST visualization. | [slides](seminars/seminar6/seminar6.ipynb) |
 | 7 | October, 22 | <b>Lecture 7:</b> WGAN with gradient penalty (WGAN-GP). f-divergence minimization. GAN evaluation. FID, MMD, Precision-Recall, truncation trick. | [slides](lectures/lecture7/Lecture7.pdf) |
