@@ -147,7 +147,7 @@
 		\]
 		It is Forward KL with respect to $p(\bz | \blambda)$.
 	\end{block}
-	\begin{block}{ELBO with flow-based VAE prior}
+	\begin{block}{ELBO with learnable VAE prior}
 		\vspace{-0.6cm}
 		{\small
 			\begin{multline*}
@@ -206,8 +206,8 @@
 	\end{block}
 	Imagine we have two sets of samples 
 	\begin{itemize}
-		\item $\cS_1 = \{\bx_i\}_{i=1}^{n_1} \sim \pi(\bx)$ -- real samples;
-		\item $\cS_2 = \{\bx_i\}_{i=1}^{n_2} \sim p(\bx | \btheta)$ -- generated (or fake) samples.
+		\item $\{\bx_i\}_{i=1}^{n_1} \sim \pi(\bx)$ -- real samples;
+		\item $\{\bx_i\}_{i=1}^{n_2} \sim p(\bx | \btheta)$ -- generated (or fake) samples.
 	\end{itemize}
 	Let define discriminative model (classifier):
 	\[
@@ -222,13 +222,39 @@
 \end{frame}
 %=======
 \begin{frame}{Generative adversarial networks (GAN)}
-	The more powerful discriminative model we will have, the more likely we will get the "best" generative distribution $p(\bx | \btheta)$. \\
-	The most common way to learn a classifier is to minimize cross entropy loss.
 	\begin{itemize}
-		\item \textbf{Generator:} generative model $\bx = \bG(\bz)$, which makes generated sample more realistic. Here $\bz$ comes from the base (known) distribution $p(\bz)$ and $\bx \sim p(\bx | \btheta)$. Generator tries to \textbf{maximize} cross entropy.
-		\item \textbf{Discriminator:} a classifier $p(y = 1 | \bx) = D(\bx) \in [0, 1]$, which distinguishes real samples from generated samples. Discriminator tries to \textbf{minimize} cross entropy (tries to enhance discriminative model).
+		\item The more powerful discriminative model we will have, the more likely we will get the "best" generative distribution $p(\bx | \btheta)$.
+		\item The most common way to learn a classifier is to minimize cross entropy loss.
 	\end{itemize}
-	\begin{block}{Objective}
+	\begin{block}{Cross entropy for discriminative model}
+		\vspace{-0.3cm}
+		\[
+			\min_{p(y | \bx)} \left[ - \bbE_{\pi(\bx)} \log p(y = 1 | \bx) - \bbE_{p(\bx | \btheta)} \log p(y = 0 | \bx) \right] 
+		\]
+		\[
+			\max_{p(y | \bx)} \left[\bbE_{\pi(\bx)} \log p(y = 1 | \bx) + \bbE_{p(\bx | \btheta)} \log p(y = 0 | \bx) \right] 
+		\]
+	\end{block}
+	\vspace{-0.3cm}
+	\begin{block}{Generative model}
+		Assume generative model $p(\bx, \bz | \btheta) = p (\bx | \bz, \btheta) p(\bz) $ with the base distribution $p(\bz)$ and deterministic map $p (\bx | \bz, \btheta) = \delta (\bx - \bG_{\btheta}(\bz))$.
+	\end{block}
+	
+	\myfootnotewithlink{https://arxiv.org/abs/1406.2661}{Goodfellow I. J. et al. Generative Adversarial Networks, 2014}
+\end{frame}
+%=======
+\begin{frame}{Generative adversarial networks (GAN)}
+	\begin{block}{Cross entropy for discriminative model}
+		\vspace{-0.3cm}
+		\[
+			\max_{p(y | \bx)} \left[\bbE_{\pi(\bx)} \log p(y = 1 | \bx) + \bbE_{p(\bx | \btheta)} \log p(y = 0 | \bx) \right] 
+		\]
+	\end{block}
+	\begin{itemize}
+		\item \textbf{Discriminator:} a classifier $p(y = 1 | \bx, \bphi) = D_{\bphi}(\bx) \in [0, 1]$, which distinguishes real samples from $\pi(\bx)$ and  generated samples from $p(\bx | \btheta)$. Discriminator tries to \textbf{minimize} cross entropy.
+		\item \textbf{Generator:} generative model $\bx = \bG_{\btheta}(\bz)$ with $\bz \sim p(\bz)$, which makes the generated sample more realistic. Generator tries to \textbf{maximize} cross entropy.
+	\end{itemize}
+	\begin{block}{GAN Objective}
 		\vspace{-0.5cm}
 		\[
 			\min_{G} \max_D \left[ \bbE_{\pi(\bx)} \log D(\bx) + \bbE_{p(\bx | \btheta)} \log (1 - D(\bx)) \right] 
@@ -572,7 +598,7 @@
 		\[
 		W(\pi || p) = \frac{1}{K} \max_{\| f \|_L \leq K} \left[ \bbE_{\pi(\bx)} f(\bx)  - \bbE_{p(\bx)} f(\bx)\right],
 		\]
-		where $f : \bbR^n \rightarrow \bbR$, $\| f \|_L \leq K$ are $K-$Lipschitz continuous functions ($f: \cX \rightarrow \bbR$)
+		where $f : \bbR^m \rightarrow \bbR$, $\| f \|_L \leq K$ are $K-$Lipschitz continuous functions ($f: \cX \rightarrow \bbR$)
 		\vspace{-0.2cm}
 		\[
 		|f(\bx_1) - f(\bx_2)| \leq K \| \bx_1 - \bx_2 \|, \quad \text{for all } \bx_1, \bx_2 \in \cX.
@@ -584,9 +610,7 @@
 	\myfootnotewithlink{https://arxiv.org/abs/1701.07875}{Arjovsky M., Chintala S., Bottou L. Wasserstein GAN, 2017}
 \end{frame}
 %=======
-\section{Lipschitzness of Wasserstein GAN critic}
-%=======
-\subsection{Wasserstein GAN}
+\section{Wasserstein GAN}
 %=======
 \begin{frame}{Wasserstein GAN}
 	\begin{block}{Theorem (Kantorovich-Rubinstein duality)}
