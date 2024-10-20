@@ -20,8 +20,8 @@
 	\end{block}
 	Imagine we have two sets of samples 
 	\begin{itemize}
-		\item $\cS_1 = \{\bx_i\}_{i=1}^{n_1} \sim \pi(\bx)$ -- real samples;
-		\item $\cS_2 = \{\bx_i\}_{i=1}^{n_2} \sim p(\bx | \btheta)$ -- generated (or fake) samples.
+		\item $\{\bx_i\}_{i=1}^{n_1} \sim \pi(\bx)$ -- real samples;
+		\item $\{\bx_i\}_{i=1}^{n_2} \sim p(\bx | \btheta)$ -- generated (or fake) samples.
 	\end{itemize}
 	Let define discriminative model (classifier):
 	\[
@@ -180,18 +180,22 @@
 		\[
 		\min_{\btheta} \max_{\bphi} \bbE_{\pi(\bx)} \log D_{\bphi}(\bx) + \bbE_{p(\bz)} \log (1 - D_{\bphi}(\bG_{\btheta}(\bz)))
 		\]
-		\vspace{-0.2cm}
+		\vspace{-0.3cm}
 	\end{block}
 	\begin{block}{WGAN objective}
 		\vspace{-0.3cm}
 		\[
-		\min_{\btheta} W(\pi || p) \approx \min_{\btheta} \max_{\bphi \in \boldsymbol{\Phi}} \left[ \bbE_{\pi(\bx)} f_{\bphi}(\bx)  - \bbE_{p(\bz)} f_{\bphi}(\bG_{\btheta}(\bz))\right].
+		\min_{\btheta} {\color{violet}W(\pi || p)} \approx \min_{\btheta} {\color{violet}\max_{\bphi \in \boldsymbol{\Phi}} \left[ \bbE_{\pi(\bx)} f_{\bphi}(\bx)  - \bbE_{p(\bz)} f_{\bphi}(\bG_{\btheta}(\bz))\right]}.
 		\]
 		\vspace{-0.3cm}
 	\end{block}
 	\begin{itemize}
-		\item Discriminator $D$ is similar to the function $f$, but not the same (it is not a classifier anymore). In the WGAN model, function~$f$ is usually called $\textbf{critic}$.
-		\item \textit{"Weight clipping is a clearly terrible way to enforce a Lipschitz constraint"}. If the clipping parameter $c$ is too large, it is hard to train the critic till optimality. If the clipping parameter $c$ is too small, it could lead to vanishing gradients.
+		\item Discriminator $D$ is similar to the function $f$, but it is not a classifier anymore. In the WGAN model, function~$f$ is usually called $\textbf{critic}$.
+		\item \textit{"Weight clipping is a clearly terrible way to enforce a Lipschitz constraint"}. 
+		\begin{itemize}
+			\item If the clipping parameter $c$ is too large, it is hard to train the critic till optimality.
+			\item If the clipping parameter $c$ is too small, it could lead to vanishing gradients.
+		\end{itemize}
 	\end{itemize}
 	
 	\myfootnotewithlink{https://arxiv.org/abs/1701.07875}{Arjovsky M., Chintala S., Bottou L. Wasserstein GAN, 2017}
@@ -231,9 +235,9 @@
 %=======
 \begin{frame}{Divergences}
 	\begin{itemize}
-		\item Forward KL divergence in maximum likelihood estimation.
-		\item Reverse KL in variational inference.
-		\item JS divergence in standard GAN.
+		\item Forward KL divergence in the maximum likelihood estimation.
+		\item Reverse KL in the variational inference (KL term in ELBO).
+		\item JS divergence in the standard GAN.
 		\item Wasserstein distance in WGAN.
 	\end{itemize}
 	\begin{block}{What is a divergence?}
@@ -272,56 +276,62 @@
 \end{frame}
 %=======
 \begin{frame}{f-divergence family}
-	\vspace{-0.2cm}
+	\vspace{-0.3cm}
 	\begin{block}{Fenchel conjugate}
-		\vspace{-0.7cm}
+		\vspace{-0.5cm}
 		\[
 		f^*(t) = \sup_{u \in \text{dom}_f} \left( ut - f(u) \right), \quad f(u) = \sup_{t \in \text{dom}_{f^*}} \left( ut - f^*(t) \right)
 		\]
-		\vspace{-0.5cm}
+		\vspace{-0.3cm}
 	\end{block}
+	\vspace{-0.3cm}
+	\begin{minipage}[t]{0.5\columnwidth}
+		\begin{figure}
+			\centering
+			\includegraphics[width=0.8\linewidth]{figs/conj}
+		\end{figure}
+	\end{minipage}%
+	\begin{minipage}[t]{0.5\columnwidth}
+		\begin{figure}
+			\centering
+			\includegraphics[width=0.85\linewidth]{figs/double_conj}
+		\end{figure}
+	\end{minipage}
 	\textbf{Important property:} $ f^{**} = f$ for convex $f$.
-	\begin{block}{f-divergence}
-		\vspace{-0.8cm}
-		\begin{multline*}
-			D_f(\pi || p) = \bbE_{p(\bx)}  f\left( \frac{\pi(\bx)}{p(\bx)} \right)  = \int p(\bx) {\color{violet}f\left( \frac{\pi(\bx)}{p(\bx)} \right) } d \bx = \\ = \int p(\bx) {\color{violet} \sup_{t \in \text{dom}_{f^*}} \left( \frac{\pi(\bx)}{p(\bx)} t - f^*(t) \right)} d \bx = \\ 
-			= \int \sup_{t \in \text{dom}_{f^*}} \left( \pi(\bx)t - p(\bx) f^*(t) \right) d \bx .
-		\end{multline*}
-		\vspace{-0.6cm}
-	\end{block}
-	Here we seek value of $t$, which gives us maximum value of $ \pi(\bx)t - p(\bx) f^*(t)$, for each data point $\bx$.
 	\myfootnotewithlink{https://arxiv.org/abs/1606.00709}{Nowozin S., Cseke B., Tomioka R. f-GAN: Training Generative Neural Samplers using Variational Divergence Minimization, 2016}
 \end{frame}
 %=======
 \begin{frame}{f-divergence family}
-	\vspace{-0.4cm}
-	\begin{block}{f-divergence}
-		\vspace{-0.3cm}
-		\[
-		D_f(\pi || p) = \bbE_{p(\bx)}  f\left( \frac{\pi(\bx)}{p(\bx)} \right)  = \int p(\bx) f\left( \frac{\pi(\bx)}{p(\bx)} \right) d \bx.
-		\]
-		\vspace{-0.4cm}
-	\end{block}
+	\vspace{-0.3cm}
+	\[
+		f^*(t) = \sup_{u \in \text{dom}_f} \left( ut - f(u) \right), \quad f(u) = \sup_{t \in \text{dom}_{f^*}} \left( ut - f^*(t) \right)
+	\]
+	\vspace{-0.5cm}
 	\begin{block}{Variational f-divergence estimation}
-		\vspace{-0.8cm}
+		\vspace{-0.7cm}
 		\begin{multline*}
-			D_f(\pi || p)  = {\color{violet}\int} {\color{teal} \sup_{t \in \text{dom}_{f^*}}} \left( \pi(\bx)t - p(\bx) f^*(t) \right) d \bx \geq \\
-			 \geq {\color{teal}\sup_{T \in \cT}} {\color{violet}\int} \left( \pi(\bx)T(\bx) - p(\bx) f^*(T(\bx)) \right) d \bx = \\
-			 = \sup_{T \in \cT} \left[\bbE_{\pi}T(\bx) -  \bbE_p f^*(T(\bx)) \right]
+			D_f(\pi || p) = \bbE_{p(\bx)}  f\left( \frac{\pi(\bx)}{p(\bx)} \right)  = \int p(\bx) {\color{violet}f\left( \frac{\pi(\bx)}{p(\bx)} \right) } d \bx = \\ = \int p(\bx) {\color{violet} \sup_{t \in \text{dom}_{f^*}} \left( \frac{\pi(\bx)}{p(\bx)} t - f^*(t) \right)} d \bx = \\ 
+			= {\color{olive}\int} {\color{teal} \sup_{t \in \text{dom}_{f^*}}} \left( \pi(\bx)t - p(\bx) f^*(t) \right) d \bx \geq \\
+		 \geq {\color{teal}\sup_{T \in \cT}} {\color{olive}\int} \left( \pi(\bx)T(\bx) - p(\bx) f^*(T(\bx)) \right) d \bx = \\
+		 = \sup_{T \in \cT} \left[\bbE_{\pi}T(\bx) -  \bbE_p f^*(T(\bx)) \right]
 		\end{multline*}
-	\vspace{-0.6cm}
+		\vspace{-0.6cm}
 	\end{block}
-	This is a lower bound because of Jensen inequality and restricted class of functions $\cT: \cX \rightarrow \bbR$. 
-	
 	\myfootnotewithlink{https://arxiv.org/abs/1606.00709}{Nowozin S., Cseke B., Tomioka R. f-GAN: Training Generative Neural Samplers using Variational Divergence Minimization, 2016}
 \end{frame}
 %=======
 \begin{frame}{f-divergence family}
 	\begin{block}{Variational divergence estimation}
+		\vspace{-0.2cm}
 		\[
 			D_f(\pi || p) \geq \sup_{T \in \cT} \left[\bbE_{\pi}T(\bx) -  \bbE_p f^*(T(\bx)) \right]
 		\]
-		The lower bound is tight for $T^*(\bx) = f'\left( \frac{\pi(\bx)}{p(\bx)} \right)$.
+		\vspace{-0.3cm}
+		\begin{itemize}
+			\item Here $\cT$ is a predefined class of functions.
+			\item The lower bound is tight for $T^*(\bx) = f'\left( \frac{\pi(\bx)}{p(\bx)} \right)$. 
+		\end{itemize}
+		\vspace{-0.3cm}
 	\end{block}
 	\begin{block}{Example (JSD)}
 		\begin{itemize}
@@ -329,7 +339,7 @@
 			\[ 
 				f(u) = u \log u - (u + 1) \log (u + 1), \quad f^*(t) = - \log (1 - e^t).
 			\]
-			\item Let reparametrize $T(\bx) = \log D(\bx)$.
+			\item Let reparametrize $T(\bx) = \log D(\bx)$ ($D(\bx) \in [0, 1]$).
 		\end{itemize}
 		\vspace{-0.4cm}
 	\end{block}
@@ -345,8 +355,9 @@
 		\[
 			D_f(\pi || p) \geq \sup_{T \in \cT} \left[\bbE_{\pi}T(\bx) -  \bbE_p f^*(T(\bx)) \right]
 		\]
+		\vspace{-0.3cm}
 	\end{block}
-	\textbf{Note:} To evaluate lower bound we only need samples from $\pi(\bx)$ and $p(\bx)$. Hence, we could fit implicit generative model.
+	\textbf{Note:} To evaluate the lower bound we only need samples from $\pi(\bx)$ and $p(\bx)$. Hence, we are able to fit the implicit generative model.
 	\begin{figure}
 		\centering
 		\includegraphics[width=1.0\linewidth]{figs/f_div_results}
@@ -358,42 +369,47 @@
 \section{Evaluation of likelihood-free models}
 %=======
 \begin{frame}{Evaluation of likelihood-free models}
-	How to evaluate generative models?
 	\begin{block}{Likelihood-based models}
 		\begin{itemize}
-			\item Split data to train/val/test.
-			\item Fit model on the train part.
-			\item Tune hyperparameters on the validation part.
-			\item Evaluate generalization by reporting likelihoods on the test set.
+			\item \textbf{train part:} fit the model.
+			\item \textbf{validation part:} tune the hyperparameters.
+			\item \textbf{test part:} evaluate generalization by reporting the likelihood.
 		\end{itemize}
 	\end{block}
-	\begin{block}{Not all models have tractable likelihoods}
+	Not all models have tractable likelihood \\ (VAE: compare ELBO values; GAN: \textbf{???}).
+	\begin{block}{What do we want from samples?}
 		\begin{itemize}
-			\item VAE: compare ELBO values.
-			\item GAN: ???
+			\item Sharpness
+			\begin{figure}
+				\centering
+				\includegraphics[width=0.9\linewidth]{figs/sharpness}
+			\end{figure}
+			\item Diversity
+			\begin{figure}
+				\centering
+				\includegraphics[width=0.9\linewidth]{figs/diversity}
+			\end{figure}
 		\end{itemize}
 	\end{block}
+	\myfootnotewithlink{https://deepgenerativemodels.github.io}{image credit: https://deepgenerativemodels.github.io}
 \end{frame}
 %=======
 \begin{frame}{Evaluation of likelihood-free models}
 	Let take some pretrained image classification model to get the conditional label distribution $p(y | \bx)$ (e.g. ImageNet classifier).
 	\begin{block}{What do we want from samples?}
 		\begin{itemize}
-			\item \textbf{Sharpness}
-			\begin{figure}
-				\centering
-				\includegraphics[width=0.9\linewidth]{figs/sharpness}
-			\end{figure}
-			The conditional distribution $p(y | \bx)$ should have low entropy (each image $\bx$ should have distinctly recognizable object).
-			\item \textbf{Diversity}
-			\begin{figure}
-				\centering
-				\includegraphics[width=0.9\linewidth]{figs/diversity}
-			\end{figure}
-			The marginal distribution $p(y) = \int p(y | \bx) p(\bx) d \bx$ should have high entropy (there should be as many classes generated as possible).
+			\item \textbf{Sharpness.}
+			The \textbf{conditional} distribution $p(y | \bx)$ should have low entropy (each image $\bx$ depicts distinctly recognizable object).
+			\item \textbf{Diversity.}
+			The \textbf{marginal} distribution $p(y) = \int p(y | \bx) p(\bx) d \bx$ should have high entropy (we generate all classes uniformly).
 		\end{itemize}
 	\end{block}
-	\myfootnotewithlink{https://deepgenerativemodels.github.io}{image credit: https://deepgenerativemodels.github.io}
+	\vspace{-0.3cm}
+	\begin{figure}
+		\centering
+		\includegraphics[width=1.0\linewidth]{figs/is_toy}
+	\end{figure}
+	\myfootnotewithlink{https://medium.com/octavian-ai/a-simple-explanation-of-the-inception-score-372dff6a8c7a}{image credit: https://medium.com/octavian-ai/a-simple-explanation-of-the-inception-score-372dff6a8c7a}
 \end{frame}
 %=======
 \subsection{Frechet Inception Distance (FID)}
@@ -410,7 +426,7 @@
 		If $\pi(\bx) = \cN(\bmu_\pi, \bSigma_\pi)$, $p(\by) = \cN(\bmu_p, \bSigma_p)$, then
 		\vspace{-0.3cm}
 		\[
-		W_2^2(\pi, p) = \| \bmu_{\pi} - \bmu_{p}\|_2^2 + \text{tr} \left[ \bSigma_{\pi} + \bSigma_p - 2 \left(\bSigma_{\pi}^{1/2} \bSigma_p \bSigma_{\pi}^{1/2} \right)^{1/2} \right]
+		W_2^2(\pi, p) = \| \bmu_{\pi} - \bmu_{p}\|^2 + \text{tr} \left[ \bSigma_{\pi} + \bSigma_p - 2 \left(\bSigma_{\pi}^{1/2} \bSigma_p \bSigma_{\pi}^{1/2} \right)^{1/2} \right]
 		\]
 		\vspace{-0.7cm}
 	\end{block}
@@ -431,7 +447,7 @@
 \begin{frame}{Frechet Inception Distance (FID)}
 	\vspace{-0.4cm}
 	\[
-	\text{FID} (\pi, p) =  \| \bmu_{\pi} - \bmu_{p}\|_2^2 + \text{tr} \left[ \bSigma_{\pi} + \bSigma_p - 2 \left(\bSigma_{\pi}^{1/2} \bSigma_p \bSigma_{\pi}^{1/2} \right)^{1/2} \right]
+	\text{FID} (\pi, p) =  \| \bmu_{\pi} - \bmu_{p}\|^2 + \text{tr} \left[ \bSigma_{\pi} + \bSigma_p - 2 \left(\bSigma_{\pi}^{1/2} \bSigma_p \bSigma_{\pi}^{1/2} \right)^{1/2} \right]
 	\]
 	\vspace{-0.3cm}
 	\begin{itemize}
@@ -440,53 +456,12 @@
 		\item High dependence on the pretrained classification model.
 		\item Uses the normality assumption!
 	\end{itemize}
-	\begin{figure}
-		\includegraphics[width=0.95\linewidth]{figs/fid_normal}
-	\end{figure}
-	
-	\myfootnotewithlink{https://arxiv.org/abs/2401.09603}{Jayasumana S. et al. Rethinking FID: Towards a Better Evaluation Metric for Image Generation, 2024}
-\end{frame}
-%=======
-\subsection{Maximum Mean Discrepancy (MMD)}
-%=======
-\begin{frame}{Maximum Mean Discrepancy (MMD)}
-	\begin{block}{Theorem}
-		$\pi(\bx) = p(\by)$ if and only if $\bbE_{\pi(\bx)} f(\bx) = \bbE_{p(\by)} f(\by)$ for any bounded and continuous $f$.
+	\begin{block}{$FID(p(\bx), \cN(0, \bI))$}
+		\begin{figure}
+			\includegraphics[width=0.95\linewidth]{figs/fid_normal}
+		\end{figure}
 	\end{block}
-	\vspace{-0.3cm}
-	\[
-		\text{MMD}(\pi, p) = \sup_f \left[ \bbE_{\pi(\bx)} f(\bx) - \bbE_{p(\bx)} f(\bx) \right]
-	\]	
-	\vspace{-0.3cm}
-	\begin{block}{Theorem (Reproducing Kernel Hilbert Space)}
-		\vspace{-0.6cm}
-		\[
-			\text{MMD}^2(\pi, p) = \bbE_{\substack{\bx \sim\pi(\bx) \\ \bx' \sim\pi(\bx)}} k(\bx, \bx') + \bbE_{\substack{\by \sim p(\by) \\ \by' \sim p(\by)}} k(\by, \by') - 2 \bbE_{\substack{\bx \sim\pi(\bx) \\ \by \sim p(\by)}} k(\bx, \by)
-		\]
-		\begin{itemize}
-			\item $k(\bx, \by)$ is a positive definite, symmetric kernel function (for example $k(\bx, \by) = \frac{\exp(\|\bx - \by\|^2)}{\sigma^2}$);
-			\item $f(\bx) = \langle f, \phi(\bx) \rangle_{\mathcal{H}}$;
-			\item $\phi(\bx) = k(\cdot, \bx)$.
-		\end{itemize} 
-		\vspace{-0.3cm}
-	\end{block}
-	\myfootnotewithlink{https://arxiv.org/abs/2401.09603}{Jayasumana S. et al. Rethinking FID: Towards a Better Evaluation Metric for Image Generation, 2024}
-\end{frame}
-%=======
-\begin{frame}{Maximum Mean Discrepancy (MMD)}
-		\vspace{-0.6cm}
-		\[
-			\text{MMD}^2(\pi, p) = \bbE_{\substack{\bx \sim\pi(\bx) \\ \bx' \sim\pi(\bx)}} k(\bx, \bx') + \bbE_{\substack{\by \sim p(\by) \\ \by' \sim p(\by)}} k(\by, \by') - 2 \bbE_{\substack{\bx \sim\pi(\bx) \\ \by \sim p(\by)}} k(\bx, \by)
-		\]
-		\vspace{-0.3cm}
-	\begin{figure}
-		\includegraphics[width=0.95\linewidth]{figs/mmd_normal}
-	\end{figure}
-	\begin{itemize}
-		\item Needs less sample size for evaluation.
-		\item High dependence on the pretrained classification model.
-		\item Works with any distribution!
-	\end{itemize}
+
 	\myfootnotewithlink{https://arxiv.org/abs/2401.09603}{Jayasumana S. et al. Rethinking FID: Towards a Better Evaluation Metric for Image Generation, 2024}
 \end{frame}
 %=======
@@ -512,29 +487,29 @@
 \end{frame}
 %=======
 \begin{frame}{Precision-Recall}
+	\vspace{-0.2cm}
 	\begin{itemize}
 		\item $\cS_{\pi} = \{\bx_i\}_{i=1}^{n} \sim \pi(\bx)$ -- real samples;
 		\item $\cS_{p} = \{\bx_i\}_{i=1}^{n} \sim p(\bx | \btheta)$ -- generated samples.
 	\end{itemize}
-	Embed samples using pretrained classifier network (as previously):
-	\[
-		\cG_{\pi} = \{\mathbf{g}_i\}_{i=1}^n, \quad \cG_{p} = \{\mathbf{g}_i\}_{i=1}^n.
-	\]
 	Define binary function:
+	\vspace{-0.2cm}
 	\[
-		f(\mathbf{g}, \cG) = 
+		\mathbb{I}(\bx, \cS) = 
 		\begin{cases}
-			1, \quad \text{if exists } \mathbf{g}' \in \cG: \| \mathbf{g}  - \mathbf{g}'\|_2 \leq \| \mathbf{g}' - \text{NN}_k(\mathbf{g}', \cG)\|_2; \\
+			1, \quad \text{if exists } \bx' \in \cS: \| \bx  - \bx'\|_2 \leq \| \bx' - \text{NN}_k(\bx', \cS)\|_2; \\
 			0, \quad \text{otherwise.}
 		\end{cases}
 	\]
+	\vspace{-0.3cm}
 	\[
-		\text{Precision} (\cG_{\pi}, \cG_{p}) = \frac{1}{n} \sum_{\mathbf{g} \in \cG_{p}} f(\mathbf{g}, \cG_{\pi}); \,\, \text{Recall} (\cG_{\pi}, \cG_{p}) = \frac{1}{n} \sum_{\mathbf{g} \in \cG_{\pi}} f(\mathbf{g}, \cG_{p}).
+		\text{Precision} (\cS_{\pi}, \cS_{p}) = \frac{1}{n} \sum_{\mathbf{\bx} \in \cS_{p}} \mathbb{I}(\bx, \cS_{\pi}); \,\, \text{Recall} (\cS_{\pi}, \cS_{p}) = \frac{1}{n} \sum_{\bx \in \cS_{\pi}} \mathbb{I}(\bx, \cS_{p}).
 	\]
-	\vspace{-0.4cm}
+	\vspace{-0.6cm}
 	\begin{figure}
-		\includegraphics[width=0.7\linewidth]{figs/pr_k_nearest}
+		\includegraphics[width=0.75\linewidth]{figs/pr_k_nearest}
 	\end{figure}
+	Embed the samples using the pretrained network (as for FID).
 	\myfootnotewithlink{https://arxiv.org/abs/1904.06991}{Kynkäänniemi T. et al. Improved precision and recall metric for assessing generative models, 2019}
 \end{frame}
 %=======
@@ -550,19 +525,18 @@
 %=======
 \begin{frame}{Truncation trick}
 	\begin{block}{BigGAN: truncated normal sampling}
-		\vspace{-0.3cm}
 		\[
-			p(\bz | \psi) = \cN(\bz | 0, \bI) / \int_{-\infty}^\psi \cN(\bz' | 0, \bI) d\bz'
+			p(\bz | \psi) = \frac{\cN(\bz | 0, \bI)}{\int_{-\infty}^\psi \cN(\bz' | 0, \bI) d\bz'}
 		\]
-		Components of $\bz \sim \cN(0, \bI)$ which fall outside a predefined range are resampled.
+		Elements of $\bz \sim \cN(0, \bI)$ which fall outside a predefined range are resampled.
 	\end{block}
 	
 	\begin{block}{StyleGAN}
-		\vspace{-0.2cm}
+		\vspace{-0.3cm}
 		\[
 			\bz' = \hat{\bz} + \psi \cdot (\bz - \hat{\bz}), \quad \hat{\bz} = \bbE_{\bz} \bz
 		\]
-		\vspace{-0.2cm}
+		\vspace{-0.3cm}
 		\begin{itemize}
 			\item Constant $\psi$ is a tradeoff between diversity and fidelity. 
 			\item $\psi=0.7$ is used for most of the results.
@@ -577,15 +551,11 @@
 	\begin{itemize}
 		\item Kantorovich-Rubinstein duality gives the way to calculate the EM distance using only samples.
 		\vfill
-		\item Wasserstein GAN uses Kantorovich-Rubinstein duality for getting Earth Mover distance as model objective.
+		\item Wasserstein GAN uses the weight clipping to ensure the Lipschitness of the critic.
 		\vfill
 		\item f-divergence family is a unified framework for divergence minimization, which uses variational approximation. Standard GAN is a special case of it.
 		\vfill
-		\item We need a measure of quality for the implicit models (like GANs). 
-		\vfill 
 		\item Frechet Inception Distance is the most popular metric for the implicit models evaluation. 
-		\vfill
-		\item Maximum Mean Discrepancy tries to fix some of the FID drawbacks.
 		\vfill
 		\item Precision-recall allow to select model that compromises the sample quality and the sample diversity.	
 		\vfill 
