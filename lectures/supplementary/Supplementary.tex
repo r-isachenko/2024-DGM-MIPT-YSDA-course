@@ -3472,22 +3472,6 @@ where $i$ is treated as random variable:
 \subsection{Evaluation of likelihood-free models}
 %=======
 \begin{frame}{Evaluation of likelihood-free models}
-	\begin{block}{What do we want from samples?}
-		\begin{itemize}
-			\item \textbf{Sharpness.}
-			The conditional distribution $p(y | \bx)$ should have low entropy (each image $\bx$ should have distinctly recognizable object).
-			\item \textbf{Diversity.}
-			The marginal distribution $p(y) = \int p(y | \bx) p(\bx) d \bx$ should have high entropy (there should be as many classes generated as possible).
-		\end{itemize}
-	\end{block}
-	\begin{figure}
-		\centering
-		\includegraphics[width=1.0\linewidth]{figs/is_toy}
-	\end{figure}
-	\myfootnotewithlink{https://medium.com/octavian-ai/a-simple-explanation-of-the-inception-score-372dff6a8c7a}{image credit: https://medium.com/octavian-ai/a-simple-explanation-of-the-inception-score-372dff6a8c7a}
-\end{frame}
-%=======
-\begin{frame}{Evaluation of likelihood-free models}
 		\begin{block}{What do we want from samples?}
 		\begin{itemize}
 			\item Sharpness $\Rightarrow$ low $H(y | \bx) = - \sum_{y} \int_{\bx} p(y, \bx) \log p(y | \bx) d\bx$.
@@ -3572,13 +3556,45 @@ where $i$ is treated as random variable:
 	\href{https://arxiv.org/abs/1706.08500}{Heusel M. et al. GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium, 2017}}
 \end{frame}
 %=======
-\begin{frame}{StyleGAN}
-		\begin{figure}
-			\centering
-			\includegraphics[width=0.6\linewidth]{figs/stylegan_mix}
-		\end{figure}
-
-	\myfootnotewithlink{https://arxiv.org/abs/1812.04948}{Karras T., Laine S., Aila T. A Style-Based Generator Architecture for Generative Adversarial Networks, 2018}
+\begin{frame}{Maximum Mean Discrepancy (MMD)}
+	\begin{block}{Theorem}
+		$\pi(\bx) = p(\by)$ if and only if $\bbE_{\pi(\bx)} f(\bx) = \bbE_{p(\by)} f(\by)$ for any bounded and continuous $f$.
+	\end{block}
+	\vspace{-0.3cm}
+	\[
+		\text{MMD}(\pi, p) = \sup_f \left[ \bbE_{\pi(\bx)} f(\bx) - \bbE_{p(\bx)} f(\bx) \right]
+	\]	
+	\vspace{-0.3cm}
+	\begin{block}{Theorem (Reproducing Kernel Hilbert Space)}
+		\vspace{-0.6cm}
+		\[
+			\text{MMD}^2(\pi, p) = \bbE_{\substack{\bx \sim\pi(\bx) \\ \bx' \sim\pi(\bx)}} k(\bx, \bx') + \bbE_{\substack{\by \sim p(\by) \\ \by' \sim p(\by)}} k(\by, \by') - 2 \bbE_{\substack{\bx \sim\pi(\bx) \\ \by \sim p(\by)}} k(\bx, \by)
+		\]
+		\begin{itemize}
+			\item $k(\bx, \by)$ is a positive definite, symmetric kernel function (for example $k(\bx, \by) = \frac{\exp(\|\bx - \by\|^2)}{\sigma^2}$);
+			\item $f(\bx) = \langle f, \phi(\bx) \rangle_{\mathcal{H}}$;
+			\item $\phi(\bx) = k(\cdot, \bx)$.
+		\end{itemize} 
+		\vspace{-0.3cm}
+	\end{block}
+	\myfootnotewithlink{https://arxiv.org/abs/2401.09603}{Jayasumana S. et al. Rethinking FID: Towards a Better Evaluation Metric for Image Generation, 2024}
+\end{frame}
+%=======
+\begin{frame}{Maximum Mean Discrepancy (MMD)}
+		\vspace{-0.6cm}
+		\[
+			\text{MMD}^2(\pi, p) = \bbE_{\substack{\bx \sim\pi(\bx) \\ \bx' \sim\pi(\bx)}} k(\bx, \bx') + \bbE_{\substack{\by \sim p(\by) \\ \by' \sim p(\by)}} k(\by, \by') - 2 \bbE_{\substack{\bx \sim\pi(\bx) \\ \by \sim p(\by)}} k(\bx, \by)
+		\]
+		\vspace{-0.3cm}
+	\begin{figure}
+		\includegraphics[width=0.95\linewidth]{figs/mmd_normal}
+	\end{figure}
+	\begin{itemize}
+		\item Needs less sample size for evaluation.
+		\item High dependence on the pretrained classification model.
+		\item Works with any distribution!
+	\end{itemize}
+	\myfootnotewithlink{https://arxiv.org/abs/2401.09603}{Jayasumana S. et al. Rethinking FID: Towards a Better Evaluation Metric for Image Generation, 2024}
 \end{frame}
 %=======
 \section{Quantized latents}
