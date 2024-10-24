@@ -12,7 +12,7 @@
 	\begin{block}{Langevin dynamic}
 		\vspace{-0.3cm}
 		\[
-			\bx_{l + 1} = \bx_l + \frac{\eta}{2} \cdot \nabla_{\bx_l} \log p(\bx_l | \btheta) + \sqrt{\eta} \cdot \bepsilon, \quad \bepsilon \sim \cN(0, \bI).
+			\bx_{l + 1} = \bx_l + \frac{\eta}{2} \cdot \nabla_{\bx_l} \log p(\bx_l | \btheta) + \sqrt{\eta} \cdot \bepsilon_l, \quad \bepsilon_l \sim \cN(0, \bI).
 		\]
 		\vspace{-0.7cm}
 	\end{block}
@@ -41,7 +41,7 @@
 	Let perturb original data by normal noise $q(\bx_{\sigma} | \bx) = \cN(\bx, \sigma^2 \cdot \bI)$
 	\vspace{-0.3cm}
 	\[
-	q(\bx_{\sigma}) = \int \pi(\bx) q(\bx_{\sigma} | \bx) d\bx.
+	q(\bx_{\sigma}) = \int q(\bx_{\sigma} | \bx) \pi(\bx) d\bx.
 	\]
 	\vspace{-0.6cm} \\
 	Then the solution of 
@@ -114,7 +114,7 @@
 %=======
 \begin{frame}{Recap of previous lecture}
 	\begin{block}{Forward gaussian diffusion process}
-		Let $\bx_0 = \bx \sim \pi(\bx)$, $\beta_t \in (0, 1)$, $\alpha_t = 1 - \beta_t$ and $\bar{\alpha}_t = \prod_{s=1}^t \alpha_s$. 
+		Let $\bx_0 = \bx \sim \pi(\bx)$, $\beta_t \ll 1$, $\alpha_t = 1 - \beta_t$ and $\bar{\alpha}_t = \prod_{s=1}^t \alpha_s$. 
 		\begin{align*}
 			\bx_t &= \sqrt{1 - \beta_t} \cdot \bx_{t - 1} + \sqrt{\beta_t} \cdot \bepsilon, \quad \text{where }\bepsilon \sim \cN(0, \bI); \\
 			\bx_t &= \sqrt{\bar{\alpha}_t} \cdot \bx_{0} + \sqrt{1 - \bar{\alpha}_t} \cdot \bepsilon, \quad \text{where } \bepsilon \sim \cN(0, \bI).
@@ -129,7 +129,7 @@
 	\begin{enumerate}
 		\item $\bx_0 = \bx \sim \pi(\bx)$;
 		\item $\bx_t = \sqrt{1 - \beta_t} \cdot \bx_{t - 1} + \sqrt{\beta_t} \cdot \bepsilon$, where $\bepsilon \sim \cN(0, \bI)$, $t \geq 1$;
-		\item $\bx_T \sim p_{\infty}(\bx) = \cN(0, \bI)$, where $T >> 1$.
+		\item $\bx_T \sim p_{\infty}(\bx) = \cN(0, \bI)$, where $T \gg 1$.
 	\end{enumerate}
 	If we are able to invert this process, we will get the way to sample $\bx \sim \pi(\bx)$ using noise samples $p_{\infty}(\bx) = \cN(0, \mathbf{I})$.
 	\myfootnotewithlink{https://lilianweng.github.io/posts/2021-07-11-diffusion-models/}{Weng L. What are Diffusion Models?, blog post, 2021}
@@ -487,6 +487,8 @@
 %=======
 \begin{frame}{Summary}
 	\begin{itemize}
+		\item Denoising score matching is applicable to gaussian diffusion process.
+		\vfill
 		\item Reverse process allows to sample from the real distribution $\pi(\bx)$ using samples from noise, but it is intractable.
 		\vfill
 		\item We will use approximation to get the reverse process.		

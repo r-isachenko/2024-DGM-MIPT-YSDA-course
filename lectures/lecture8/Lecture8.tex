@@ -90,9 +90,9 @@
 		\vspace{-0.3cm}
 		\begin{multline*}
 			\text{FID} (\pi, p) =  W_2^2(\pi, p) = \inf_{\gamma \in \Gamma(\pi, p)} \bbE_{(\bx, \by) \sim \gamma} \| \bx - \by \|^2 \\
-			= \| \bmu_{\pi} - \bmu_{p}\|_2^2 + \text{tr} \left[ \bSigma_{\pi} + \bSigma_p - 2 \left(\bSigma_{\pi}^{1/2} \bSigma_p \bSigma_{\pi}^{1/2} \right)^{1/2} \right]
+			= \| \bmu_{\pi} - \bmu_{p}\|^2 + \text{tr} \left[ \bSigma_{\pi} + \bSigma_p - 2 \left(\bSigma_{\pi}^{1/2} \bSigma_p \bSigma_{\pi}^{1/2} \right)^{1/2} \right]
 		\end{multline*}
-		\vspace{-0.6cm}
+		\vspace{-0.4cm}
 	\end{block}
 	\begin{itemize}
 		\item Needs a large sample size for evaluation.
@@ -136,40 +136,7 @@
 %=======
 \section{Langevin dynamic}
 %=======
-\begin{frame}{Langevin dynamic}
-	\vspace{-0.4cm}
-	\begin{block}{Statement}
-		Let $\bx_0$ be a random vector. Then samples from the following dynamics
-		\vspace{-0.3cm}
-		\[
-			\bx_{l + 1} = \bx_l + \frac{\eta}{2} \cdot \nabla_{\bx_l} \log p(\bx_l | \btheta) + \sqrt{\eta} \cdot \bepsilon, \quad \bepsilon \sim \cN(0, \bI).
-		\]
-		will come from $p(\bx | \btheta)$ (under mild regularity conditions, for small enough $\eta$ and large enough $l$).
-	\end{block}
-	\begin{minipage}{0.55\linewidth}
-		\begin{itemize}
-			\item Here we assume that we already have some generative model $p(\bx | \btheta)$.
-			\item The density $p(\bx | \btheta)$ is a \textbf{stationary} distribution for the Markov chain. \\
-			\item What do we get if $\bepsilon = \boldsymbol{0}$?
-		\end{itemize}
-	\end{minipage}%
-	\begin{minipage}{0.4\linewidth}
-		\begin{figure}
-			\centering
-			\includegraphics[width=0.9\linewidth]{figs/langevin_dynamic}
-		\end{figure}
-	\end{minipage}
-	\myfootnotewithlink{https://yang-song.github.io/blog/2021/score/}{Song Y. Generative Modeling by Estimating Gradients of the Data Distribution, blog post, 2021} 
-	\end{frame}
-%=======
 \begin{frame}{Energy-based models}
-	\begin{block}{Langevin dynamic}
-		\vspace{-0.3cm}
-		\[
-			\bx_{l + 1} = \bx_l + \frac{\eta}{2} \cdot \nabla_{\bx_l} \log p(\bx_l | \btheta) + \sqrt{\eta} \cdot \bepsilon, \quad \bepsilon \sim \cN(0, \bI).
-		\]
-		We are able to sample from the model using Langevin dynamics if we have $\nabla_{\bx}\log p(\bx| \btheta)$.
-	\end{block}
 	\begin{block}{Unnormalized density}
 		\vspace{-0.2cm}
 		\[
@@ -180,12 +147,47 @@
 			\item $\hat{p}(\bx | \btheta)$ is any non-negative function. \\
 			\item If we use the reparametrization $\hat{p}(\bx | \btheta) = \exp(-f_{\btheta}(\bx))$, we remove the non-negativite constraint.
 		\end{itemize}
+	\end{block}
+	\vspace{-0.3cm}
+	\begin{block}{Unnormalized density}
+		The gradient of the normalized log-density equals to the gradient of the unnormalized log-density:
 		\[
 			\nabla_{\bx} \log p(\bx | \btheta) = \nabla_{\bx} \log \hat{p}(\bx | \btheta) - \nabla_{\bx} \log Z_{\btheta} = \nabla_{\bx} \log \hat{p}(\bx | \btheta)
 		\]
-		The gradient of the normalized density equals to the gradient of the unnormalized density.
 	\end{block}
+	\vspace{-0.3cm}
+	\begin{itemize}
+		\item Let assume that we already have the density (normalized or unnormalized) $p(\bx | \btheta)$.
+		\item How to sample from the model?
+	\end{itemize}
 \end{frame}
+%=======
+\begin{frame}{Langevin dynamic}
+	\vspace{-0.4cm}
+	\begin{block}{Theorem (informal)}
+		Let $\bx_0$ be a random vector. Under some mild regularity conditions samples from the following dynamics will come from $p(\bx | \btheta)$ (for small enough $\eta$ and large enough $l$)
+		\vspace{-0.3cm}
+		\[
+			\bx_{l + 1} = \bx_l + \frac{\eta}{2} \cdot \nabla_{\bx_l} \log p(\bx_l | \btheta) + \sqrt{\eta} \cdot \bepsilon_l, \quad \bepsilon_l \sim \cN(0, \bI).
+		\]
+		\vspace{-0.5cm}
+	\end{block}
+	\begin{minipage}{0.55\linewidth}
+		\begin{itemize}
+			\item What do we get if $\bepsilon_l = \boldsymbol{0}$?
+			\item The density $p(\bx | \btheta)$ is a \textbf{stationary} distribution for the Markov chain. 
+			\item We take the gradient w.r.t. to $\bx$ (not $\btheta$).
+			\item $\nabla_{\bx} \log p(\bx | \btheta)$ defines the vector field.
+		\end{itemize}
+	\end{minipage}%
+	\begin{minipage}{0.45\linewidth}
+		\begin{figure}
+			\centering
+			\includegraphics[width=0.9\linewidth]{figs/langevin_dynamic}
+		\end{figure}
+	\end{minipage}
+	\myfootnotewithlink{https://yang-song.github.io/blog/2021/score/}{Song Y. Generative Modeling by Estimating Gradients of the Data Distribution, blog post, 2021} 
+	\end{frame}
 %=======
 \section{Score matching}
 %=======
@@ -200,7 +202,7 @@
 	\begin{block}{Langevin dynamic}
 		If we find the score function $\bs_{\btheta}(\bx) = \nabla_{\bx}\log p(\bx| \btheta)$ we will be able to sample from the model using Langevin dynamic. 
 		\[
-			\bx_{l + 1} = \bx_l + \frac{\eta}{2} \cdot {\color{violet}\nabla_{\bx_l} \log p(\bx_l | \btheta)} + \sqrt{\eta} \cdot \bepsilon = \bx_l + \frac{\eta}{2} \cdot  {\color{violet}\bs_{\btheta}(\bx_l)} + \sqrt{\eta} \cdot \bepsilon.
+			\bx_{l + 1} = \bx_l + \frac{\eta}{2} \cdot {\color{violet}\nabla_{\bx_l} \log p(\bx_l | \btheta)} + \sqrt{\eta} \cdot \bepsilon_l = \bx_l + \frac{\eta}{2} \cdot  {\color{violet}\bs_{\btheta}(\bx_l)} + \sqrt{\eta} \cdot \bepsilon_l.
 		\] 
 		\vspace{-0.5cm} 
 	\end{block}
@@ -231,7 +233,7 @@
 	\myfootnotewithlink{https://yang-song.github.io/blog/2021/score/}{Song Y. Generative Modeling by Estimating Gradients of the Data Distribution, blog post, 2021}
 \end{frame}
 %=======
-\section{Denoising score matching}
+\subsection{Denoising score matching}
 %=======
 \begin{frame}{Denoising score matching}
 	Let perturb original data $\bx \sim \pi(\bx)$ by random normal noise 
@@ -242,19 +244,46 @@
 	\[
 		q(\bx_{\sigma}) = \int q(\bx_{\sigma} | \bx) \pi(\bx) d\bx.
 	\]
-	\vspace{-0.4cm} 
+	\vspace{-0.5cm} 
 	\begin{block}{Assumption}
 		The solution of 
 		\[
-			\frac{1}{2} \bbE_{\pi(\bx_{\sigma} | \sigma)}\bigl\| \bs_{\btheta, \sigma}(\bx_{\sigma}) - \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma}) \bigr\|^2_2 \rightarrow \min_{\btheta}
+			\frac{1}{2} \bbE_{q(\bx_{\sigma})}\bigl\| \bs_{\btheta, \sigma}(\bx_{\sigma}) - \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma}) \bigr\|^2_2 \rightarrow \min_{\btheta}
 		\]
 		\vspace{-0.3cm} \\
 		satisfies $\bs_{\btheta, \sigma}(\bx_{\sigma}) \approx \bs_{\btheta, 0}(\bx_0) = \bs_{\btheta}(\bx)$ if $\sigma$ is small enough.
 	\end{block}
 	\begin{itemize}
-		\item $\bs_{\btheta, \sigma}(\bx_{\sigma})$ tries to \textbf{denoise} a corrupted sample $\bx_{\sigma}$.
+		\item The score function of the noised data is almost the same as the score function of the original data.
 		\item Score function $\bs_{\btheta, \sigma}(\bx_{\sigma})$ parametrized by $\sigma$. 
-		\item \textbf{Problem:} We don't know $q(\bx_{\sigma})$, just like $\pi(\bx)$.
+		\item \textbf{Note:} We don't know $q(\bx_{\sigma})$, just like $\pi(\bx)$.
+	\end{itemize}
+	\myfootnotewithlink{http://www.iro.umontreal.ca/~vincentp/Publications/smdae_techreport.pdf}{Vincent P. A Connection Between Score Matching and Denoising Autoencoders, 2010}
+\end{frame}
+%=======
+\begin{frame}{Denoising score matching}
+	\begin{block}{Theorem}
+	\vspace{-0.5cm}
+	\begin{multline*}
+		\bbE_{q(\bx_{\sigma})}\underbrace{\bigl\| \bs_{\btheta, \sigma}(\bx_{\sigma}) - \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma}) \bigr\|^2_2}_{h(\bx_{\sigma})} = \\
+		= \bbE_{\pi(\bx)} \bbE_{q(\bx_{\sigma} | \bx)}\bigl\| \bs_{\btheta, \sigma}(\bx_{\sigma}) - \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma} | \bx) \bigr\|^2_2 + \text{const}(\btheta)
+	\end{multline*}
+	\vspace{-0.5cm}
+	\end{block}
+	\begin{block}{Gradient of the noise kernel}
+		\vspace{-0.3cm}
+		\[
+			\bx_{\sigma} = \bx + \sigma \cdot \bepsilon, \quad q(\bx_{\sigma} | \bx) = \cN(\bx, \sigma^2 \cdot \bI)
+		\]
+		\vspace{-0.3cm}
+		\[
+			\nabla_{\bx_{\sigma}} \log q(\bx_{\sigma} | \bx) = - \frac{\bx_{\sigma} - \bx}{\sigma^2}  = - \frac{\bepsilon}{\sigma}
+		\]
+		\vspace{-0.5cm}
+	\end{block}
+	\begin{itemize}
+		\item The RHS does not need to compute $\nabla_{\bx_{\sigma}} \log q(\bx_{\sigma})$ and even $\nabla_{\bx_{\sigma}} \log \pi(\bx_{\sigma})$.
+		\item $\bs_{\btheta, \sigma}(\bx_{\sigma})$ tries to \textbf{denoise} the noised samples $\bx_{\sigma}$. 
 	\end{itemize}
 	\myfootnotewithlink{http://www.iro.umontreal.ca/~vincentp/Publications/smdae_techreport.pdf}{Vincent P. A Connection Between Score Matching and Denoising Autoencoders, 2010}
 \end{frame}
@@ -314,13 +343,20 @@
 	\begin{block}{Theorem}
 	\vspace{-0.7cm}
 	\begin{multline*}
-		\bbE_{q(\bx_{\sigma})}\bigl\| \bs_{\btheta, \sigma}(\bx_{\sigma}) - \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma}) \bigr\|^2_2 = \\
+		\bbE_{q(\bx_{\sigma})}\underbrace{\bigl\| \bs_{\btheta, \sigma}(\bx_{\sigma}) - \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma}) \bigr\|^2_2}_{h(\bx_{\sigma})} = \\
 		= \bbE_{\pi(\bx)} \bbE_{q(\bx_{\sigma} | \bx)}\bigl\| \bs_{\btheta, \sigma}(\bx_{\sigma}) - \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma} | \bx) \bigr\|^2_2 + \text{const}(\btheta)
 	\end{multline*}
 	\vspace{-0.9cm}
 	\end{block}
 	\begin{block}{Proof (continued)}
-		\vspace{-0.7cm}
+		\vspace{-0.3cm}
+		\[
+			\bbE_{q(\bx_{\sigma})} h(\bx_{\sigma})=  \bbE_{\pi(\bx)} \bbE_{q(\bx_{\sigma} | \bx)}  h(\bx_{\sigma}) d\bx_{\sigma}
+		\]
+		\[
+			\bbE_{q(\bx_{\sigma})} \left[\bs_{\btheta, \sigma}^T(\bx_{\sigma}) \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma}) \right] = \bbE_{\pi(\bx)} \bbE_{q(\bx_{\sigma} | \bx)} \left[\bs_{\btheta, \sigma}^T(\bx_{\sigma}) \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma} | \bx) \right]
+		\]
+		\vspace{-0.5cm}
 		{\small
 		\begin{multline*}
 			\bbE_{q(\bx_{\sigma})}\bigl\| \bs_{\btheta, \sigma}(\bx_{\sigma}) - \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma}) \bigr\|^2_2 = \\ 
@@ -330,14 +366,6 @@
 		}
 		\vspace{-0.8cm}
 	\end{block}
-	\begin{block}{Gradient of the noise kernel}
-	\vspace{-0.3cm}
-	\[
-		\nabla_{\bx_{\sigma}} \log q(\bx_{\sigma} | \bx) = \nabla_{\bx_{\sigma}} \log \cN(\bx, \sigma^2 \bI) = - \frac{\bx_{\sigma} - \bx}{\sigma^2}  = - \frac{\bepsilon}{\sigma}
-	\]
-	\vspace{-0.5cm}
-	\end{block}
-	The RHS does not need to compute $\nabla_{\bx_{\sigma}} \log q(\bx_{\sigma})$ and even $\nabla_{\bx_{\sigma}} \log \pi(\bx_{\sigma})$.
 	\myfootnotewithlink{http://www.iro.umontreal.ca/~vincentp/Publications/smdae_techreport.pdf}{Vincent P. A Connection Between Score Matching and Denoising Autoencoders, 2010}
 \end{frame}
 %=======
@@ -367,26 +395,35 @@
 	\begin{block}{Langevin dynamic}
 		\vspace{-0.3cm}
 		\[
-			\bx_{l + 1} = \bx_l + \frac{\eta}{2} \cdot \bs_{\btheta, \sigma}(\bx_l) + \sqrt{\eta} \cdot \bepsilon, \quad \bepsilon \sim \cN(0, \bI).
+			\bx_{l + 1} = \bx_l + \frac{\eta}{2} \cdot \bs_{\btheta, \sigma}(\bx_l) + \sqrt{\eta} \cdot \bepsilon_l, \quad \bepsilon_l \sim \cN(0, \bI).
 		\]
 		\vspace{-0.7cm}
 	\end{block}
 	\myfootnotewithlink{https://yang-song.github.io/blog/2021/score/}{Song Y. Generative Modeling by Estimating Gradients of the Data Distribution, blog post, 2021}
 \end{frame}
 %=======
-\section{Noise Conditioned Score Network (NCSN)}
+\subsection{Noise Conditioned Score Network (NCSN)}
 %=======
 \begin{frame}{Denoising score matching}
-	\begin{itemize}
-		\item If $\sigma$ is \textbf{small}, the score function is not accurate and Langevin dynamics will probably fail to jump between modes.
+	\vspace{-0.5cm}
+	\[
+		\bbE_{\pi(\bx)} \bbE_{\cN(0, \bI)}\left\| \bs_{\btheta, \sigma}(\bx + \sigma \cdot \bepsilon) + \frac{\bepsilon}{\sigma} \right\|^2_2 \rightarrow \min_{\btheta}
+	\]
+	\begin{minipage}{0.5\linewidth}
+		\begin{itemize}
+			\item If $\sigma$ is \textbf{small}, the score function is not accurate and Langevin dynamics will probably fail to jump between modes.
+			\item If $\sigma$ is \textbf{large}, it is good for low-density regions and  multimodal distributions, but we will learn too corrupted distribution.
+		\end{itemize}
+	\end{minipage}%
+	\begin{minipage}{0.5\linewidth}
 		\begin{figure}
-			\includegraphics[width=0.75\linewidth]{figs/pitfalls}
+			\includegraphics[width=\linewidth]{figs/pitfalls}
 		\end{figure}
-		\item If $\sigma$ is \textbf{large}, it is good for low-density regions and  multimodal distributions, but we will learn too corrupted distribution.
+		\vspace{-0.3cm}
 		\begin{figure}
-			\includegraphics[width=0.75\linewidth]{figs/single_noise}
+			\includegraphics[width=\linewidth]{figs/single_noise}
 		\end{figure}
-	\end{itemize}
+	\end{minipage}
 	\myfootnotewithlink{https://yang-song.github.io/blog/2021/score/}{Song Y. Generative Modeling by Estimating Gradients of the Data Distribution, blog post, 2021}
 \end{frame}
 %=======
@@ -409,7 +446,7 @@
 \end{frame}
 %=======
 \begin{frame}{Noise Conditioned Score Network (NCSN)}
-	Train the denoising score function $\bs_{\btheta, \sigma_t}(\bx_t)$ for each noise level using unified weighted objective:
+	Train the denoising score function $\bs_{\btheta, \sigma_t}(\bx_t)$ for each noise level $\sigma_t$ using unified weighted objective:
 	\vspace{-0.2cm}
 	\[
 		\sum_{t=1}^T {\color{violet}\sigma_t^2} \cdot \bbE_{\pi(\bx)} \bbE_{q(\bx_t | \bx)}\bigl\| \bs_{\btheta, \sigma_t}(\bx_t) - \nabla_{\bx_t} \log q(\bx_t | \bx) \bigr\|^2_2 \rightarrow \min_{\btheta}
@@ -449,7 +486,34 @@
 \section{Forward gaussian diffusion process}
 %=======
 \begin{frame}{Forward gaussian diffusion process}
-	Let $\bx_0 = \bx \sim \pi(\bx)$, $\beta_t \in (0, 1)$. Define the Markov chain
+	Let $\bx_0 = \bx \sim \pi(\bx)$, $\beta_t \ll 1$. Define the Markov chain
+	\[
+		\bx_t = \sqrt{1 - \beta_t} \cdot \bx_{t - 1} + \sqrt{\beta_t} \cdot \bepsilon_t, \quad \text{where }\bepsilon_t \sim \cN(0, \bI);
+	\]
+	\[
+		q(\bx_t | \bx_{t-1}) = \cN(\sqrt{1 - \beta_t} \cdot \bx_{t-1}, \beta_t \cdot \bI).
+	\]
+	\vspace{-0.5cm}
+	\begin{block}{Langevin dynamics}
+		\vspace{-0.3cm}
+		\[
+			\bx_{l + 1} = \bx_l + \frac{\color{violet} \eta}{2} \cdot {\color{teal}\nabla_{\bx_l} \log p(\bx_l | \btheta)} + \sqrt{\color{violet} \eta} \cdot \bepsilon_l, \quad \bepsilon_l \sim \cN(0, \bI).
+		\]
+		\vspace{-0.5cm}
+	\end{block}
+	\vspace{-0.7cm}
+	\begin{multline*}
+		\bx_t = \sqrt{1 - \beta_t} \cdot \bx_{t - 1} + \sqrt{\beta_t} \cdot \bepsilon_t \approx \left(1 - \frac{\beta_t}{2}\right) \cdot \bx_{t - 1} + \sqrt{\beta_t} \cdot \bepsilon_t = \\ =  \bx_{t - 1} + \frac{ \color{violet}  \beta_t}{2} \cdot  {\color{teal} (-\bx_{t - 1})} + \sqrt{ \color{violet}  \beta_t} \cdot \bepsilon_t
+	\end{multline*}
+	\vspace{-1.0cm}
+	\begin{itemize}
+		\item ${\color{violet} \beta_t = \eta}$
+		\item ${\color{teal}\log p(\bx_{t-1} | \btheta) = - \bx_{t-1}} = \log \cN(0, \bI)$
+	\end{itemize}
+	\myfootnotewithlink{http://proceedings.mlr.press/v37/sohl-dickstein15.pdf}{Sohl-Dickstein J. Deep Unsupervised Learning using Nonequilibrium Thermodynamics, 2015}
+ \end{frame}
+%=======
+\begin{frame}{Forward gaussian diffusion process}
 	\[
 		\bx_t = \sqrt{1 - \beta_t} \cdot \bx_{t - 1} + \sqrt{\beta_t} \cdot \bepsilon_t, \quad \text{where }\bepsilon_t \sim \cN(0, \bI);
 	\]
@@ -512,7 +576,7 @@
 	\begin{enumerate}
 		\item $\bx_0 = \bx \sim \pi(\bx)$;
 		\item $\bx_t = \sqrt{1 - \beta_t} \cdot \bx_{t - 1} + \sqrt{\beta_t} \cdot \bepsilon$, where $\bepsilon \sim \cN(0, \bI)$, $t \geq 1$;
-		\item $\bx_T \sim p_{\infty}(\bx) = \cN(0, \bI)$, where $T >> 1$.
+		\item $\bx_T \sim p_{\infty}(\bx) = \cN(0, \bI)$, where $T \gg 1$.
 	\end{enumerate}
 	If we are able to invert this process, we will get the way to sample $\bx \sim \pi(\bx)$ using noise samples $p_{\infty}(\bx) = \cN(0, \mathbf{I})$. \\ 
 	Now our goal is to revert this process.
@@ -525,13 +589,11 @@
 		\vfill
 		\item Score matching proposes to minimize the Fisher divergence to get the score function.
 		\vfill 
-		\item Denoising score matching minimizes Fisher divergence on noisy samples. It allows to estimate Fisher divergence using samples.
+		\item Denoising score matching minimizes the Fisher divergence on noisy samples. It allows to estimate the Fisher divergence using samples.
 		\vfill
-		\item Noise conditioned score network uses multiple noise levels and annealed Langevin dynamics to fit score function and sample from the model.	
+		\item Noise conditioned score network uses multiple noise levels and annealed Langevin dynamics to fit the score function and sample from the model.	
 		\vfill
 		\item Gaussian diffusion process is a Markov chain that injects special form of Gaussian noise to the samples.
-		\vfill
-		\item Denoising score matching is applicable to gaussian diffusion process.
 	\end{itemize}
 \end{frame}
 %=======
