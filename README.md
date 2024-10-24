@@ -39,9 +39,9 @@ The course is accompanied by practical tasks that allow you to understand the pr
 |  |  | <b>Seminar 6:</b>  VAE: Implementation hints. Vanilla 2D VAE coding. VAE on Binarized MNIST visualization. | [slides](seminars/seminar6/seminar6.ipynb) |
 | 7 | October, 22 | <b>Lecture 7:</b> Wasserstein GAN (WGAN). f-divergence minimization. GAN evaluation (FID, Precision-Recall, truncation trick). | [slides](lectures/lecture7/Lecture7.pdf) |
 |  |  | <b>Seminar 7:</b> Posterior collapse. Beta VAE on MNIST. | [slides](seminars/seminar7/seminar7.ipynb) |
-<!---
-| 8 | October, 29 | <b>Lecture 8:</b>  Langevin dynamic. Score matching. Denoising score matching. Noise Conditioned Score Network (NCSN). | [slides](lectures/lecture8/Lecture8.pdf) |
+| 8 | October, 29 | <b>Lecture 8:</b>  Langevin dynamic. Score matching (Denoising score matching, Noise Conditioned Score Network (NCSN)). Forward gaussian diffusion process. | [slides](lectures/lecture8/Lecture8.pdf) |
 |  |  | <b>Seminar 8:</b> KL vs JS divergences. Vanilla GAN in 1D coding. Mode collapse and vanishing gradients. Non-saturating GAN. | [slides](seminars/seminar8/seminar8.ipynb) |
+<!---
 | 9 | November, 5 | <b>Lecture 9:</b> Gaussian diffusion process: forward + reverse. Gaussian diffusion model as VAE, derivation of ELBO. Reparametrization of gaussian diffusion model. | [slides](lectures/lecture9/Lecture9.pdf) |
 |  |  | <b>Seminar 9:</b> WGAN and WGAN-GP on 1D data. | [slides](seminars/seminar9/seminar9.ipynb) |
 | 10 | November, 12 | <b>Lecture 10:</b> Denoising diffusion probabilistic model (DDPM): overview. Denoising diffusion as score-based generative model. Model guidance: classifier guidance, classfier-free guidance. Continuous-in-time NF and neural ODE. | [slides](lectures/lecture10/Lecture10.pdf) |
