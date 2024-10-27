@@ -27,29 +27,23 @@ class FullyConnectedMLP(nn.Module):
         batch_size = x.shape[0]
         x = x.view(batch_size, -1)
         return self.net(x).view(batch_size, self.output_dim)
-    
-###############
-# Taken from seminar 6
 
-def batch_jacobian(input, output, create_graph=True, retain_graph=True):
+def computePotGrad(input, output, create_graph=True, retain_graph=True):
     '''
     :Parameters:
-    input : tensor (bs, D)
-    output: tensor (bs, d) , NN(input)
+    input : tensor (bs, *shape)
+    output: tensor (bs, 1) , NN(input)
     :Returns:
-    gradient of output w.r.t. input (in batch manner), shape (bs, d, D)
+    gradient of output w.r.t. input (in batch manner), shape (bs, *shape)
     '''
-    s_output = torch.sum(output, dim=0) # (d,)
-    batched_grad_outputs = torch.eye(s_output.size(0)).to(output) #(d, d)
     grad = autograd.grad(
-        outputs=s_output, inputs=input,
-        grad_outputs=batched_grad_outputs,
-        create_graph=create_graph, 
+        outputs=output, 
+        inputs=input,
+        grad_outputs=torch.ones_like(output),
+        create_graph=create_graph,
         retain_graph=retain_graph,
-        only_inputs=True,
-        is_grads_batched=True
-    ) # (d, bs, D) 
-    return grad[0].permute(1, 0, 2)
+    ) # (bs, *shape) 
+    return grad[0]
 
 ###########
 # current seminar functions
@@ -70,9 +64,9 @@ def make_inference(generator, critic, n_samples=5000, compute_grad_norms=True):
         tsr_grid.requires_grad_() # (grid_size, 2)
         _critic_output = critic(tsr_grid) # (grid_size, 1)
         assert len(critic_output.shape) == 2
-        grads = batch_jacobian(
+        grads = computePotGrad(
             tsr_grid, _critic_output, 
-            create_graph=False, retain_graph=False).squeeze(1) # (grid_size, 2)
+            create_graph=False, retain_graph=False) # (grid_size, 2)
         critic_grad_norms = torch.norm(grads, dim=-1).detach().cpu().numpy().reshape((1000 + 1, 1000 + 1))
 
     critic_output = np.prod(critic_output, axis=-1).reshape((1000 + 1, 1000 + 1))
@@ -104,3 +98,94 @@ def visualize_GAN_output(
     ax[1].set_title('Norms of critic/discriminator gradients')
     fig.colorbar(cnt, ax=ax[1])
     plt.show()
+
+
+class StatsManager:
+
+    @staticmethod
+    def traverse(o, tree_types=(list, tuple, np.ndarray)):
+        if isinstance(o, tree_types):
+            for value in o:
+                for subvalue in StatsManager.traverse(value, tree_types):
+                    yield subvalue
+        else:
+            yield o
+
+    def __init__(self, *names):
+        self.stats = {}
+        self.names = list(names)
+        for name in names:
+            self.stats[name] = []
+    
+    def add_stat_names(self, *names):
+        self.names = self.names + list(names)
+        for name in names:
+            if name in self.stats.keys():
+                raise Exception(
+                    "name '{}' has already been presented!".format(name))
+            self.stats[name] = []
+
+    def add_all(self, *vals):
+        if len(vals) == 1:
+            for name in self.names:
+                if vals[0] is not None:
+                    self.add(name, vals[0])
+            return
+        if len(vals) == len(self.names):
+            for name, val in zip(self.names, vals):
+                if val is not None:
+                    self.add(name, val)
+            return
+        raise Exception('stats update is ambiguous')
+
+    def add(self, name, val):
+        self.stats[name][-1] += val
+    
+    def upd_all(self, *vals):
+        if len(vals) == 1:
+            for name in self.names:
+                if vals[0] is not None:
+                    self.upd(name, vals[0])
+            return
+        if len(vals) == len(self.names):
+            for name, val in zip(self.names, vals):
+                if val is not None:
+                    self.upd(name, val)
+            return 
+        raise Exception('stats update is ambiguous')
+    
+    def upd(self, name, val):
+        self.stats[name].append(val)
+    
+    def get(self, name):
+        return self.stats[name]
+    
+    def draw(self, axs, names=None):
+        axs_list = list(self.traverse(axs))
+        if names is None:
+            names = self.names
+        for i, name in enumerate(names):
+            axs_list[i].plot(self.get(name))
+            axs_list[i].set_title(name)
+    
+    def reset(self):
+        for name in self.stats.keys():
+            self.stats[name] = []
+
+
+def computePotGrad(input, output, create_graph=True, retain_graph=True):
+    '''
+    :Parameters:
+    input : tensor (bs, *shape)
+    output: tensor (bs, 1) , NN(input)
+    :Returns:
+    gradient of output w.r.t. input (in batch manner), shape (bs, *shape)
+    '''
+    grad = autograd.grad(
+        outputs=output, 
+        inputs=input,
+        grad_outputs=torch.ones_like(output),
+        create_graph=create_graph,
+        retain_graph=retain_graph,
+    ) # (bs, *shape) 
+    return grad[0]
