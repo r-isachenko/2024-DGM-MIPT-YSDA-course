@@ -265,7 +265,7 @@
 	\begin{block}{Theorem}
 	\vspace{-0.5cm}
 	\begin{multline*}
-		\bbE_{q(\bx_{\sigma})}\underbrace{\bigl\| \bs_{\btheta, \sigma}(\bx_{\sigma}) - \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma}) \bigr\|^2_2}_{h(\bx_{\sigma})} = \\
+		\bbE_{q(\bx_{\sigma})}\bigl\| \bs_{\btheta, \sigma}(\bx_{\sigma}) - \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma}) \bigr\|^2_2 = \\
 		= \bbE_{\pi(\bx)} \bbE_{q(\bx_{\sigma} | \bx)}\bigl\| \bs_{\btheta, \sigma}(\bx_{\sigma}) - \nabla_{\bx_{\sigma}} \log q(\bx_{\sigma} | \bx) \bigr\|^2_2 + \text{const}(\btheta)
 	\end{multline*}
 	\vspace{-0.5cm}
@@ -301,7 +301,7 @@
 		\vspace{-0.7cm}
 		\begin{multline*}
 			\bbE_{q(\bx_{\sigma})} h(\bx_{\sigma}) = \int {\color{violet}q(\bx_{\sigma})} h(\bx_{\sigma}) d\bx_{\sigma} = \\
-			= \int \left({\color{violet}\int q(\bx_{\sigma} | \bx) \pi(\bx) d\bx}\right) h(\bx_{\sigma}) d\bx_{\sigma} =  \bbE_{\pi(\bx)} \bbE_{q(\bx_{\sigma} | \bx)}  h(\bx_{\sigma}) d\bx_{\sigma}
+			= \int \left({\color{violet}\int q(\bx_{\sigma} | \bx) \pi(\bx) d\bx}\right) h(\bx_{\sigma}) d\bx_{\sigma} =  \bbE_{\pi(\bx)} \bbE_{q(\bx_{\sigma} | \bx)}  h(\bx_{\sigma})
 		\end{multline*}
 		\vspace{-0.7cm}
 		{\small
@@ -508,7 +508,7 @@
 	\vspace{-1.0cm}
 	\begin{itemize}
 		\item ${\color{violet} \beta_t = \eta}$
-		\item ${\color{teal}\log p(\bx_{t-1} | \btheta) = - \bx_{t-1}} = \log \cN(0, \bI)$
+		\item ${\color{teal} \nabla_{\bx_{t-1}}\log p(\bx_{t-1} | \btheta) = - \bx_{t-1}} = \nabla_{\bx_{t-1}} \log \cN(0, \bI)$
 	\end{itemize}
 	\myfootnotewithlink{http://proceedings.mlr.press/v37/sohl-dickstein15.pdf}{Sohl-Dickstein J. Deep Unsupervised Learning using Nonequilibrium Thermodynamics, 2015}
  \end{frame}
