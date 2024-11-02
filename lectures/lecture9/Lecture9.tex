@@ -126,13 +126,27 @@
 		\end{align*}
 		\vspace{-0.6cm}
 	\end{block}
+	\begin{figure}
+		\includegraphics[width=0.8\linewidth]{figs/conditional_diffusion}
+	\end{figure}
+	\myfootnotewithlink{https://arxiv.org/abs/2403.18103}{Chan S. Tutorial on Diffusion Models for Imaging and Vision, 2024}
+\end{frame}
+%=======
+\begin{frame}{Recap of previous lecture}
+	\textbf{Diffusion} refers to the flow of particles from high-density regions towards low-density regions.
+	\vspace{-0.2cm}
+	\begin{figure}
+		\includegraphics[width=0.5\linewidth]{figs/diffusion_over_time}
+	\end{figure}
+	\vspace{-0.6cm}
 	\begin{enumerate}
 		\item $\bx_0 = \bx \sim \pi(\bx)$;
 		\item $\bx_t = \sqrt{1 - \beta_t} \cdot \bx_{t - 1} + \sqrt{\beta_t} \cdot \bepsilon$, where $\bepsilon \sim \cN(0, \bI)$, $t \geq 1$;
 		\item $\bx_T \sim p_{\infty}(\bx) = \cN(0, \bI)$, where $T \gg 1$.
 	\end{enumerate}
-	If we are able to invert this process, we will get the way to sample $\bx \sim \pi(\bx)$ using noise samples $p_{\infty}(\bx) = \cN(0, \mathbf{I})$.
-	\myfootnotewithlink{https://lilianweng.github.io/posts/2021-07-11-diffusion-models/}{Weng L. What are Diffusion Models?, blog post, 2021}
+	If we are able to invert this process, we will get the way to sample $\bx \sim \pi(\bx)$ using noise samples $p_{\infty}(\bx) = \cN(0, \mathbf{I})$. \\ 
+	Now our goal is to revert this process.
+	\myfootnotewithlink{https://ayandas.me/blog-tut/2021/12/04/diffusion-prob-models.html}{Das A. An introduction to Diffusion Probabilistic Models, blog post, 2021}
 \end{frame}
 %=======
 \begin{frame}{Outline}
@@ -244,7 +258,7 @@
 			\begin{enumerate}
 				\item $\bx_T \sim p_{\infty}(\bx) = \cN(0, \bI)$;
 				\item $\bx_{t - 1} = \bsigma_{\btheta, t}(\bx_t) \cdot \bepsilon + \bmu_{\btheta, t}(\bx_t)$;
-				\item $\bx_0 = \bx \sim \pi(\bx)$;
+				\item $\bx_0 = \bx \sim \pi(\bx)$.
 			\end{enumerate}
 		\end{block}
 	\end{minipage}
@@ -255,18 +269,22 @@
 \section{Gaussian diffusion model as VAE}
 %=======
 \begin{frame}{Gaussian diffusion model as VAE}
-	Let treat $\bz = (\bx_1, \dots, \bx_T)$ as a latent variable (\textbf{note:} each $\bx_t$ has the same size). Probabilistic model is
+	Let treat $\bz = (\bx_1, \dots, \bx_T)$ as a latent variable (\textbf{note:} each $\bx_t$ has the same size) and $\bx = \bx_0$ as observed samples. 
+	\begin{block}{Latent Variable Model}
+		\vspace{-0.3cm}
 		\[
 			p(\bx, \bz | \btheta) = p(\bx | \bz, \btheta) p(\bz | \btheta)
 		\]	
-		\vspace{-0.4cm}
+		\vspace{-0.7cm}
+	\end{block}
 	\begin{figure}
 		\includegraphics[width=0.8\linewidth]{figs/diffusion_pgm_forward}
 	\end{figure}
+	\vspace{-0.3cm}
 	\begin{block}{Forward diffusion}
 		\begin{itemize}
 			\item Variational posterior distribution (encoder)
-			\vspace{-0.4cm}
+			\vspace{-0.3cm}
 			\[
 				q(\bz | \bx) = q(\bx_1, \dots, \bx_T | \bx_0) = \prod_{t = 1}^T q(\bx_t | \bx_{t - 1}).
 			\]
@@ -278,28 +296,28 @@
 \end{frame}
 %=======
 \begin{frame}{Gaussian diffusion model as VAE}
-	Let treat $\bz = (\bx_1, \dots, \bx_T)$ as a latent variable (\textbf{note:} each $\bx_t$ has the same size). Probabilistic model is
-		\[
-			p(\bx, \bz | \btheta) = p(\bx | \bz, \btheta) p(\bz | \btheta)
-		\]	
-		\vspace{-0.4cm}
+	\vspace{-0.3cm}
+	\[
+		p(\bx, \bz | \btheta) = p(\bx | \bz, \btheta) p(\bz | \btheta)
+	\]	
+	\vspace{-0.3cm}
 	\begin{figure}
 		\includegraphics[width=0.8\linewidth]{figs/diffusion_pgm_reverse}
 	\end{figure}
+	\vspace{-0.2cm}
 	\begin{block}{Reverse diffusion}
-
-	\begin{itemize}
-		\item Generative distribution (decoder)
-		\vspace{-0.3cm}
-		\[
-			p(\bx | \bz, \btheta) = p(\bx_0 | \bx_1, \btheta).
-		\]
-		\item Prior distribution
-		\vspace{-0.3cm}
-		\[
-			p(\bz | \btheta) = \prod_{t=2}^T p(\bx_{t - 1} | \bx_t, \btheta)  \cdot p(\bx_T).
-		\]
-	\end{itemize}
+		\begin{itemize}
+			\item Generative distribution (decoder)
+			\[
+				p(\bx | \bz, \btheta) = p(\bx_0 | \bx_1, \btheta).
+			\]
+			\item Prior distribution
+			\vspace{-0.3cm}
+			\[
+				p(\bz | \btheta) = p(\bx_1, \dots, \bx_T | \btheta) = \prod_{t=2}^T p(\bx_{t - 1} | \bx_t, \btheta)  \cdot p(\bx_T).
+			\]
+		\end{itemize}
+		\textbf{Note:} this differs from the vanilla VAE with the complex decoder $p(\bx | \bz, \btheta)$ and the standard normal prior $p(\bz)$.
 	\end{block}
 	\myfootnotewithlink{https://ayandas.me/blog-tut/2021/12/04/diffusion-prob-models.html}{Das A. An introduction to Diffusion Probabilistic Models, blog post, 2021}
 \end{frame}
