@@ -187,7 +187,9 @@
 	\textbf{Note:} We are able to apply NCSN approach with annealed Langevin dynamics to get diffusion denoising model.
 \end{frame}
 %=======
-\section{Reverse Gaussian diffusion process}
+\section{Denoising Diffusion Probabilistic Model (DDPM)}
+%=======
+\subsection{Reverse Gaussian diffusion process}
 %=======
 \begin{frame}{Reverse Gaussian diffusion process}
 	\begin{figure}
@@ -293,7 +295,6 @@
 %=======
 \begin{frame}{Distribution summary}
 	\textbf{Forward process} goes from any distribution $\pi(\bx)$ to $\cN(0, \bI)$ via noise injection.
-	\vspace{-0.3cm}
 	\begin{align*}
 		q(\bx_t | \bx_{t-1}) &= \cN(\sqrt{1 - \beta_t} \cdot \bx_{t-1}, \beta_t \cdot \bI); \\
 		q(\bx_t | \bx_0) &= \cN(\sqrt{\bar{\alpha}_t} \cdot \bx_0, (1 - \bar{\alpha}_t) \cdot \bI).
@@ -302,15 +303,12 @@
 	\[
 		q(\bx_{t-1}|\bx_{t}) = \frac{q(\bx_{t}|\bx_{t-1}) q(\bx_{t-1})}{q(\bx_{t})} \approx \cN \left(\bmu_{\btheta, t}(\bx_t), \bsigma_{\btheta, t}^2(\bx_t)\right)
 	\]
-	\textbf{Conditioned reverse process} is Normal with the known parameters. 
+	\textbf{Conditioned reverse process} is Normal with the known parameters, which defines how to denoise a noisy image $\bx_t$ with access to what the final, completely denoised image $\bx_0$ should be.
 	\[
 		q(\bx_{t-1}|\bx_{t}, {\color{olive}\bx_0}) = \cN(\tilde{\bmu}_t(\bx_t, \bx_0), \tilde{\beta}_t \cdot \bI)
 	\]
-	$q(\bx_{t-1} | \bx_t, \bx_0)$ defines how to denoise a noisy image $\bx_t$ with access to what the final, completely denoised image $\bx_0$ should be.
 	\myfootnotewithlink{https://arxiv.org/abs/2006.11239}{Ho J. Denoising Diffusion Probabilistic Models, 2020}
 \end{frame}
-%=======
-\subsection{Denoising Diffusion Probabilistic Model (DDPM)}
 %=======
 \subsection{Gaussian diffusion model as VAE}
 %=======
@@ -498,26 +496,51 @@
 \end{frame}
 %=======
 \begin{frame}{ELBO for Gaussian diffusion model}
-	Training
-	
-	Inference
+	\begin{block}{Training}
+		\begin{enumerate}
+			\item Get the sample $\bx_0 \sim \pi(\bx)$.
+			\item Get noisy image $\bx_t = \sqrt{\bar{\alpha}_t} \cdot \bx_0 + \sqrt{1 - \bar{\alpha}_t} \cdot \bepsilon$, where $\bepsilon \sim \cN(0, \bI)$.
+			\item Compute ELBO 
+			\vspace{-0.3cm}
+			\begin{multline*}
+				\cL_{\bphi, \btheta}(\bx) =  {\color{olive}\bbE_{q(\bx_1 | \bx_0)} \log p(\bx_0 | \bx_1, \btheta)} - {\color{violet}KL\bigl(q(\bx_T | \bx_0) || p(\bx_T)\bigr)} - \\
+				- {\color{teal}\sum_{t=2}^T \underbrace{ \bbE_{q(\bx_t | \bx_0)} \left[\frac{1}{2\tilde{\beta}_t} \bigl\| \tilde{\bmu}_t(\bx_t, \bx_0) - \bmu_{\btheta, t}(\bx_t) \bigr\|^2  \right]}_{\cL_t}}
+			\end{multline*}
+			\vspace{-0.7cm}
+		\end{enumerate}
+	\end{block}
+	\begin{block}{Sampling}
+		\begin{enumerate}
+			\item Sample $\bx_T \sim \cN(0, \bI)$.
+			\item Get denoised image $\bx_{t - 1} = \bmu_{\btheta, t}(\bx_t) +  \sqrt{\tilde{\beta}_t} \cdot \bepsilon$, where $\bepsilon \sim \cN(0, \bI)$.
+		\end{enumerate}
+	\end{block}
+	\myfootnotewithlink{https://arxiv.org/abs/2006.11239}{Ho J. Denoising Diffusion Probabilistic Models, 2020}
 	
 	\myfootnotewithlink{https://arxiv.org/abs/2006.11239}{Ho J. Denoising Diffusion Probabilistic Models, 2020}
 \end{frame}
 %=======
-\section{Reparametrization of Gaussian diffusion model}
+\subsection{Reparametrization of Gaussian diffusion model}
 %=======
 \begin{frame}{Reparametrization of DDPM}
 	\[
 		\cL_t = \bbE_{q(\bx_t | \bx_0)} \left[\frac{1}{2\tilde{\beta}_t} \bigl\| \tilde{\bmu}_t(\bx_t, \bx_0) - \bmu_{\btheta, t}(\bx_t) \bigr\|^2  \right]
 	\]
+	\[
+		\tilde{\bmu}_t(\bx_t, \bx_0) = \frac{\sqrt{\alpha_t}(1 - \bar{\alpha}_{t-1})}{1 - \bar{\alpha}_t} \cdot \bx_t + \frac{\sqrt{\bar{\alpha}_{t-1}}(1 - \alpha_t)}{1 - \bar{\alpha}_t} \cdot {\color{olive} \bx_0}
+	\]
 	\vspace{-0.2cm}
 	\[
 		\bx_t = \sqrt{\bar{\alpha}_t} \cdot \bx_0 + \sqrt{1 - \bar{\alpha}_t} \cdot \bepsilon \quad \Rightarrow \quad {\color{olive} \bx_0} = \frac{\bx_t -  \sqrt{1 - \bar{\alpha}_t} \cdot \bepsilon}{\sqrt{\bar{\alpha}_t}}
 	\]
+	\vspace{-0.3cm}
+	\begin{itemize}
+	\item There is linear dependence between $\bepsilon$, $\bx_t$, $\bx_0$.
+	\item Let try to rewrite this mean in terms of $\bx_t$ and $\bepsilon$.
+	\end{itemize}
 	\vspace{-0.2cm}
 	\begin{align*}
-		\tilde{\bmu}_t(\bx_t, \bx_0) &= \frac{\sqrt{\alpha_t}(1 - \bar{\alpha}_{t-1})}{1 - \bar{\alpha}_t} \cdot \bx_t + \frac{\sqrt{\bar{\alpha}_{t-1}}(1 - \alpha_t)}{1 - \bar{\alpha}_t} \cdot {\color{olive} \bx_0} \\
+		\tilde{\bmu}_t(\bx_t, \bepsilon) &= \frac{\sqrt{\alpha_t}(1 - \bar{\alpha}_{t-1})}{1 - \bar{\alpha}_t} \cdot \bx_t + \frac{\sqrt{\bar{\alpha}_{t-1}}(1 - \alpha_t)}{1 - \bar{\alpha}_t} \cdot {\color{olive} \left(\frac{\bx_t -  \sqrt{1 - \bar{\alpha}_t} \cdot \bepsilon}{\sqrt{\bar{\alpha}_t}}\right)} \\
 		&= \frac{1}{\sqrt{\alpha_t}} \cdot \bx_t - \frac{1 - \alpha_t}{\sqrt{\alpha_t (1 - \bar{\alpha}_t)}} \cdot \bepsilon
 	\end{align*}
 	\myfootnotewithlink{https://arxiv.org/abs/2006.11239}{Ho J. Denoising Diffusion Probabilistic Models, 2020}
@@ -542,7 +565,7 @@
 			\cL_t &=  \bbE_{\color{violet} \bepsilon \sim \cN(0, \bI)} \left[ \frac{{\color{teal}(1 - \alpha_t)^2}}{{\color{olive}2\tilde{\beta}_t} {\color{teal} \alpha_t (1 - \bar{\alpha}_t)}} \bigl\| \bepsilon - \bepsilon_{\btheta, t}({\color{violet}\bx_t}) \bigr\|^2 \right] \\
 			& =	 \bbE_{\color{violet}\bepsilon \sim \cN(0, \bI)} \left[ \frac{(1 - \alpha_t)^2}{2\tilde{\beta}_t \alpha_t (1 - \bar{\alpha}_t)} \Bigl\| \bepsilon - \bepsilon_{\btheta, t}\bigl( {\color{violet}\sqrt{\bar{\alpha}_t} \bx_0 + \sqrt{1 - \bar{\alpha}_t} \bepsilon}\bigr) \Bigr\|^2 \right]
 		\end{align*}
-		At each step of reverse diffusion process we try to predict the noise~$\bepsilon$ that we used in the forward diffusion process!
+		At each step of the reverse diffusion process we try to predict the noise~$\bepsilon$ that we used in the forward diffusion process!
 	\myfootnotewithlink{https://arxiv.org/abs/2006.11239}{Ho J. Denoising Diffusion Probabilistic Models, 2020}
 	\end{frame}
 %=======
@@ -555,7 +578,9 @@
 	\[
 		\cL_t  = \bbE_{\bepsilon \sim \cN(0, \bI)} \left[ \frac{(1 - \alpha_t)^2}{2\tilde{\beta}_t \alpha_t (1 - \bar{\alpha}_t)} \Bigl\| \bepsilon - \bepsilon_{\btheta, t}\bigl( \sqrt{\bar{\alpha}_t} \bx_0 + \sqrt{1 - \bar{\alpha}_t} \bepsilon\bigr) \Bigr\|^2 \right]
 	\]
+	Let drop the scaling coefficient.
 	\begin{block}{Simplified objective}
+		\vspace{-0.3cm}
 		\[
 			 \cL_{\text{simple}} = \bbE_{t \sim U\{2, T\}} \bbE_{\bepsilon \sim \cN(0, \bI)} \Bigl\| \bepsilon - \bepsilon_{\btheta, t}\bigl( \sqrt{\bar{\alpha}_t} \cdot \bx_0 + \sqrt{1 - \bar{\alpha}_t} \cdot \bepsilon\bigr) \Bigr\|^2 
 		\]
@@ -565,19 +590,17 @@
 %=======
 \begin{frame}{Summary}
 	\begin{itemize}
-		\item Denoising score matching is applicable to Gaussian diffusion process.
+		\item Denoising score matching with Langevin dynamics is applicable to Gaussian diffusion process.
 		\vfill
-		\item Reverse process allows to sample from the real distribution $\pi(\bx)$ using samples from noise, but it is intractable.
+		\item Reverse process allows to recover the samples from the real distribution $\pi(\bx)$ from the noise, but it is intractable.
 		\vfill
-		\item We will use approximation to get the reverse process.		
+		\item DDPM approximates the reverse process using Normal assumption.		
 		\vfill
-		\item Diffusion model is a VAE model which reverts Gaussian diffusion process using variational inference.
+		\item One could treat DDPM as VAE model with hierarchical latent variables.
 		\vfill
-		\item ELBO of DDPM could be represented as a sum of KL terms.
+		\item ELBO of DDPM could be represented as a sum of large number of the KL terms.
 		\vfill
-		\item DDPM is a VAE model with hierarchical latent variables.
-		\vfill
-		\item At each step DDPM predicts the noise that was used in the forward diffusion process.
+		\item At each step DDPM predicts the noise that was used in the forward diffusion process. This noise is used in the reverse process.
 	\end{itemize}
 \end{frame}
 %=======
