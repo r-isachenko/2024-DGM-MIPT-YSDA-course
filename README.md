@@ -43,10 +43,10 @@ The course is accompanied by practical tasks that allow you to understand the pr
 |  |  | <b>Seminar 8:</b> StyleGAN. | [slides](seminars/seminar8/StyleGAN.ipynb) |
 | 9 | November, 5 | <b>Lecture 9:</b> Denoising score matching for diffusion. Reverse Gaussian diffusion process. Gaussian diffusion model as VAE. ELBO for DDPM. | [slides](lectures/lecture9/Lecture9.pdf) |
 |  |  | <b>Seminar 9:</b> Noise Conditioned Score Network (NCSN). | [slides](seminars/seminar9/seminar9.ipynb) |
-<!---
-| 10 | November, 12 | <b>Lecture 10:</b> Denoising diffusion probabilistic model (DDPM): reparametrization and overview. Denoising diffusion as score-based generative model. Model guidance: classifier guidance, classfier-free guidance. Continuous-in-time NF and neural ODE. | [slides](lectures/lecture10/Lecture10.pdf) |
+| 10 | November, 12 | <b>Lecture 10:</b> Denoising diffusion probabilistic model (DDPM): reparametrization and overview. Denoising diffusion as score-based generative model. Model guidance: classifier guidance, classfier-free guidance. | [slides](lectures/lecture10/Lecture10.pdf) |
 |  |  | <b>Seminar 10:</b>  Denoising diffusion probabilistic model (DDPM). Denoising Diffusion Implicit Models (DDIM).| [slides](seminars/seminar10/seminar10.ipynb) |
-| 11 | November, 19 | <b>Lecture 11:</b> Kolmogorov-Fokker-Planck equation for NF log-likelihood. FFJORD and Hutchinson's trace estimator. Adjoint method for continuous-in-time NF. SDE basics. | [slides](lectures/lecture11/Lecture11.pdf) |
+<!---
+| 11 | November, 19 | <b>Lecture 11:</b> Continuous-in-time NF and neural ODE. Kolmogorov-Fokker-Planck equation for NF log-likelihood. FFJORD and Hutchinson's trace estimator. Adjoint method for continuous-in-time NF. SDE basics. | [slides](lectures/lecture11/Lecture11.pdf) |
 |  |  | <b>Seminar 11:</b> Guidance. CLIP, GLIDE, DALL-E 2, Imagen, Latent Diffusion Model. | [slides](seminars/seminar11/seminar11.ipynb) |
 | 12 | November, 26 | <b>Lecture 12:</b> Kolmogorov-Fokker-Planck equation. Probability flow ODF. Reverse SDE. Variance Preserving and Variance Exploding SDEs. | [slides](lectures/lecture12/Lecture12.pdf) |
 |  |  | <b>Seminar 12:</b>  | [slides](seminars/seminar11/seminar11.ipynb) |

@@ -13,6 +13,33 @@
 \end{frame}
 %=======
 \begin{frame}{Recap of previous lecture}
+	\begin{block}{Continuous-in-time dynamic (neural ODE)}
+		\vspace{-0.7cm}
+		\begin{align*}
+		   \frac{d \bz(t)}{dt} &= \bff_{\btheta}(\bz(t), t); \quad \text{with initial condition }\bz(0) = \bz_0. \\
+		   \bz(t_1) &= \int^{1}_{0} \bff_{\btheta}(\bz(t), t) d t  + \bz_0 \approx \text{ODESolve}(\bz(0), \bff_{\btheta}, t_0=0, t_1=1).
+		\end{align*}
+		\vspace{-0.7cm}
+	\end{block}	
+	\begin{block}{Euler update step}
+		\vspace{-0.6cm}
+		\[
+   \frac{\bz(t + \Delta t) - \bz(t)}{\Delta t} = \bff_{\btheta}(\bz(t), t) \,\, \Rightarrow \,\, \bz(t + \Delta t) = \bz(t) + \Delta t \cdot \bff_{\btheta}(\bz(t), t)
+		\]
+		\vspace{-0.7cm}
+	\end{block}	
+	\begin{block}{Theorem (Picard)}
+		If $\bff$ is uniformly Lipschitz continuous in $\bz$ and continuous in $t$, then the ODE has a \textbf{unique} solution.
+	\end{block}
+		\vspace{-0.7cm}
+		\begin{align*}
+			\bx &= \bz(1) = \bz(0) + \int_{0}^{1} \bff_{\btheta}(\bz(t), t) dt \\
+			\bz &= \bz(0) = \bz(1) + \int_{1}^{0} \bff_{\btheta}(\bz(t), t) dt
+		\end{align*}
+	\myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}   
+\end{frame}
+%=======
+\begin{frame}{Recap of previous lecture}
 	\begin{block}{Theorem (Kolmogorov-Fokker-Planck: special case)}
 		If $\bff$ is uniformly Lipschitz continuous in $\bz$ and continuous in $t$, then
 		\[
