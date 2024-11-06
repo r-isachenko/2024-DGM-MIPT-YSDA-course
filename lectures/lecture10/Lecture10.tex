@@ -80,7 +80,7 @@
 \end{frame}
 %=======
 \begin{frame}{Recap of previous lecture}
-	\begin{block}{ELBO of gaussian diffusion model}
+	\begin{block}{ELBO of Gaussian diffusion model}
 		\vspace{-0.7cm}
 		\begin{multline*}
 			\cL_{\bphi, \btheta}(\bx) =  {\color{olive}\bbE_{q(\bx_1 | \bx_0)} \log p(\bx_0 | \bx_1, \btheta)} - {\color{violet}KL\bigl(q(\bx_T | \bx_0) || p(\bx_T)\bigr)} - \\
@@ -132,6 +132,76 @@
 \end{frame}
 %=======
 \section{Denoising Diffusion Probabilistic Model (DDPM)}
+%=======
+\subsection{Reparametrization of Gaussian diffusion model}
+%=======
+\begin{frame}{Reparametrization of DDPM}
+	\[
+		\cL_t = \bbE_{q(\bx_t | \bx_0)} \left[\frac{1}{2\tilde{\beta}_t} \bigl\| \tilde{\bmu}_t(\bx_t, \bx_0) - \bmu_{\btheta, t}(\bx_t) \bigr\|^2  \right]
+	\]
+	\[
+		\tilde{\bmu}_t(\bx_t, \bx_0) = \frac{\sqrt{\alpha_t}(1 - \bar{\alpha}_{t-1})}{1 - \bar{\alpha}_t} \cdot \bx_t + \frac{\sqrt{\bar{\alpha}_{t-1}}(1 - \alpha_t)}{1 - \bar{\alpha}_t} \cdot {\color{olive} \bx_0}
+	\]
+	\vspace{-0.2cm}
+	\[
+		\bx_t = \sqrt{\bar{\alpha}_t} \cdot \bx_0 + \sqrt{1 - \bar{\alpha}_t} \cdot \bepsilon \quad \Rightarrow \quad {\color{olive} \bx_0} = \frac{\bx_t -  \sqrt{1 - \bar{\alpha}_t} \cdot \bepsilon}{\sqrt{\bar{\alpha}_t}}
+	\]
+	\vspace{-0.3cm}
+	\begin{itemize}
+	\item There is linear dependence between $\bepsilon$, $\bx_t$, $\bx_0$.
+	\item Let try to rewrite this mean in terms of $\bx_t$ and $\bepsilon$.
+	\end{itemize}
+	\vspace{-0.2cm}
+	\begin{align*}
+		\tilde{\bmu}_t(\bx_t, \bepsilon) &= \frac{\sqrt{\alpha_t}(1 - \bar{\alpha}_{t-1})}{1 - \bar{\alpha}_t} \cdot \bx_t + \frac{\sqrt{\bar{\alpha}_{t-1}}(1 - \alpha_t)}{1 - \bar{\alpha}_t} \cdot {\color{olive} \left(\frac{\bx_t -  \sqrt{1 - \bar{\alpha}_t} \cdot \bepsilon}{\sqrt{\bar{\alpha}_t}}\right)} \\
+		&= \frac{1}{\sqrt{\alpha_t}} \cdot \bx_t - \frac{1 - \alpha_t}{\sqrt{\alpha_t (1 - \bar{\alpha}_t)}} \cdot \bepsilon
+	\end{align*}
+	\myfootnotewithlink{https://arxiv.org/abs/2006.11239}{Ho J. Denoising Diffusion Probabilistic Models, 2020}
+	\end{frame}
+%=======
+\begin{frame}{Reparametrization of DDPM}
+	\vspace{-0.3cm}
+	\[
+		\cL_t = \bbE_{\color{violet}q(\bx_t | \bx_0)} \left[ {\color{olive}\frac{1}{2\tilde{\beta}_t}} \bigl\| \tilde{\bmu}_t(\bx_t, \bx_0) - \bmu_{\btheta, t}(\bx_t) \bigr\|^2  \right]
+	\]
+	\vspace{-0.3cm}
+	\begin{block}{Reparametrization}
+		\vspace{-0.7cm}
+		\begin{align*}
+			\tilde{\bmu}_t(\bx_t, \bx_0) &= \frac{1}{\sqrt{\alpha_t}} \cdot \bx_t - \frac{1 - \alpha_t}{\sqrt{\alpha_t (1 - \bar{\alpha}_t)}} \cdot \bepsilon \\
+			\bmu_{\btheta, t}(\bx_t) &= \frac{1}{\sqrt{\alpha_t}} \cdot \bx_t - {\color{teal}\frac{1 - \alpha_t}{\sqrt{\alpha_t (1 - \bar{\alpha}_t)}}} \cdot \bepsilon_{\btheta, t}(\bx_t)
+		\end{align*}
+		\vspace{-0.7cm}
+	\end{block}
+		\vspace{-0.5cm}
+		\begin{align*}
+			\cL_t &=  \bbE_{\color{violet} \bepsilon \sim \cN(0, \bI)} \left[ \frac{{\color{teal}(1 - \alpha_t)^2}}{{\color{olive}2\tilde{\beta}_t} {\color{teal} \alpha_t (1 - \bar{\alpha}_t)}} \bigl\| \bepsilon - \bepsilon_{\btheta, t}({\color{violet}\bx_t}) \bigr\|^2 \right] \\
+			& =	 \bbE_{\color{violet}\bepsilon \sim \cN(0, \bI)} \left[ \frac{(1 - \alpha_t)^2}{2\tilde{\beta}_t \alpha_t (1 - \bar{\alpha}_t)} \Bigl\| \bepsilon - \bepsilon_{\btheta, t}\bigl( {\color{violet}\sqrt{\bar{\alpha}_t} \bx_0 + \sqrt{1 - \bar{\alpha}_t} \bepsilon}\bigr) \Bigr\|^2 \right]
+		\end{align*}
+		At each step of the reverse diffusion process we try to predict the noise~$\bepsilon$ that we used in the forward diffusion process!
+	\myfootnotewithlink{https://arxiv.org/abs/2006.11239}{Ho J. Denoising Diffusion Probabilistic Models, 2020}
+	\end{frame}
+%=======
+\begin{frame}{Reparametrization of DDPM}
+	\begin{multline*}
+		\cL_{\bphi, \btheta}(\bx) =  {\color{olive}\bbE_{q(\bx_1 | \bx_0)} \log p(\bx_0 | \bx_1, \btheta)} - {\color{violet}KL\bigl(q(\bx_T | \bx_0) || p(\bx_T)\bigr)} - \\
+		- \sum_{t=2}^T \underbrace{ \bbE_{q(\bx_t | \bx_0)} KL \bigl(q(\bx_{t-1} | \bx_t, \bx_0) || p(\bx_{t - 1} | \bx_t, \btheta )\bigr)}_{\cL_t}
+	\end{multline*}
+	\vspace{-0.3cm}
+	\[
+		\cL_t  = \bbE_{\bepsilon \sim \cN(0, \bI)} \left[ \frac{(1 - \alpha_t)^2}{2\tilde{\beta}_t \alpha_t (1 - \bar{\alpha}_t)} \Bigl\| \bepsilon - \bepsilon_{\btheta, t}\bigl( \sqrt{\bar{\alpha}_t} \bx_0 + \sqrt{1 - \bar{\alpha}_t} \bepsilon\bigr) \Bigr\|^2 \right]
+	\]
+	Let drop the scaling coefficient.
+	\begin{block}{Simplified objective}
+		\vspace{-0.3cm}
+		\[
+			 \cL_{\text{simple}} = \bbE_{t \sim U\{2, T\}} \bbE_{\bepsilon \sim \cN(0, \bI)} \Bigl\| \bepsilon - \bepsilon_{\btheta, t}\bigl( \sqrt{\bar{\alpha}_t} \cdot \bx_0 + \sqrt{1 - \bar{\alpha}_t} \cdot \bepsilon\bigr) \Bigr\|^2 
+		\]
+	\end{block}
+	\myfootnotewithlink{https://arxiv.org/abs/2006.11239}{Ho J. Denoising Diffusion Probabilistic Models, 2020}
+	\end{frame}
+%=======
+\subsection{Overview}
 %=======
 \begin{frame}{Generative models zoo}
 	\begin{tikzpicture}[
@@ -638,6 +708,8 @@
 %=======
 \begin{frame}{Summary}
 	\begin{itemize}
+		\item At each step DDPM predicts the noise that was used in the forward diffusion process. This noise is used in the reverse process.
+		\vfill
 		\item DDPM is a VAE model that tries to invert forward diffusion process using variational inference. DDPM is really slow, because we have to apply the model $T$ times.
 		\vfill
 		\item Objective of DDPM is closely related to the noise conditioned score network and score matching.	
