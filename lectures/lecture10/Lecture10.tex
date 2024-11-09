@@ -301,7 +301,7 @@
 			\item Compute loss $ \cL_{\text{simple}} = \| \bepsilon - \bepsilon_{\btheta, t}(\bx_t) \|^2 $.
 		\end{enumerate}
 	\end{block}
-	\begin{block}{Sampling}
+	\begin{block}{Sampling (ancestral sampling)}
 		\begin{enumerate}
 			\item Sample $\bx_T \sim \cN(0, \bI)$.
 			\item Compute mean of $p(\bx_{t-1} | \bx_t, \btheta) = \cN(\bmu_{\btheta, t}(\bx_t), \tilde{\beta}_t \cdot \bI)$:
@@ -324,14 +324,15 @@
 	\myfootnotewithlink{https://arxiv.org/abs/2006.11239}{Ho J. Denoising Diffusion Probabilistic Models, 2020}
 \end{frame}
 %=======
-\section{Denosing diffusion as score-based generative model}
+\subsection{DDPM as score-based generative model}
 %=======
 \begin{frame}{Denosing diffusion as score-based generative model}
 	\begin{block}{DDPM objective}
-		\vspace{-0.5cm}
-		\[
-			\cL_t = \bbE_{\bepsilon \sim \cN(0, \bI)} \left[ \frac{(1 - \alpha_t)^2}{2\tilde{\beta}_t \alpha_t  {\color{teal}(1 - \bar{\alpha}_t)}}  \Bigl\|  \bepsilon_{\btheta, t}\bigl( \sqrt{\bar{\alpha}_t} \bx_0 + \sqrt{1 - \bar{\alpha}_t} \bepsilon\bigr) {\color{teal} - \bepsilon}\Bigr\|_2^2  \right]
-		\]
+		\vspace{-0.7cm}
+		\begin{align*}
+			\cL_t &= \bbE_{\bepsilon \sim \cN(0, \bI)} \left[ \frac{(1 - \alpha_t)^2}{2\tilde{\beta}_t \alpha_t  (1 - \bar{\alpha}_t)}  \left\|  \bepsilon_{\btheta, t} (\bx_t) - \bepsilon\right\|_2^2  \right] \\
+			& = \bbE_{\bepsilon \sim \cN(0, \bI)} \left[ \frac{(1 - \alpha_t)^2}{2\tilde{\beta}_t \alpha_t }  \Bigl\| {\color{violet} \frac{\bepsilon_{\btheta, t}  (\bx_t) }{\sqrt{1 - \bar{\alpha}_t}}} - {\color{teal}\frac{\bepsilon}{\sqrt{1 - \bar{\alpha}_t}}}\Bigr\|_2^2  \right]
+		\end{align*}
 		\vspace{-0.7cm}
 	\end{block}
 	\vspace{-0.5cm}
@@ -342,7 +343,7 @@
 		Let reparametrize our model: 
 		\vspace{-0.2cm}
 		\[
-			\bs_{\btheta, t}(\bx_t) = - \frac{\bepsilon_{\btheta, t}(\bx_t)}{\sqrt{1 - \bar{\alpha}_t}}.
+			\bs_{\btheta, t}(\bx_t) = {\color{violet}- \frac{\bepsilon_{\btheta, t}(\bx_t)}{\sqrt{1 - \bar{\alpha}_t}}} = \nabla_{\bx_t} \log p(\bx_t | \btheta).
 		\]
 		\[
 			\cL_t = \bbE_{q(\bx_t | \bx_0)} \left[ \frac{(1 - \alpha_t)^2}{2\tilde{\beta}_t \alpha_t}  \Bigl\|  \bs_{\btheta, t} (\bx_t) - \nabla_{\bx_t} \log q(\bx_t | \bx_0) \Bigr\|_2^2  \right]
@@ -350,11 +351,14 @@
 	\myfootnotewithlink{https://arxiv.org/abs/2006.11239}{Ho J. Denoising Diffusion Probabilistic Models, 2020}
 	\end{frame}
 %=======
-\begin{frame}{Denosing diffusion as score-based generative model}
+\begin{frame}{DDPM vs NCSN: objectives}
 	\begin{block}{DDPM objective}
 		\vspace{-0.5cm}
 		\[
 			\bbE_{\pi(\bx_0)} \bbE_{t \sim U\{1, T\}}\bbE_{q(\bx_t | \bx_0)} \left[ {\color{olive}\frac{(1 - \alpha_t)^2}{2\tilde{\beta}_t \alpha_t}} \Bigl\|  \bs_{\btheta, t} (\bx_t) - \nabla_{\bx_t} \log q(\bx_t | \bx_0) \Bigr\|_2^2  \right]
+		\]
+		\[
+			\bx_t = \sqrt{\bar{\alpha}_t} \cdot \bx_0 + \sqrt{1 - \bar{\alpha}_t} \cdot \bepsilon
 		\]
 		In practice {\color{olive}the coefficient} is omitted.
 	\end{block}
@@ -363,19 +367,62 @@
 		\[
 			\bbE_{\pi(\bx_0)} \bbE_{t \sim U\{1, T\}} \bbE_{q(\bx_t | \bx_0)}\bigl\| \bs_{\btheta, \sigma_t}(\bx_t) - \nabla_{\bx_t} \log q(\bx_t | \bx_0) \bigr\|^2_2 
 		\]
-		\vspace{-0.3cm}
+		\[
+			\bx_t = \bx_0 + \sigma_t \cdot \bepsilon
+		\]
+		\vspace{-0.5cm}
 	\end{block}
-	\textbf{Note:} The objective of DDPM and NCSN is almost identical. But the difference in sampling scheme:
-	\begin{itemize}
-		\item NCSN uses annealed Langevin dynamics;
-		\item DDPM uses ancestral sampling.
-	\end{itemize}
-	\[
-		\bs_{\btheta, t}(\bx_t) = - \frac{\bepsilon_{\btheta, t}(\bx_t)}{\sqrt{1 - \bar{\alpha}_t}} = \nabla_{\bx_t} \log p(\bx_t | \btheta)
-	\]
+	\textbf{ELBO maximization approach gives the same objective as denoising score-matching approach!}
 	\myfootnotewithlink{https://arxiv.org/abs/2006.11239}{Ho J. Denoising Diffusion Probabilistic Models, 2020}
 	\end{frame}
 %=======
+\begin{frame}{DDPM vs NCSN: sampling}
+	\begin{block}{DDPM sampling (ancestral sampling)}
+			\vspace{-0.7cm}
+			\begin{align*}
+				\bx_T &\sim \cN(0, \bI) \\
+				\bx_{t - 1} &= {\color{teal}\bmu_{\btheta, t}(\bx_t)} + \sigma_t \cdot \bepsilon \\
+				& ={\color{teal}\frac{1}{\sqrt{\alpha_t}} \cdot \bx_t - \frac{1 - \alpha_t}{\sqrt{\alpha_t (1 - \bar{\alpha}_t)}} \cdot \bepsilon_{\btheta, t}(\bx_t)} +  \sigma_t \cdot \bepsilon \\
+				& = \frac{1}{\sqrt{1 - \beta_t}} \cdot \bx_t + \frac{\beta_t}{\sqrt{1 - \beta_t}} \cdot \bs_{\btheta, t} (\bx_t) +  \sigma_t \cdot \bepsilon
+			\end{align*}
+			\vspace{-0.5cm}
+	\end{block}
+	\begin{block}{NCSN sampling (annealed Langevin dynamics)}
+		\begin{itemize}
+			\item Sample $\bx_T^0 \sim \cN(0, \sigma_T^2 \cdot \bI) \approx q(\bx_T)$.
+			\item Apply $L$ steps of Langevin dynamic
+			\vspace{-0.2cm}
+			\[
+				\bx_t^l = \bx_t^{l-1} + \frac{\eta_t}{2} \cdot \bs_{\btheta, \sigma_t}(\bx_t^{l - 1}) + \sqrt{\eta_t} \cdot \bepsilon_t^l.
+			\] 
+			\vspace{-0.7cm}
+			\item Update $\bx_{t-1}^0 = \bx_t^L$ and choose the next $\sigma_t$.
+		\end{itemize}
+	\end{block}
+	\myfootnotewithlink{https://arxiv.org/abs/2006.11239}{Ho J. Denoising Diffusion Probabilistic Models, 2020}
+	\end{frame}
+%=======
+\begin{frame}{DDPM vs NCSN}
+	\begin{block}{Summary}
+		\begin{itemize}
+		\item Different Markov chains:
+			\begin{itemize}
+				\item DDPM: $\bx_t = \sqrt{\bar{\alpha}_t} \cdot \bx_0 + \sqrt{1 - \bar{\alpha}_t} \cdot \bepsilon$;
+				\item NCSN: $\bx_t = \bx_0 + \sigma_t \cdot \bepsilon$.
+				\item It is possible to consider the more general framework $q(\bx_t |\bx_0) = \cN(\alpha_t \cdot \bx_0, \sigma^2_t\cdot \bI)$
+			\end{itemize}
+		\item Identical objectives: ELBO $\equiv$ score-matching.
+		\item Different sampling schemes:
+			\begin{itemize}
+				\item ancestral sampling for DDPM;
+				\item annealed Langevin dynamics for NCSN;
+				\item there is a combined approach with alternating updates of DDPM and NCSN.
+			\end{itemize}
+		\end{itemize}
+	\end{block}
+	\myfootnote{\href{https://arxiv.org/abs/2107.00630}{Kingma D. et al. Variational Diffusion Models, 2021} \\
+	\href{}{Song Y. et al. Score-Based Generative Modeling through Stochastic Differential Equations, 2020}}
+	\end{frame}
 \section{Guidance}
 %=======
 \begin{frame}{Guidance}
@@ -427,23 +474,29 @@
 \end{frame}
 %=======
 \begin{frame}{Guidance}
-	\begin{block}{How to make conditional model $p(\bx | \by, \btheta)$?}
+	\begin{itemize}
+	\item If we have \textbf{supervised} data $\{(\bx_i, \by_i)\}_{i=1}^n$ we could theat $\by$ as additional model input:
+	\begin{itemize}
+		\item $p(x_j | \bx_{1:j-1}, {\color{olive}\by}, \btheta)$ for AR;
+		\item Encoder $q(\bz | \bx, {\color{olive}\by}, \bphi)$ and decoder $p(\bx | \bz, {\color{olive}\by}, \btheta)$ for VAE;
+		\item $G_{\btheta}(\bz, {\color{olive}\by})$ for NF and GAN;
+		\item $p(\bx_{t-1} | \bx_t, {\color{olive}\by}, \btheta)$ for DDPM.
+	\end{itemize}
+	\item If we have \textbf{unsupervised} data $\{\bx_i\}_{i=1}^n$ we need to create the way to convert unconditional model $p(\bx | \btheta)$ to the conditional.
+	\item It is really helpful to have the way to control the power of guidance.
+	\end{itemize}
+	\begin{block}{Guidance types}
 		\begin{itemize}
-		\item If we have \textbf{supervised} data $\{(\bx_i, \by_i)\}_{i=1}^n$ we could theat $\by$ as additional model input:
-		\begin{itemize}
-			\item $p(x_j | \bx_{1:j-1}, {\color{olive}\by}, \btheta)$ for AR;
-			\item Encoder $q(\bz | \bx, {\color{olive}\by}, \bphi)$ and decoder $p(\bx | \bz, {\color{olive}\by}, \btheta)$ for VAE;
-			\item $G_{\btheta}(\bz, {\color{olive}\by})$ for NF and GAN;
-			\item $p(\bx_{t-1} | \bx_t, {\color{olive}\by}, \btheta)$ for DDPM.
-		\end{itemize}
-		\item If we have \textbf{unsupervised} data $\{\bx_i\}_{i=1}^n$ we need to create the way to convert unconditional model $p(\bx | \btheta)$ to the conditional.
-		\end{itemize}
-	\end{block}
-	\begin{block}{Diffusion \textbf{unsupervised} guidance}
-		\begin{itemize}
-			\item Assume that we are given the distribution $q(\by | \bx_0)$. 
-			\item \textbf{Forward process:} since we have already defined Markov chain, we have $q(\bx_t | \bx_{t-1}, \by) = q(\bx_t | \bx_{t - 1})$.
-			\item \textbf{Reverse process:} let try to find reverse $q(\bx_{t-1} | \bx_t, \by)$.
+			\item \textbf{Classifier guidance:} 
+				\begin{itemize}
+					\item suitable for unsupervised data;
+					\item uses the additional classifier model.
+				\end{itemize}
+			\item \textbf{Classifier-free guidance:} 
+				\begin{itemize}
+					\item suitable for supervised data;
+					\item get rid of the additional classifier model.
+				\end{itemize}
 		\end{itemize}
 	\end{block}
 \end{frame}
@@ -455,35 +508,30 @@
 	\begin{block}{DDPM sampling}
 		\begin{enumerate}
 			\item Sample $\bx_T \sim \cN(0, \bI)$.
-			\item Compute mean of $p(\bx_{t-1} | \bx_t, \btheta) = \cN(\bmu_{\btheta, t}(\bx_t), \sigma_t^2 \cdot \bI)$:
-			\[
-				\bmu_{\btheta, t}(\bx_t) = \frac{1}{\sqrt{\alpha_t}} \cdot \bx_t - \frac{1 - \alpha_t}{\sqrt{\alpha_t (1 - \bar{\alpha}_t)}} \cdot \bepsilon_{\btheta, t}(\bx_t)
-			\]
+			\item Get denoised image (unconditional generation)
 			\vspace{-0.3cm}
-			\item Get denoised image $\bx_{t - 1} = \bmu_{\btheta, t}(\bx_t) +  \sigma_t \cdot \bepsilon$, where $\bepsilon \sim \cN(0, \bI)$.
+			\begin{align*}
+				\bx_{t - 1} &= \frac{1}{\sqrt{1 - \beta_t}} \cdot \bx_t + \frac{\beta_t}{\sqrt{1 - \beta_t}} \cdot {\color{teal}\bs_{\btheta, t} (\bx_t)} +  \sigma_t \cdot \bepsilon \\
+				& = \frac{1}{\sqrt{1 - \beta_t}} \cdot \bx_t + \frac{\beta_t}{\sqrt{1 - \beta_t}} \cdot {\color{teal} \nabla_{\bx_t} \log p(\bx_t | \btheta)} +  \sigma_t \cdot \bepsilon
+			\end{align*}
+			\vspace{-0.5cm}
 		\end{enumerate}
 	\end{block}
-	\vspace{-0.5cm}
-	\[
-		\bx_{t - 1} = \frac{1}{\sqrt{\alpha_t}} \cdot \bx_t - \frac{1 - \alpha_t}{\sqrt{\alpha_t (1 - \bar{\alpha}_t)}} \cdot \bepsilon_{\btheta, t}(\bx_t) +  \sigma_t \cdot \bepsilon
-	\]
-	\[
-		\bs_{\btheta, t}(\bx_t) = - \frac{\bepsilon_{\btheta, t}(\bx_t)}{\sqrt{1 - \bar{\alpha}_t}} = \nabla_{\bx_t} \log p(\bx_t | \btheta)
-	\]
-	\[
-		\bx_{t - 1} = \frac{1}{\sqrt{\alpha_t}} \cdot \bx_t + \frac{1 - \alpha_t}{\sqrt{\alpha_t}} \cdot  \nabla_{\bx_t} \log p(\bx_t | \btheta) +  \sigma_t \cdot \bepsilon
-	\]
+	\begin{block}{Conditional generation}
+		\vspace{-0.3cm}
+		\[
+			\bx_{t - 1} = \frac{1}{\sqrt{\alpha_t}} \cdot \bx_t + \frac{1 - \alpha_t}{\sqrt{\alpha_t}} \cdot  \nabla_{\bx_t} \log p(\bx_t | {\color{olive}\by}, \btheta) +  \sigma_t \cdot \bepsilon
+		\]
+		\vspace{-0.5cm}
+	\end{block}
+	\begin{itemize}
+		\item Assume for simplicity $\by$ is a class labels.
+		\item Suppose that we have the distribution $p(\by | \bx_t)$ -- classifier on noisy samples.
+	\end{itemize}
 	\myfootnotewithlink{https://arxiv.org/abs/2105.05233}{Dhariwal P., Nichol A. Diffusion Models Beat GANs on Image Synthesis, 2021}
 \end{frame}
 %=======
 \begin{frame}{Classifier guidance}
-	\begin{block}{Unconditional generation}
-		\vspace{-0.3cm}
-		\[
-			\bx_{t - 1} = \frac{1}{\sqrt{\alpha_t}} \cdot \bx_t + \frac{1 - \alpha_t}{\sqrt{\alpha_t}} \cdot  \nabla_{\bx_t} \log p(\bx_t | \btheta) +  \sigma_t \cdot \bepsilon
-		\]
-		\vspace{-0.5cm}
-	\end{block}
 	\begin{block}{Conditional generation}
 		\vspace{-0.3cm}
 		\[
@@ -494,23 +542,11 @@
 	\begin{block}{Conditional distribution}
 		\vspace{-0.7cm}
 		\begin{align*}
-			\nabla_{\bx_t} \log p(\bx_t | \by, \btheta) &= \nabla_{\bx_t} \log \left(\frac{p(\by | \bx_t)p(\bx_t | \btheta)}{p(\by)} \right)\\
+			{\color{olive}\nabla_{\bx_t} \log p(\bx_t | \by, \btheta)} &= \nabla_{\bx_t} \log \left(\frac{p(\by | \bx_t)p(\bx_t | \btheta)}{p(\by)} \right)\\
 			&= \nabla_{\bx_t} \log p(\by | \bx_t) + {\color{violet}\nabla_{\bx_t} \log p(\bx_t | \btheta)}\\
-			&= \nabla_{\bx_t} \log p(\by | \bx_t) {\color{violet}- \frac{\bepsilon_{\btheta, t}(\bx_t)}{\sqrt{1 - \bar{\alpha}_t}}}
+			&= {\color{teal}\nabla_{\bx_t} \log p(\by | \bx_t)} {\color{violet}- \frac{\bepsilon_{\btheta, t}(\bx_t)}{\sqrt{1 - \bar{\alpha}_t}}}
 		\end{align*}
-		\vspace{-0.7cm}
-	\end{block}
-	Here $p(\by | \bx_t)$ -- classifier on noisy samples (we have to learn it separately).
-	\myfootnotewithlink{https://arxiv.org/abs/2105.05233}{Dhariwal P., Nichol A. Diffusion Models Beat GANs on Image Synthesis, 2021}
-\end{frame}
-%=======
-\begin{frame}{Classifier guidance}
-	\begin{block}{Conditional distribution}
-		\vspace{-0.3cm}
-		\[
-			{\color{olive}\nabla_{\bx_t} \log p(\bx_t | \by, \btheta)} = {\color{teal}\nabla_{\bx_t} \log p(\by | \bx_t)} {\color{violet}- \frac{\bepsilon_{\btheta, t}(\bx_t)}{\sqrt{1 - \bar{\alpha}_t}}}
-		\]
-		\vspace{-0.3cm}
+		\vspace{-0.5cm}
 	\end{block}
 	Let parametetrize $\nabla_{\bx_t} \log p(\bx_t | \by, \btheta) = - \frac{\bepsilon_{\btheta, t}(\bx_t, \by)}{\sqrt{1 - \bar{\alpha}_t}}$.
 	\begin{block}{Classifier-corrected noise prediction}
@@ -519,11 +555,36 @@
 			{\color{olive}\bepsilon_{\btheta, t}(\bx_t, \by)} = {\color{violet}\bepsilon_{\btheta, t}(\bx_t)} - \sqrt{1 - \bar{\alpha}_t} \cdot {\color{teal}\nabla_{\bx_t} \log p(\by | \bx_t)}
 		\]
 	\end{block}
-	\begin{block}{Guidance scale}
+	\myfootnotewithlink{https://arxiv.org/abs/2105.05233}{Dhariwal P., Nichol A. Diffusion Models Beat GANs on Image Synthesis, 2021}
+\end{frame}
+%=======
+\begin{frame}{Classifier guidance}
+	\begin{block}{Classifier-corrected noise prediction}
+		\vspace{-0.3cm}
 		\[
-			\bepsilon_{\btheta, t}(\bx_t, \by) = \bepsilon_{\btheta, t}(\bx_t) - {\color{teal}\gamma} \cdot \sqrt{1 - \bar{\alpha}_t} \cdot \nabla_{\bx_t} \log p(\by | \bx_t)
+			\bepsilon_{\btheta, t}(\bx_t, \by) = \bepsilon_{\btheta, t}(\bx_t) - \sqrt{1 - \bar{\alpha}_t} \cdot \nabla_{\bx_t} \log p(\by | \bx_t)
+		\]
+		\vspace{-0.5cm}
+	\end{block}
+	\begin{block}{Guidance scale}
+		\vspace{-0.3cm}
+		\[
+			{\color{olive}\bepsilon_{\btheta, t}(\bx_t, \by)} = \bepsilon_{\btheta, t}(\bx_t) - {\color{teal}\gamma} \cdot \sqrt{1 - \bar{\alpha}_t} \cdot \nabla_{\bx_t} \log p(\by | \bx_t)
 		\]
 		Here we introduce {\color{teal} guidance scale $\gamma$} that controls the magnitude of the classifier guidance.
+	\end{block}
+	\begin{block}{Training}
+		\begin{itemize}
+			\item Train DDPM as usual.
+			\item Train the additional classifier $p(\by | \bx_t)$ on the noisy samples $\bx_t$.
+		\end{itemize}
+		\vspace{-0.2cm}
+	\end{block}
+	\begin{block}{Guided sampling}
+		\vspace{-0.3cm}
+		\[
+			\bx_{t-1} = \frac{1}{\sqrt{\alpha_t}} \cdot \bx_t - \frac{1 - \alpha_t}{\sqrt{\alpha_t (1 - \bar{\alpha}_t)}} \cdot  {\color{olive}\bepsilon_{\btheta, t}(\bx_t, \by)} + \sigma_t \cdot \bepsilon
+		\]
 	\end{block}
 	\myfootnotewithlink{https://arxiv.org/abs/2105.05233}{Dhariwal P., Nichol A. Diffusion Models Beat GANs on Image Synthesis, 2021}
 \end{frame}
@@ -536,7 +597,7 @@
 		\]
 		\vspace{-0.7cm}
 	\end{block}
-	\begin{block}{Conditional distribution}
+	\begin{block}{Guidance-scaled conditional distribution}
 		\[
 			\frac{\bepsilon_{\btheta, t}(\bx_t, \by)}{\sqrt{1 - \bar{\alpha}_t}} = \frac{\bepsilon_{\btheta, t}(\bx_t)}{\sqrt{1 - \bar{\alpha}_t}} - {\color{teal}\gamma} \cdot \nabla_{\bx_t} \log p(\by | \bx_t)
 		\]
@@ -548,30 +609,7 @@
 		\end{align*}
 		\vspace{-0.5cm}
 	\end{block}
-	\textbf{Note:} Guidance scale $\gamma$ tries to sharpen the distribution $p(\by | \bx_t)$.
-	\myfootnotewithlink{https://arxiv.org/abs/2105.05233}{Dhariwal P., Nichol A. Diffusion Models Beat GANs on Image Synthesis, 2021}
-\end{frame}
-%=======
-\begin{frame}{Classifier guidance}
-	\begin{itemize}
-		\item Train DDPM as usual.
-		\item Train the classifier $p(\by | \bx_t)$ on the noisy samples $\bx_t$.
-	\end{itemize}
-	\begin{block}{Guided sampling}
-		\begin{enumerate}
-			\item Sample $\bx_T \sim \cN(0, \bI)$.
-			\item Compute "corrected" $\bepsilon_{\btheta, t}(\bx_t, \by)$:
-			\[
-				{\color{olive}\bepsilon_{\btheta, t}(\bx_t, \by)} = \bepsilon_{\btheta, t}(\bx_t) - {\color{teal}\gamma} \cdot \sqrt{1 - \bar{\alpha}_t} \cdot \nabla_{\bx_t} \log p(\by | \bx_t)
-			\]
-			\item Compute mean of $p(\bx_{t-1} | \bx_t, \by, \btheta) = \cN\bigl(\bmu_{\btheta, t}(\bx_t, \by), \sigma_t^2 \cdot \bI\bigr)$:
-			\[
-				\bmu_{\btheta, t}(\bx_t, \by) = \frac{1}{\sqrt{\alpha_t}} \bx_t - \frac{1 - \alpha_t}{\sqrt{\alpha_t (1 - \bar{\alpha}_t)}} \cdot  	{\color{olive}\bepsilon_{\btheta, t}(\bx_t, \by)}
-			\]
-			\vspace{-0.3cm}
-			\item Get denoised image $\bx_{t - 1} = \bmu_{\btheta, t}(\bx_t, \by) + \sigma_t \cdot \bepsilon$, where $\bepsilon \sim \cN(0, \bI)$.
-		\end{enumerate}
-	\end{block}
+	\textbf{Note:} Guidance scale $\gamma$ tries to sharpen the distribution $p(\by | \bx_t)$ (in this case $Z$ should not depend on $\bx_t$).
 	\myfootnotewithlink{https://arxiv.org/abs/2105.05233}{Dhariwal P., Nichol A. Diffusion Models Beat GANs on Image Synthesis, 2021}
 \end{frame}
 %=======
@@ -623,13 +661,13 @@
 %=======
 \begin{frame}{Summary}
 	\begin{itemize}
-		\item At each step DDPM predicts the noise that was used in the forward diffusion process. This noise is used in the reverse process.
+		\item At each step DDPM predicts the noise that was used in the forward diffusion process. 
 		\vfill
-		\item DDPM is a VAE model that tries to invert forward diffusion process using variational inference. DDPM is really slow, because we have to apply the model $T$ times.
+		\item DDPM is a VAE model that tries to invert forward diffusion process using variational inference. 
 		\vfill
-		\item Objective of DDPM is closely related to the noise conditioned score network and score matching.	
+		\item DDPM is really slow, because we have to apply the model $T$ times.
 		\vfill
-		\item Conditional models use labels $\by$ as the additional input. Majority of the modern generative models are conditional.
+		\item DDPM and NCSN are closely related in terms of objectives.	
 		\vfill
 		\item Classifier guidance is the way to turn the unconditional model to the conditional one via the training additional classifier on the noisy data.
 		\vfill
