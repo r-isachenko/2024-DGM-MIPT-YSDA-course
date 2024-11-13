@@ -268,7 +268,7 @@
 			\item Encoder is a fixed Gaussian Markov chain $q(\bx_1, \dots, \bx_T | \bx_0)$.
 			\item Latent variable is a hierarchical (in each step the dim. of the latent equals to the dim of the input).
 			\item Decoder is a simple Gaussian model $p(\bx_0 | \bx_1, \btheta)$.
-			\item Prior distribution is given by parametric Gaussian Makov chain $p(\bx_{t-1} | \bx_t, \btheta)$.
+			\item Prior distribution is given by parametric Gaussian Markov chain $p(\bx_{t-1} | \bx_t, \btheta)$.
 		\end{itemize}
 	\end{block}
 	\begin{minipage}{0.5\linewidth}
@@ -421,7 +421,7 @@
 		\end{itemize}
 	\end{block}
 	\myfootnote{\href{https://arxiv.org/abs/2107.00630}{Kingma D. et al. Variational Diffusion Models, 2021} \\
-	\href{}{Song Y. et al. Score-Based Generative Modeling through Stochastic Differential Equations, 2020}}
+	\href{https://arxiv.org/abs/2011.13456}{Song Y. et al. Score-Based Generative Modeling through Stochastic Differential Equations, 2020}}
 	\end{frame}
 \section{Guidance}
 %=======
@@ -490,7 +490,7 @@
 			\item \textbf{Classifier guidance:} 
 				\begin{itemize}
 					\item suitable for unsupervised data;
-					\item uses the additional classifier model.
+					\item uses the additional classifier model (we need supervised data to train the classifier).
 				\end{itemize}
 			\item \textbf{Classifier-free guidance:} 
 				\begin{itemize}
@@ -518,9 +518,9 @@
 		\end{enumerate}
 	\end{block}
 	\begin{block}{Conditional generation}
-		\vspace{-0.3cm}
+		\vspace{-0.5cm}
 		\[
-			\bx_{t - 1} = \frac{1}{\sqrt{\alpha_t}} \cdot \bx_t + \frac{1 - \alpha_t}{\sqrt{\alpha_t}} \cdot  \nabla_{\bx_t} \log p(\bx_t | {\color{olive}\by}, \btheta) +  \sigma_t \cdot \bepsilon
+			\bx_{t - 1} = \frac{1}{\sqrt{1 - \beta_t}}\cdot \bx_t +  \frac{\beta_t}{\sqrt{1 - \beta_t}}  \cdot  \nabla_{\bx_t} \log p(\bx_t | {\color{olive}\by}, \btheta) +  \sigma_t \cdot \bepsilon
 		\]
 		\vspace{-0.5cm}
 	\end{block}
@@ -533,9 +533,9 @@
 %=======
 \begin{frame}{Classifier guidance}
 	\begin{block}{Conditional generation}
-		\vspace{-0.3cm}
+		\vspace{-0.5cm}
 		\[
-			\bx_{t - 1} = \frac{1}{\sqrt{\alpha_t}} \cdot \bx_t + \frac{1 - \alpha_t}{\sqrt{\alpha_t}} \cdot  \nabla_{\bx_t} \log p(\bx_t | {\color{olive}\by}, \btheta) +  \sigma_t \cdot \bepsilon
+			\bx_{t - 1} = \frac{1}{\sqrt{1 - \beta_t}}\cdot \bx_t +  \frac{\beta_t}{\sqrt{1 - \beta_t}}  \cdot  \nabla_{\bx_t} \log p(\bx_t | {\color{olive}\by}, \btheta) +  \sigma_t \cdot \bepsilon
 		\]
 		\vspace{-0.5cm}
 	\end{block}
@@ -643,7 +643,7 @@
 		\nabla_{\bx_t}^{\gamma} \log p(\bx_t | \by, \btheta) =  (1 - \gamma) \cdot  \nabla_{\bx_t} \log p(\bx_t | \btheta) + \gamma \cdot  \nabla_{\bx_t} \log p(\bx_t| \by, \btheta)
 	\]
 	\[
-		\frac{\bepsilon_{\btheta, t}(\bx_t, \by)}{\sqrt{1 - \bar{\alpha}_t}} = (1 - \gamma) \cdot  \frac{\bepsilon_{\btheta, t}(\bx_t)}{\sqrt{1 - \bar{\alpha}_t}} +  \gamma \cdot \frac{\bepsilon_{\btheta, t}(\bx_t, \by)}{\sqrt{1 - \bar{\alpha}_t}} 
+		\frac{\hat{\bepsilon}_{\btheta, t}(\bx_t, \by)}{\sqrt{1 - \bar{\alpha}_t}} = (1 - \gamma) \cdot  \frac{\bepsilon_{\btheta, t}(\bx_t)}{\sqrt{1 - \bar{\alpha}_t}} +  \gamma \cdot \frac{\bepsilon_{\btheta, t}(\bx_t, \by)}{\sqrt{1 - \bar{\alpha}_t}} 
 	\]
 	\begin{block}{Classifier-free-corrected noise prediction}
 		\vspace{-0.3cm}
