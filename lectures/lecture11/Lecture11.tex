@@ -83,67 +83,85 @@
 		\item NCSN uses annealed Langevin dynamics;
 		\item DDPM uses ancestral sampling.
 	\end{itemize}
-	\[
-		\bs_{\btheta, t}(\bx_t) = - \frac{\bepsilon_{\btheta, t}(\bx_t)}{\sqrt{1 - \bar{\alpha}_t}} = \nabla_{\bx_t} \log p(\bx_t | \btheta)
-	\]
 	\myfootnotewithlink{https://arxiv.org/abs/2006.11239}{Ho J. Denoising Diffusion Probabilistic Models, 2020}
 	\end{frame}
+%=======
+\begin{frame}{Recap of previous lecture}
+	\begin{block}{DDPM vs NCSN: summary}
+		\begin{itemize}
+		\item Different Markov chains:
+			\begin{itemize}
+				\item DDPM: $\bx_t = \sqrt{\bar{\alpha}_t} \cdot \bx_0 + \sqrt{1 - \bar{\alpha}_t} \cdot \bepsilon$;
+				\item NCSN: $\bx_t = \bx_0 + \sigma_t \cdot \bepsilon$.
+				\item It is possible to consider the more general framework $q(\bx_t |\bx_0) = \cN(\alpha_t \cdot \bx_0, \sigma^2_t\cdot \bI)$
+			\end{itemize}
+		\item Identical objectives: ELBO $\equiv$ score-matching.
+		\item Different sampling schemes:
+			\begin{itemize}
+				\item ancestral sampling for DDPM;
+				\item annealed Langevin dynamics for NCSN;
+				\item there is a combined approach with alternating updates of DDPM and NCSN.
+			\end{itemize}
+		\end{itemize}
+	\end{block}
+	\myfootnote{\href{https://arxiv.org/abs/2107.00630}{Kingma D. et al. Variational Diffusion Models, 2021} \\
+	\href{https://arxiv.org/abs/2011.13456}{Song Y. et al. Score-Based Generative Modeling through Stochastic Differential Equations, 2020}}
+\end{frame}
 %=======
 \begin{frame}{Recap of previous lecture}
 	\begin{block}{Unconditional generation}
 		\vspace{-0.3cm}
 		\[
-			\bx_{t - 1} = \frac{1}{\sqrt{\alpha_t}} \cdot \bx_t + \frac{1 - \alpha_t}{\sqrt{\alpha_t}} \cdot  \nabla_{\bx_t} \log p(\bx_t | \btheta) +  \sigma_t \cdot \bepsilon
+			\bx_{t - 1} = \frac{1}{\sqrt{1 - \beta_t}} \cdot \bx_t + \frac{\beta_t}{\sqrt{1 - \beta_t}} \cdot {\color{teal} \nabla_{\bx_t} \log p(\bx_t | \btheta)} +  \sigma_t \cdot \bepsilon
 		\]
 		\vspace{-0.5cm}
 	\end{block}
 	\begin{block}{Conditional generation}
-		\vspace{-0.3cm}
+		\vspace{-0.5cm}
 		\[
-			\bx_{t - 1} = \frac{1}{\sqrt{\alpha_t}} \cdot \bx_t + \frac{1 - \alpha_t}{\sqrt{\alpha_t}} \cdot  \nabla_{\bx_t} \log p(\bx_t | {\color{olive}\by}, \btheta) +  \sigma_t \cdot \bepsilon
+			\bx_{t - 1} =  \frac{1}{\sqrt{1 - \beta_t}}\cdot \bx_t +  \frac{\beta_t}{\sqrt{1 - \beta_t}}  \cdot  \nabla_{\bx_t} \log p(\bx_t | {\color{olive}\by}, \btheta) +  \sigma_t \cdot \bepsilon
 		\]
 		\vspace{-0.5cm}
 	\end{block}
 	\begin{block}{Conditional distribution}
-		\vspace{-0.3cm}
-		\[
-			\nabla_{\bx_t} \log p(\bx_t | \by, \btheta) = \nabla_{\bx_t} \log p(\by | \bx_t) {\color{violet}- \frac{\bepsilon_{\btheta, t}(\bx_t)}{\sqrt{1 - \bar{\alpha}_t}}}
-		\]
-		\vspace{-0.3cm}
+		\vspace{-0.5cm}
+		\begin{align*}
+			{\color{olive}\nabla_{\bx_t} \log p(\bx_t | \by, \btheta)} &= \nabla_{\bx_t} \log p(\by | \bx_t) + {\color{violet}\nabla_{\bx_t} \log p(\bx_t | \btheta)}\\
+			&= {\color{teal}\nabla_{\bx_t} \log p(\by | \bx_t)} {\color{violet}- \frac{\bepsilon_{\btheta, t}(\bx_t)}{\sqrt{1 - \bar{\alpha}_t}}}
+		\end{align*}
+		\vspace{-0.5cm}
 	\end{block}
 	Here $p(\by | \bx_t)$ -- classifier on noisy samples (we have to learn it separately).
-	\begin{block}{Classifier-corrected noise prediction}
-		\vspace{-0.3cm}
-		\[
-			{\color{olive}\bepsilon_{\btheta, t}(\bx_t, \by)} = {\color{violet}\bepsilon_{\btheta, t}(\bx_t)} - \sqrt{1 - \bar{\alpha}_t} \cdot {\color{teal}\nabla_{\bx_t} \log p(\by | \bx_t)}
-		\]
-	\end{block}
 	\myfootnotewithlink{https://arxiv.org/abs/2105.05233}{Dhariwal P., Nichol A. Diffusion Models Beat GANs on Image Synthesis, 2021}
 \end{frame}
 %=======
 \begin{frame}{Recap of previous lecture}
-	\begin{block}{Guidance scale}
+	\begin{block}{Classifier-corrected noise prediction}
 		\vspace{-0.3cm}
 		\[
-			\bepsilon_{\btheta, t}(\bx_t, \by) = \bepsilon_{\btheta, t}(\bx_t) - {\color{teal}\gamma} \cdot \sqrt{1 - \bar{\alpha}_t} \cdot \nabla_{\bx_t} \log p(\by | \bx_t)
-		\]
-		\[
-			\nabla_{\bx_t}^{\gamma} \log p(\bx_t | \by, \btheta) = \nabla_{\bx_t} \log \left( \frac{p(\by | \bx_t)^{\gamma} p(\bx_t | \btheta)}{Z} \right)
+			\bepsilon_{\btheta, t}(\bx_t, \by) = \bepsilon_{\btheta, t}(\bx_t) - \sqrt{1 - \bar{\alpha}_t} \cdot \nabla_{\bx_t} \log p(\by | \bx_t)
 		\]
 		\vspace{-0.5cm}
 	\end{block}
-	\textbf{Note:} Guidance scale $\gamma$ tries to sharpen the distribution $p(\by | \bx_t)$.
-	\begin{block}{Guided sampling}
+	\begin{block}{Guidance scale}
+		\vspace{-0.3cm}
 		\[
 			{\color{olive}\bepsilon_{\btheta, t}(\bx_t, \by)} = \bepsilon_{\btheta, t}(\bx_t) - {\color{teal}\gamma} \cdot \sqrt{1 - \bar{\alpha}_t} \cdot \nabla_{\bx_t} \log p(\by | \bx_t)
 		\]
-		\[
-			\bmu_{\btheta, t}(\bx_t, \by) = \frac{1}{\sqrt{\alpha_t}} \bx_t - \frac{1 - \alpha_t}{\sqrt{\alpha_t (1 - \bar{\alpha}_t)}} \cdot  	{\color{olive}\bepsilon_{\btheta, t}(\bx_t, \by)}
-		\]
-		\[
-			\bx_{t - 1} = \bmu_{\btheta, t}(\bx_t, \by) + \sigma_t \cdot \bepsilon, \quad \bepsilon \sim \cN(0, \bI)
-		\]
+		\vspace{-0.5cm}
 	\end{block}
+	\begin{itemize}
+		\item Train DDPM as usual.
+		\item Train the additional classifier $p(\by | \bx_t)$ on the noisy samples $\bx_t$.
+	\end{itemize}
+	\begin{block}{Guided sampling}
+		\vspace{-0.3cm}
+		\[
+			\bx_{t-1} = \frac{1}{\sqrt{\alpha_t}} \cdot \bx_t - \frac{1 - \alpha_t}{\sqrt{\alpha_t (1 - \bar{\alpha}_t)}} \cdot  {\color{olive}\bepsilon_{\btheta, t}(\bx_t, \by)} + \sigma_t \cdot \bepsilon
+		\]
+		\vspace{-0.3cm}
+	\end{block}
+	\textbf{Note:} Guidance scale $\gamma$ tries to sharpen the distribution $p(\by | \bx_t)$ (in this case $Z$ should not depend on $\bx_t$).
 	\myfootnotewithlink{https://arxiv.org/abs/2105.05233}{Dhariwal P., Nichol A. Diffusion Models Beat GANs on Image Synthesis, 2021}
 \end{frame}
 %=======
@@ -181,50 +199,102 @@
 %=======
 \section{Continuous-in-time normalizing flows}
 %=======
-\begin{frame}{Continuous-in-time normalizing flows}
+\begin{frame}{Discrete-in-time NF}
 	\vspace{-0.3cm}
-	\begin{block}{Discrete-in-time NF}
-		Previously we assume that the time axis is discrete:
+	\begin{block}{Change of variable theorem (CoV)}
+		Let $\bx$ be a random variable with density function $p(\bx)$ and $\bff: \mathbb{R}^m \rightarrow \mathbb{R}^m$ is a differentiable, \textbf{invertible} function. If $\bz = \bff(\bx)$, $\bx = \bff^{-1}(\bz) = \bg(\bz)$, then
 		\vspace{-0.3cm}
-		  \[
-			  \bz_{t+1} = \bff_{\btheta}(\bz_t); \quad \log p(\bz_{t+1}) = \log p(\bz_{t}) - \log \left| \det \frac{\partial \bff_{\btheta}(\bz_t)}{\partial \bz_{t}} \right| .
-		  \]
-		\vspace{-0.6cm}
+		\[
+			p(\bx) = p(\bz) |\det(\bJ_{\bff})| = p(\bz) \left|\det \left( \frac{\partial \bz}{\partial \bx} \right) \right| = p(\bff(\bx)) \left|\det \left(  \frac{\partial \bff(\bx)}{\partial \bx} \right) \right|
+		\]
+		\vspace{-0.5cm}
 	\end{block}
-	Let assume the more general case of continuous time. It means that we will have the dynamic function $\bz(t)$.
+
+	\vspace{-0.3cm}
+	\begin{figure}
+		\includegraphics[width=0.95\linewidth]{figs/normalizing-flow}
+	\end{figure}
+	\vspace{-0.4cm}
+	\[
+		\log p(\bx | \btheta) = \log p(\bff_K \circ \dots \circ \bff_1(\bx)) + \sum_{k=1}^K\log \left|\det \left(\frac{\partial \mathbf{f}_k}{\partial \bff_{k-1}}\right)\right|.
+	\]
+	\vspace{-0.4cm}
+	\myfootnotewithlink{https://lilianweng.github.io/lil-log/2018/10/13/flow-based-deep-generative-models.html}{https://lilianweng.github.io/lil-log/2018/10/13/flow-based-deep-generative-models.html}
+\end{frame}
+%=======
+\begin{frame}{Discrete-in-time NF}
+	\begin{itemize}
+		\item Previously we assumed that the time axis is discrete:
+		\vspace{-0.3cm}
+		 \[
+		 	 \bx_{t+1} = \bff_{\btheta}(\bx_t, t); \quad \log p(\bx_{t+1}) = \log p(\bx_{t}) - \log \left| \det \frac{\partial \bff_{\btheta}(\bx_t)}{\partial \bx_{t}} \right| .
+		 \]
+		\item Let consider the more general case of continuous time. It means that we will have the function $\bx(t): \bbR \rightarrow \bbR^m$ of continuous dynamic.
+	\end{itemize}
 	\begin{block}{Continuous-in-time dynamics}
 		Consider Ordinary Differential Equation (ODE)
 		\vspace{-0.3cm}
 		\begin{align*}
-		   \frac{d \bz(t)}{dt} &= \bff_{\btheta}(\bz(t), t); \quad \text{with initial condition }\bz(t_0) = \bz_0. \\
-		   \bz(t_1) &= \int^{t_1}_{t_0} \bff_{\btheta}(\bz(t), t) d t  + \bz_0 \approx \text{ODESolve}(\bz(t_0), \bff_{\btheta}, t_0,t_1).
+		   \frac{d \bx(t)}{dt} &= \bff_{\btheta}(\bx(t), t); \quad \text{with initial condition }\bx(t_0) = \bx_0. \\
+		   \bx(t_1) &= \int^{t_1}_{t_0} \bff_{\btheta}(\bx(t), t) d t  + \bx_0
 		\end{align*}
 		\vspace{-0.6cm}
 	\end{block}
-	Here we need to define the computational procedure $\text{ODESolve}(\bz(t_0), \bff_{\btheta}, t_0,t_1)$.
-	\myfootnotewithlink{https://arxiv.org/abs/1810.01367}{Grathwohl W. et al. FFJORD: Free-form Continuous Dynamics for Scalable Reversible Generative Models, 2018}  
+	Here $\bff_{\btheta}: \bbR^m \times [t_0, t_1] \rightarrow \bbR^m$ is a vector field.
+\end{frame}
+%=======
+\begin{frame}{Numerical solution of ODE}
+	\vspace{-0.3cm}
+	\begin{align*}
+		\frac{d \bx(t)}{dt} &= \bff_{\btheta}(\bx(t), t); \quad \text{with initial condition }\bx(t_0) = \bx_0. \\
+		\bx(t_1) &= \int^{t_1}_{t_0} \bff_{\btheta}(\bx(t), t) d t  + \bx_0 \approx \text{ODESolve}_f(\bx_0, \btheta, t_0, t_1).
+	\end{align*}
+	Here we need to define the computational procedure $\text{ODESolve}_f(\bx_0, \btheta, t_0, t_1)$.
+	\begin{block}{Euler update step}
+		\begin{minipage}[t]{0.6\columnwidth}
+			\vspace{-0.5cm}
+			\[
+	  			\frac{\bx(t + \Delta t) - \bx(t)}{\Delta t} = \bff_{\btheta}(\bx(t), t)
+			\]
+			\[
+	  			\bx(t + \Delta t) = \bx(t) + \Delta t \cdot \bff_{\btheta}(\bx(t), t)
+			\]
+		\end{minipage}%
+		\begin{minipage}[t]{0.4\columnwidth}
+			\vspace{-0.3cm}
+			\begin{figure}
+				\centering
+				\includegraphics[width=0.7\linewidth]{figs/euler}
+			\end{figure}
+		\end{minipage}
+	\end{block}
+	\textbf{Note:} Euler method is the simplest version of the ODESolve that is unstable in practice.
 \end{frame}
 %=======
 \begin{frame}{Continuous-in-time normalizing flows}
-	\begin{block}{Euler update step}
-		\vspace{-0.5cm}
+	Let consider time interval $[t_0, t_1] = [0, 1]$ without loss of generality.
+	\begin{block}{Neural ODE}
+		\vspace{-0.2cm}
 		\[
-		    \frac{\bz(t + \Delta t) - \bz(t)}{\Delta t} = \bff_{\btheta}(\bz(t), t) \,\, \Rightarrow \,\, \bz(t + \Delta t) = \bz(t) + \Delta t \cdot \bff_{\btheta}(\bz(t), t)
+  			\frac{d \bx(t)}{dt} = \bff_{\btheta}(\bx(t), t); \quad \text{with initial condition }\bx(t_0) = \bx_0
 		\]
 		\vspace{-0.5cm}
 	\end{block}
-	\textbf{Note:} Euler method is the simplest version of ODESolve that is unstable in practice.  It is possible to use more sophisticated methods (e.x. Runge-Kutta methods).
-	\begin{minipage}[t]{0.4\columnwidth}
-		\begin{figure}
-			\centering
-			\includegraphics[width=0.7\linewidth]{figs/euler}
-		\end{figure}
+	\begin{block}{Euler ODESolve}
+		\vspace{-0.3cm}
+		\[
+		    \bx(t + \Delta t) = \bx(t) + \Delta t \cdot \bff_{\btheta}(\bx(t), t)
+		\]
+		\vspace{-0.3cm}
+	\end{block}
+	\begin{minipage}[t]{0.45\columnwidth}
+		\textbf{Note:} It is possible to use more sophisticated numerical methods instead if Euler (e.x. Runge-Kutta methods).
 	\end{minipage}%
-	\begin{minipage}[t]{0.6\columnwidth}
-		\vspace{-0.2cm}
+	\begin{minipage}[t]{0.55\columnwidth}
+		\vspace{-0.5cm}
 		\begin{figure}
 			\centering
-			\includegraphics[width=0.9\linewidth]{figs/resnet_vs_neural_ode.png}
+			\includegraphics[width=\linewidth]{figs/resnet_vs_neural_ode}
 		\end{figure}
 	\end{minipage}
 	
@@ -234,20 +304,18 @@
 %=======
 \begin{frame}{Continuous-in-time Normalizing Flows}
 	\vspace{-0.5cm}
-	\begin{block}{Neural ODE}
-		\vspace{-0.5cm}
-		\begin{align*}
-  \frac{d \bz(t)}{dt} &= \bff_{\btheta}(\bz(t), t); \quad \text{with initial condition }\bz(t_0) = \bz_0
-		\end{align*}
-		\vspace{-0.8cm}
-	\end{block}
+	\[
+ 		\frac{d \bx(t)}{dt} = \bff_{\btheta}(\bx(t), t); \quad \text{with initial condition }\bx(t_0) = \bx_0
+	\]
+	\vspace{-0.5cm}
 	\begin{minipage}[t]{0.6\columnwidth}
 		\begin{itemize}
-			\item $\bz(t_0)$ is a random variable with the density function $p(\bz(t_0))$.
-		 	\item $\bz(t_1)$ is a random variable with the density function $p(\bz(t_1))$.
-			\item$p_t(\bz) = p(\bz, t)$ is the joint density function (probability path). \\ {\color{gray}What is the difference between $p_t(\bz(t))$ and $p_t(\bz)$?}
-			\item Let consider time interval $[t_0, t_1] = [0, 1]$ without loss of generality.
+			\item $\bx(0)$ is a random variable with the density function $p(\bx(0))$.
+		 	\item $\bx(1)$ is a random variable with the density function $p(\bx(1))$.
+			\item$p_t(\bx) = p(\bx, t)$ is the \textbf{probability path} between $p_0(\bx)$ and $p_1(\bx)$.
+			\item Let say that $p_0(\bx) = \cN(0, \bI)$ is the base distribution and $p_1(\bx) = \pi(\bx)$ is the data distribution (that we try to approximate with the model distribution $p(\bx | \btheta)$.
 		\end{itemize}
+		\vspace{0.2cm}
 	\end{minipage}%
 	\begin{minipage}[t]{0.4\columnwidth}	
 		\begin{figure}
@@ -255,47 +323,47 @@
 			\includegraphics[width=\linewidth]{figs/cnf_flow.png}
 		\end{figure}
 	\end{minipage}
+	{\color{gray}What is the difference between $p_t(\bx(t))$ and $p_t(\bx)$?}
 	\myfootnotewithlink{https://arxiv.org/abs/1810.01367}{Grathwohl W. et al. FFJORD: Free-form Continuous Dynamics for Scalable Reversible Generative Models, 2018}  
 \end{frame}
 %=======
 \begin{frame}{Continuous-in-time Normalizing Flows}
-	Let say that $p_0(\bz)$ is the base distribution ($\cN(0, \bI)$) and $p_1(\bz)$ is the desired model distribution $p(\bx | \btheta)$.
 	\begin{block}{Theorem (Picard)}
-		If $\bff$ is uniformly Lipschitz continuous in $\bz$ and continuous in $t$, then the ODE has a \textbf{unique} solution.
+		If $\bff$ is uniformly Lipschitz continuous in $\bx$ and continuous in $t$, then the ODE has a \textbf{unique} solution.
 	\end{block}
 	It means that we are able \textbf{uniquely revert} our ODE. 
-	\begin{block}{Forward and inverse transforms}
-		\vspace{-0.7cm}
-		\begin{align*}
-			\bx &= \bz(1) = \bz(0) + \int_{0}^{1} \bff_{\btheta}(\bz(t), t) dt \\
-			\bz &= \bz(0) = \bz(1) + \int_{1}^{0} \bff_{\btheta}(\bz(t), t) dt
-		\end{align*}
-		\vspace{-0.5cm}
+	\begin{align*}
+		\bx &= \bx(1) = \bx(0) + \int_{0}^{1} \bff_{\btheta}(\bx(t), t) dt \\
+		\bx &= \bx(0) = \bx(1) + \int_{1}^{0} \bff_{\btheta}(\bx(t), t) dt
+	\end{align*}
+	\textbf{Note:} Unlike discrete-in-time NF, $\bff$ does not need to be invertible (uniqueness guarantees bijectivity).
+	\begin{block}{What is left?}
+		\begin{itemize}
+			\item We need the way to compute $p_t(\bx)$ at any moment $t$.
+			\item We need the way to find the optimal parameters $\btheta$ of the dynamic $\bff_{\btheta}$.
+		\end{itemize}
 	\end{block}
-	\textbf{Note:} Unlike discrete-in-time NF, $\bff$ does not need to be bijective (uniqueness guarantees bijectivity).
 	\myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}   
 \end{frame}
 %=======
 \section{Kolmogorov-Fokker-Planck equation for NF log-likelihood}
 %=======
 \begin{frame}{Continuous-in-time Normalizing Flows}
-	\begin{block}{What do we need?}
-		\begin{itemize}
-			\item We need the way to compute $p_t(\bz)$ at any moment $t$.
-			\item We need the way to find the optimal parameters $\btheta$ of the dynamic $\bff_{\btheta}$.
-		\end{itemize}
-	\end{block}
-	\vspace{-0.3cm}
-	\begin{block}{Theorem (Kolmogorov-Fokker-Planck: special case)}
-		If $\bff$ is uniformly Lipschitz continuous in $\bz$ and continuous in $t$, then
+	\begin{block}{Theorem (continuity equation)}
+		If $\bff$ is uniformly Lipschitz continuous in $\bx$ and continuous in $t$, then
 		\[
-			\frac{d \log p_t(\bz(t))}{d t} = - \text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right).
+			\frac{d \log p_t(\bx(t))}{d t} = - \text{tr} \left( \frac{\partial \bff(\bx(t), t)}{\partial \bx(t)} \right)
 		\]
+		\vspace{-0.3cm}
+	\end{block}
+	It means that if we have the value $\bx_0 = \bx(0)$ then the solution of the continuity equation will give us the density $p_1(\bx(1))$.
+	\begin{block}{Solution of continuity equation}
+		\vspace{-0.3cm}
 		\[
-			\log p_1(\bz(1)) = \log p_0(\bz(0)) - \int_{0}^{1} \text{tr}  \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) dt.
+			\log p_1(\bx(1)) = \log p_0(\bx(0)) - \int_{0}^{1} \text{tr}  \left( \frac{\partial \bff(\bx(t), t)}{\partial \bx(t)} \right) dt.
 		\]
 	\end{block}
-	It means that if we have the value $\bz_0 = \bz(0)$ then the solution of the ODE will give us the density at the moment $t=1$.
+	\textbf{Note:} This solution will give us the density along the trajectory (not the total probability path).
 	\myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}   
 \end{frame}
 %=======
@@ -303,17 +371,17 @@
 	\begin{block}{Forward transform + log-density}
 		\vspace{-0.7cm}
 		\begin{align*}
-				\bx &= \bz + \int_{0}^{1} \bff_{\btheta}(\bz(t), t) dt \\
-				\log p(\bx | \btheta) &= \log p(\bz) - \int_{0}^{1} \text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) dt
-		\end{align*}
-		Here $p(\bx | \btheta) = p_1(\bz)$, $p(\bz) = p_0(\bz)$.
+				\bx(1) &= \bx(0) + \int_{0}^{1} \bff_{\btheta}(\bx(t), t) dt \\
+				\log p_1(\bx(1) | \btheta) &= \log p_0(\bx(0)) - \int_{0}^{1} \text{tr} \left( \frac{\partial \bff_{\btheta}(\bx(t), t)}{\partial \bx(t)} \right) dt
+		\end{align*}		
+		\vspace{-0.3cm}
 	\end{block}
 	\begin{itemize}
 		\item \textbf{Discrete-in-time NF}: evaluation of determinant of the Jacobian costs $O(m^3)$ (we need invertible $\bff$).
 		\item \textbf{Continuous-in-time NF}: getting the trace of the Jacobian costs $O(m^2)$ (we need smooth $\bff$).
 	\end{itemize}
 	\begin{block}{Why $O(m^2)$?}
-		$\text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t))}{\partial \bz(t)} \right)$ costs $O(m^2)$ ($m$ evaluations of $\bff$), since we have to compute a derivative for each diagonal element. It is possible to reduce cost from $O(m^2)$ to $O(m)$!
+		$\text{tr} \left( \frac{\partial \bff_{\btheta}(\bx(t))}{\partial \bx(t)} \right)$ costs $O(m^2)$ ($m$ evaluations of $\bff$), since we have to compute a derivative for each diagonal element. It is possible to reduce cost from $O(m^2)$ to $O(m)$!
 	\end{block}
 	\myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}   
 \end{frame}
@@ -322,7 +390,7 @@
 %=======
 \begin{frame}{Continuous-in-time Normalizing Flows}
 	\begin{block}{Hutchinson's trace estimator}
-		If $\bepsilon \in \bbR^m$ is a random variable with $\mathbb{E} [\bepsilon] = 0$ and $\text{cov} (\bepsilon) = \bI$, then
+		If $\bepsilon \in \bbR^m$ is a random variable with $\mathbb{E} [\bepsilon] = 0$ and $\text{Cov} (\bepsilon) = \bI$, then
 		\vspace{-0.3cm}
 		\begin{multline*}
 		    \text{tr}(\mathbf{A}) = \text{tr}\left(\mathbf{A} \cdot {\color{olive}\bI} \right) = \text{tr}\left(\mathbf{A} \cdot {\color{olive}\mathbb{E}_{p(\bepsilon)} \left[ \bepsilon \bepsilon^T \right]} \right) = \\ 
@@ -330,11 +398,11 @@
 		\end{multline*}
 		\vspace{-0.6 cm}
 	\end{block}
-	Jacobian vector products ${\color{violet}\bv^T \frac{\partial f}{\partial \bz}}$ can be computed for approximately the same cost as evaluating $\bff$ (\texttt{torch.autograd.functional.jvp}).
+	Jacobian vector products ${\color{violet}\bv^T \frac{\partial f}{\partial \bx}}$ can be computed for approximately the same cost as evaluating $\bff$ (\texttt{torch.autograd.functional.jvp}).
 	\begin{block}{FFJORD density estimation}
 		\vspace{-0.8cm}
 		\begin{multline*}
-		    \log p_1(\bz(1)) = \log p_0(\bz(0)) - \int_{0}^{1} \text{tr}  \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) dt = \\ = \log p_0(\bz(0)) - \mathbb{E}_{p(\bepsilon)} \int_{0}^{1} \left[ {\color{violet}\bepsilon^T \frac{\partial \bff}{\partial \bz}} \bepsilon \right] dt.
+		    \log p_1(\bx(1)) = \log p_0(\bx(0)) - \int_{0}^{1} \text{tr}  \left( \frac{\partial \bff(\bx(t), t)}{\partial \bx(t)} \right) dt = \\ = \log p_0(\bx(0)) - \mathbb{E}_{p(\bepsilon)} \int_{0}^{1} \left[ {\color{violet}\bepsilon^T \frac{\partial \bff}{\partial \bx}} \bepsilon \right] dt.
 		\end{multline*}
 	\end{block}
 	\myfootnotewithlink{https://arxiv.org/abs/1810.01367}{Grathwohl W. et al. FFJORD: Free-form Continuous Dynamics for Scalable Reversible Generative Models, 2018} 
@@ -342,72 +410,83 @@
 %=======
 \section{Adjoint method for continuous-in-time NF}
 %=======
-\begin{frame}{Neural ODE}
-	\begin{block}{Continuous-in-time NF}
-		{\small
-		\begin{minipage}[t]{0.4\columnwidth}
-			\[
-	 			 \frac{d \bz(t)}{dt} = \bff_{\btheta}(\bz(t), t) 	 
-	 		\]
-	 		\[
-	 			 \bx = \bz + \int_{0}^{1} \bff_{\btheta}(\bz(t), t) dt 
-			\]
-		\end{minipage}% 
-		\begin{minipage}[t]{0.6\columnwidth}
-			\vspace{-0.4cm}
-			\[
-					\frac{d \log p_t(\bz(t))}{d t} = - \text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) 
-	 		\]
-	 		\[
-					\log p(\bx | \btheta) = \log p(\bz) - \int_{0}^{1} \text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) dt
-			\]
-		\end{minipage}
-		}
-	\end{block}
-	How to get optimal parameters of $\btheta$? \\
-	
-	For fitting parameters we need gradients. We need the analogue of the backpropagation.
-	\begin{block}{Forward pass (Loss function)}
+\begin{frame}{Continuous-in-time NF}
+	\begin{block}{Dynamics ODE}
 		\vspace{-0.3cm}
 		\[
-			\bz = \bx + \int_{1}^{0} \bff_{\btheta}(\bz(t), t) dt, \quad L(\bz) = - \log p(\bx | \btheta)
+			 \frac{d \bx(t)}{dt} = \bff_{\btheta}(\bx(t), t) 	 
+ 		\]
+ 		\[
+			 \bx(1) = \bx(0) + \int_{0}^{1} \bff_{\btheta}(\bx(t), t) dt 
 		\]
-		\[
-			L(\bz) = - \log p(\bz) + \int_{0}^{1} \text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) dt
-		\]
+		\vspace{-0.5cm}
 	\end{block}
+	\begin{block}{Continuity ODE}
+		\vspace{-0.2cm}
+		\[
+				\frac{d \log p_t(\bx(t))}{d t} = - \text{tr} \left( \frac{\partial \bff_{\btheta}(\bx(t), t)}{\partial \bx(t)} \right) 
+ 		\]
+ 		\[
+				\log p_1(\bx(1)) = \log p_0(\bx(0)) - \int_{0}^{1} \text{tr} \left( \frac{\partial \bff_{\btheta}(\bx(t), t)}{\partial \bx(t)} \right) dt
+		\]
+		\vspace{-0.3cm}
+	\end{block}
+	\begin{block}{How to get optimal parameters of $\btheta$?}
+		\begin{itemize}
+			\item We need the gradients for fitting the parameters
+			\item We need the continuous analogue of the backpropagation.
+		\end{itemize}
+	\end{block}
+	
 	\myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}     
 \end{frame}
 %=======
 \begin{frame}{Neural ODE}
-	\vspace{-0.2cm}
-	\begin{block}{Adjoint functions}
-		\vspace{-0.4cm}
+	\begin{block}{Forward pass (Loss function)}
+		\vspace{-0.3cm}
 		\[
-			\ba_{\bz}(t) = \frac{\partial L}{\partial \bz(t)}; \quad \ba_{\btheta}(t) = \frac{\partial L}{\partial \btheta(t)}.
+			L(\bx) = - \log p_1(\bx(1) | \btheta) = - \log p_0(\bx(0)) + \int_{0}^{1} \text{tr} \left( \frac{\partial \bff_{\btheta}(\bx(t), t)}{\partial \bx(t)} \right) dt
 		\]
-		These functions show how the gradient of the loss depends on the hidden state~$\bz(t)$ and parameters $\btheta$.
+	\end{block}
+	\vspace{-0.5cm}
+	\begin{block}{Adjoint functions}
+		\vspace{-0.3cm}
+		\[
+			\ba_{\bx}(t) = \frac{\partial L}{\partial \bx(t)}; \quad \ba_{\btheta}(t) = \frac{\partial L}{\partial \btheta(t)}.
+		\]
+		These functions show how the gradient of the loss depends on the hidden state~$\bx(t)$ and parameters $\btheta$.
 		\vspace{-0.3cm}
 	\end{block}
-
 	\begin{block}{Theorem (Pontryagin)}
 		\vspace{-0.6cm}
 		\[
-		\frac{d \ba_{\bz}(t)}{dt} = - \ba_{\bz}(t)^T \cdot \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz}; \quad \frac{d \ba_{\btheta}(t)}{dt} = - \ba_{\bz}(t)^T \cdot \frac{\partial \bff_{\btheta}(\bz(t),  t)}{\partial \btheta}.
+		\frac{d \ba_{\bx}(t)}{dt} = - \ba_{\bx}(t)^T \cdot \frac{\partial \bff_{\btheta}(\bx(t), t)}{\partial \bx}; \quad \frac{d \ba_{\btheta}(t)}{dt} = - \ba_{\bx}(t)^T \cdot \frac{\partial \bff_{\btheta}(\bx(t),  t)}{\partial \btheta}.
 		\]
 		\vspace{-0.7cm}
 	\end{block}
-	\begin{block}{Solution for adjoint function}
+	\myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}   
+\end{frame}
+%=======
+\begin{frame}{Adjoint method}
+	\begin{block}{Theorem (Pontryagin)}
 		\vspace{-0.6cm}
-		{\small
-		\begin{align*}
-			\frac{\partial L}{\partial \btheta(1)} &= \ba_{\btheta}(1) =  - \int_{0}^{1} \ba_{\bz}(t)^T \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \btheta(t)} dt + 0\\
-			\frac{\partial L}{\partial \bz(1)} &= \ba_{\bz}(1) =  - \int_{0}^{1} \ba_{\bz}(t)^T \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} dt + \frac{\partial L}{\partial \bz(0)}\\
-		\end{align*}
-		}
-		\vspace{-1.3cm}
+		\[
+		\frac{d \ba_{\bx}(t)}{dt} = - \ba_{\bx}(t)^T \cdot \frac{\partial \bff_{\btheta}(\bx(t), t)}{\partial \bx}; \quad \frac{d \ba_{\btheta}(t)}{dt} = - \ba_{\bx}(t)^T \cdot \frac{\partial \bff_{\btheta}(\bx(t),  t)}{\partial \btheta}.
+		\]
+		\vspace{-0.7cm}
 	\end{block}
-	\textbf{Note:} These equations are solved in reverse time direction.
+	\begin{block}{Solution for the adjoints function}
+		\vspace{-0.5cm}
+		\begin{align*}
+			\frac{\partial L}{\partial \btheta(0)} &= \ba_{\btheta}(0) =  - \int_{1}^{0} \ba_{\bx}(t)^T \frac{\partial \bff_{\btheta}(\bx(t), t)}{\partial \btheta(t)} dt + 0\\
+			\frac{\partial L}{\partial \bx(0)} &= \ba_{\bx}(0) =  - \int_{1}^{0} \ba_{\bx}(t)^T \frac{\partial \bff_{\btheta}(\bx(t), t)}{\partial \bx(t)} dt + \frac{\partial L}{\partial \bx(1)}
+		\end{align*}
+	\end{block}
+	\begin{itemize}
+		\item Think about the initial conditions.
+		\item These equations are solved in the reverse time direction.
+		\item Numerical solvers (Euler ODESolve) are used to solve them.
+	\end{itemize}
 	\myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}   
 \end{frame}
 %=======
@@ -415,7 +494,7 @@
 	\begin{block}{Forward pass}
 		\vspace{-0.3cm}
 		\[
-		\bz = \bz(0) = \int^{1}_{0} \bff_{\btheta}(\bz(t), t) d t  + \bx \quad \Rightarrow \quad \text{ODE Solver}
+		\bx(1) = \bx(0) + \int^{1}_{0} \bff_{\btheta}(\bx(t), t) d t \quad \Rightarrow \quad \text{ODE Solver}
 		\]
 		\vspace{-0.4cm}
 	\end{block}
@@ -425,9 +504,9 @@
 			\left.
 			{\footnotesize 
 				\begin{aligned}
-					\frac{\partial L}{\partial \btheta(1)} &= \ba_{\btheta}(1) =  - \int_{0}^{1} \ba_{\bz}(t)^T \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \btheta(t)} dt + 0 \\
-					\frac{\partial L}{\partial \bz(1)} &= \ba_{\bz}(1) =  - \int_{0}^{1} \ba_{\bz}(t)^T \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} dt + \frac{\partial L}{\partial \bz(0)} \\
-					\bz(1) &= - \int^{0}_{1} \bff_{\btheta}(\bz(t), t) d t  + \bz_0.
+					\frac{\partial L}{\partial \btheta(0)} &= \ba_{\btheta}(0) =  - \int_{1}^{0} \ba_{\bx}(t)^T \frac{\partial \bff_{\btheta}(\bx(t), t)}{\partial \btheta(t)} dt + 0 \\
+					\frac{\partial L}{\partial \bx(0)} &= \ba_{\bx}(0) =  - \int_{1}^{0} \ba_{\bx}(t)^T \frac{\partial \bff_{\btheta}(\bx(t), t)}{\partial \bx(t)} dt + \frac{\partial L}{\partial \bx(1)} \\
+					\bx(0) &= - \int^{1}_{0} \bff_{\btheta}(\bx(t), t) d t  + \bx(1).
 				\end{aligned}
 			}
 			\right\rbrace
@@ -441,54 +520,6 @@
 \end{frame}
 %=======
 \section{SDE basics}
-%=======
-\begin{frame}{Ordinary differential equation (ODE)}
-	\vspace{-0.5cm}
-	\begin{block}{Neural ODE}
-		\vspace{-0.5cm}
-		\begin{align*}
-  \frac{d \bz(t)}{dt} &= \bff_{\btheta}(\bz(t), t); \quad \text{with initial condition }\bz(t_0) = \bz_0
-		\end{align*}
-		\vspace{-0.8cm}
-	\end{block}
-	\begin{minipage}[t]{0.6\columnwidth}
-		\begin{itemize}
-			\item $\bz(t_0)$ is a random variable with the density function $p(\bz(t_0))$.
-		 	\item $\bz(t_1)$ is a random variable with the density function $p(\bz(t_1))$.
-			\item$p_t(\bz) = p(\bz, t)$ is the joint density function (probability path). \\ {\color{gray}What is the difference between $p_t(\bz(t))$ and $p_t(\bz)$?}
-			\item Let consider time interval $[t_0, t_1] = [0, 1]$ without loss of generality.
-		\end{itemize}
-	\end{minipage}%
-	\begin{minipage}[t]{0.4\columnwidth}	
-		\begin{figure}
-			\centering
-			\includegraphics[width=\linewidth]{figs/cnf_flow.png}
-		\end{figure}
-	\end{minipage}
-	\myfootnotewithlink{https://arxiv.org/abs/1810.01367}{Grathwohl W. et al. FFJORD: Free-form Continuous Dynamics for Scalable Reversible Generative Models, 2018} 
-\end{frame}
-%=======
-\begin{frame}{Ordinary differential equation (ODE)}
-	\[
- 			d \bz = \bff_{\btheta}(\bz, t) \cdot dt
-	\]
-	\vspace{-0.5cm}
-	\begin{block}{Discretization of ODE (Euler method)}
-		\vspace{-0.3cm}
-		\[
-			\bz(t + dt) = \bz(t) + \bff_{\btheta}(\bz(t), t) \cdot dt
-		\]
-		\vspace{-0.5cm}
-	\end{block}
-	\begin{block}{Theorem (Kolmogorov-Fokker-Planck: special case)}
-		If $\bff$ is uniformly Lipschitz continuous in $\bz$ and continuous in $t$, then
-		\[
-			\frac{d \log p(\bz(t), t)}{d t} = - \text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right).
-		\]
-	\end{block}
-	It means that if we have the value $\bz_0 = \bz(0)$ then the solution of the ODE will give us the density at the moment $t=1$.
-	\myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}   
-\end{frame}
 %=======
 \begin{frame}{Stochastic differential equation (SDE)}
 	Let define stochastic process $\bx(t)$ with initial condition $\bx(0) \sim p_0(\bx) = \pi(\bx)$:
@@ -616,9 +647,9 @@
 %=======
 \begin{frame}{Summary}
 	\begin{itemize}
-		\item Continuous-in-time NF uses neural ODE to define continuous dynamic $\bz(t)$. It has less functional restrictions.
+		\item Continuous-in-time NF uses neural ODE to define continuous dynamic $\bx(t)$. It has less functional restrictions.
 		\vfill 
-		\item Kolmogorov-Fokker-Planck theorem allows to calculate $\log p(\bz, t)$ at arbitrary moment $t$.
+		\item Continuity equation allows to calculate $\log p(\bx, t)$ at arbitrary moment $t$.
 		\vfill
 		\item FFJORD model makes such kind of NF scalable.
 		\vfill
