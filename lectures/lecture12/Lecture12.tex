@@ -171,7 +171,7 @@
 		Samples from the following dynamics will comes from $p(\bx | \btheta)$ under mild regularity conditions for small enough $\eta$.
 		\vspace{-0.2cm}
 		\[
-			\bx_{t + 1} = \bx_t + \eta \frac{1}{2} \nabla_{\bx_t} \log p(\bx_t | \btheta) + \sqrt{\eta} \cdot \bepsilon, \quad \bepsilon \sim \cN(0, \bI).
+			\bx_{t + 1} = \bx_t + \frac{\eta}{2} \nabla_{\bx_t} \log p(\bx_t | \btheta) + \sqrt{\eta} \cdot \bepsilon, \quad \bepsilon \sim \cN(0, \bI).
 		\]
 	\end{block}
 	\myfootnotewithlink{https://www.stats.ox.ac.uk/~teh/research/compstats/WelTeh2011a.pdf}{Welling M. Bayesian Learning via Stochastic Gradient Langevin Dynamics, 2011}
@@ -182,6 +182,32 @@
 \end{frame}
 %=======
 \section{Probability flow ODE}
+%=======
+\begin{frame}{Probability flow ODE}
+	\begin{block}{ODE and continuity equation}
+		\vspace{-0.3cm}
+		\[
+			d\bx = \mathbf{f}(\bx, t) dt
+		\]
+		\[
+			\frac{d \log p_t(\bx(t))}{d t} = - \text{tr} \left( \frac{\partial \bff_{\btheta}(\bx, t)}{\partial \bx} \right) 
+			\quad  \Leftrightarrow  \quad 
+ 			\frac{\partial p_t(\bx)}{\partial t} = - \text{div}\left(\bff(\bx, t) p_t(\bx)\right)
+ 		\]
+ 		The only source of stochasticity is the distibution $p_0(\bx)$.
+	\end{block}
+	\begin{block}{SDE and KFP equation}
+		\vspace{-0.3cm}
+		\[
+			d\bx = \mathbf{f}(\bx, t) dt + g(t) d \bw
+		\]
+ 		\[
+ 			\frac{\partial p_t(\bx)}{\partial t} = - \text{div}\left(\bff(\bx, t) p_t(\bx)\right) + \frac{1}{2}g^2(t) \Delta_{\bx}p_t(\bx)
+ 		\]
+ 		We have two sources of randomness: initial distribution $p_0(\bx)$ and Wiener process $\bw(t)$.
+	\end{block}
+	\myfootnotewithlink{https://arxiv.org/abs/2011.13456}{Song Y., et al. Score-Based Generative Modeling through Stochastic Differential Equations, 2020}
+\end{frame}
 %=======
 \begin{frame}{Probability flow ODE}
 	\begin{block}{Theorem}
@@ -199,8 +225,8 @@
  		\begin{multline*}
  			\frac{\partial p_t(\bx)}{\partial t} = \text{tr}\left(- \frac{\partial}{\partial \bx} \bigl[ \mathbf{f}(\bx, t) p_t(\bx)\bigr] + \frac{1}{2} g^2(t) \frac{\partial^2 p_t(\bx)}{\partial \bx^2} \right) = \\
  			=  \text{tr}\left(- \frac{\partial}{\partial \bx} \left[ \mathbf{f}(\bx, t) p_t(\bx) - \frac{1}{2} g^2(t) {\color{violet}\frac{\partial p_t(\bx)}{\partial \bx}} \right]  \right) = \\
-			 =  \text{tr}\left(- \frac{\partial}{\partial \bx} \left[ \mathbf{f}(\bx, t) p_t(\bx) - \frac{1}{2} g^2(t) {\color{violet}p_t(\bx) \frac{\partial \log p_t(\bx)}{\partial \bx}} \right]  \right)= \\
-		  =  \text{tr}\left(- \frac{\partial}{\partial \bx} \left[ \left( {\color{teal}\mathbf{f}(\bx, t) - \frac{1}{2} g^2(t) \frac{\partial \log p_t(\bx)}{\partial \bx}}\right) p_t(\bx) \right]  \right)
+			 =  \text{tr}\left(- \frac{\partial}{\partial \bx} \left[ \mathbf{f}(\bx, t) p_t(\bx) - \frac{1}{2} g^2(t) {\color{violet}p_t(\bx) \frac{\partial}{\partial \bx} \log p_t(\bx)} \right]  \right)= \\
+		  =  \text{tr}\left(- \frac{\partial}{\partial \bx} \left[ \left( {\color{teal}\mathbf{f}(\bx, t) - \frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p_t(\bx)}\right) p_t(\bx) \right]  \right)
  		\end{multline*}
  		}
  	\end{block}
@@ -220,7 +246,7 @@
 	\begin{block}{Proof (continued)}
  		\vspace{-0.7cm}
  		\begin{multline*}
- 			\frac{\partial p_t(\bx)}{\partial t} =  \text{tr}\left(- \frac{\partial}{\partial \bx} \left[ \left( {\color{teal}\mathbf{f}(\bx, t) - \frac{1}{2} g^2(t) \frac{\partial \log p_t(\bx)}{\partial \bx}}\right) p_t(\bx) \right]  \right) =\\
+ 			\frac{\partial p_t(\bx)}{\partial t} =  \text{tr}\left(- \frac{\partial}{\partial \bx} \left[ \left( {\color{teal}\mathbf{f}(\bx, t) - \frac{1}{2} g^2(t) \frac{\partial}{\partial \bx}\log p_t(\bx)}\right) p_t(\bx) \right]  \right) =\\
  			  =  \text{tr}\left(- \frac{\partial}{\partial \bx} \left[ {\color{teal}\tilde{\mathbf{f}}(\bx, t)} p_t(\bx) \right]  \right)
  		\end{multline*}
  	\end{block}
@@ -273,7 +299,7 @@
 		There exists the reverse SDE for the SDE $d\bx = \mathbf{f}(\bx, t) dt + g(t) d \bw$ that has the following form
 		\vspace{-0.3cm}
 		\[
-			d\bx = \left(\mathbf{f}(\bx, t) {\color{violet}- g^2(t) \frac{\partial \log p_t(\bx)}{\partial \bx}}\right) dt + g(t) d \bw
+			d\bx = \left(\mathbf{f}(\bx, t) {\color{violet}- g^2(t) \frac{\partial}{\partial \bx}\log p_t(\bx)}\right) dt + g(t) d \bw
 		\]
 		\vspace{-0.5cm} \\
 		with $dt < 0$.
@@ -286,7 +312,7 @@
 		There exists the reverse SDE for the SDE $d\bx = \mathbf{f}(\bx, t) dt + g(t) d \bw$ that has the following form
 		\vspace{-0.3cm}
 		\[
-			d\bx = \left(\mathbf{f}(\bx, t) {\color{violet}- g^2(t) \frac{\partial \log p_t(\bx)}{\partial \bx}}\right) dt + g(t) d \bw
+			d\bx = \left(\mathbf{f}(\bx, t) {\color{violet}- g^2(t) \frac{\partial}{\partial \bx}\log p_t(\bx)}\right) dt + g(t) d \bw
 		\]
 		\vspace{-0.5cm} \\
 		with $dt < 0$.
@@ -318,15 +344,15 @@
 			{\footnotesize
 			\begin{align*}
 				d\bx &= \left[\mathbf{f}(\bx, t) -\frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p_t(\bx) \right] dt \\
-				d\bx &= \left[- \mathbf{f}(\bx, 1 - \tau) + \frac{1}{2} g^2(1 - \tau) \frac{\partial}{\partial \bx} \log p(\bx, 1 - \tau) \right] d \tau
+				d\bx &= \left[- \mathbf{f}(\bx, 1 - \tau) + \frac{1}{2} g^2(1 - \tau) \frac{\partial}{\partial \bx} \log p_{1 - \tau}(\bx) \right] d \tau
 			\end{align*}
 			}
 			\item Convert reverse probability flow ODE to reverse SDE
 			\vspace{-0.1cm}
 			{\footnotesize
 			\begin{align*}
-				d\bx &= \left[- \mathbf{f}(\bx, 1 - \tau) + \frac{1}{2} g^2(1 - \tau) \frac{\partial}{\partial \bx} \log p(\bx, 1 - \tau) \right] d \tau \\
-				d\bx &= \left[- \mathbf{f}(\bx, 1 - \tau) + g^2(1 - \tau) \frac{\partial}{\partial \bx} \log p(\bx, 1 - \tau) \right] d\tau + g(1 - \tau) d \bw
+				d\bx &= \left[- \mathbf{f}(\bx, 1 - \tau) + \frac{1}{2} g^2(1 - \tau) \frac{\partial}{\partial \bx} \log p_{1 - \tau}(\bx) \right] d \tau \\
+				d\bx &= \left[- \mathbf{f}(\bx, 1 - \tau) + g^2(1 - \tau) \frac{\partial}{\partial \bx} \log p_{1 - \tau}(\bx) \right] d\tau + g(1 - \tau) d \bw
 			\end{align*}
 			}
 		\end{itemize}
@@ -339,7 +365,7 @@
 		There exists the reverse SDE for the SDE $d\bx = \mathbf{f}(\bx, t) dt + g(t) d \bw$ that has the following form
 		\vspace{-0.3cm}
 		\[
-			d\bx = \left(\mathbf{f}(\bx, t) {\color{violet}- g^2(t) \frac{\partial \log p_t(\bx)}{\partial \bx}}\right) dt + g(t) d \bw
+			d\bx = \left(\mathbf{f}(\bx, t) {\color{violet}- g^2(t) \frac{\partial}{\partial \bx}\log p_t(\bx)}\right) dt + g(t) d \bw
 		\]
 		\vspace{-0.5cm} \\
 		with $dt < 0$.
@@ -347,10 +373,10 @@
 	\begin{block}{Proof (continued)}
 		\vspace{-0.7cm}
 		\[
-			d\bx = \left[- \mathbf{f}(\bx, 1 - \tau) + g^2(1 - \tau) \frac{\partial}{\partial \bx} \log p(\bx, 1 - \tau) \right] d \tau + g(1 - \tau) d \bw
+			d\bx = \left[- \mathbf{f}(\bx, 1 - \tau) + g^2(1 - \tau) \frac{\partial}{\partial \bx} \log p_{1 - \tau}(\bx) \right] d \tau + g(1 - \tau) d \bw
 		\]
 		\[
-			d\bx = \left(\mathbf{f}(\bx, t) - g^2(t) \frac{\partial \log p_t(\bx)}{\partial \bx}\right) dt + g(t) d \bw
+			d\bx = \left(\mathbf{f}(\bx, t) - g^2(t) \frac{\partial}{\partial \bx}\log p_t(\bx)\right) dt + g(t) d \bw
 		\]
 		Here $d\tau > 0$ and $dt < 0$.
 	\end{block}
@@ -362,7 +388,7 @@
 	\begin{align*}
 		d\bx &= \mathbf{f}(\bx, t) dt + g(t) d \bw - \text{SDE} \\
 		d\bx &= \left[\mathbf{f}(\bx, t) -\frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p_t(\bx) \right] dt - \text{probability flow ODE} \\
-		d\bx &= \left(\mathbf{f}(\bx, t) - g^2(t) \frac{\partial \log p_t(\bx)}{\partial \bx}\right) dt + g(t) d \bw - \text{reverse SDE}
+		d\bx &= \left(\mathbf{f}(\bx, t) - g^2(t) \frac{\partial}{\partial \bx}\log p_t(\bx)\right) dt + g(t) d \bw - \text{reverse SDE}
 	\end{align*}
 	\vspace{-0.5cm}
 	\begin{itemize}
@@ -379,11 +405,12 @@
 \section{Diffusion and Score matching SDEs}
 %=======
 \begin{frame}{Score matching SDE}
+	\vspace{-0.3cm}
 	\begin{block}{Denoising score matching}
 		\vspace{-0.7cm}
 		\begin{align*}
-			\bx_t &= \bx + \sigma_t \cdot \bepsilon_t, & p(\bx_t | \bx, \sigma_t) &= \cN(\bx, \sigma_t^2 \cdot \bI) \\
-			\bx_{t-1} &= \bx + \sigma_{t-1} \cdot \bepsilon_{t-1}, & p(\bx_{t-1} | \bx, \sigma_{t-1}) &= \cN(\bx, \sigma_{t-1}^2 \cdot \bI)
+			\bx_t &= \bx + \sigma_t \cdot \bepsilon_t, & q(\bx_t | \bx) &= \cN(\bx, \sigma_t^2 \cdot \bI) \\
+			\bx_{t-1} &= \bx + \sigma_{t-1} \cdot \bepsilon_{t-1}, & q(\bx_{t-1} | \bx) &= \cN(\bx, \sigma_{t-1}^2 \cdot \bI)
 		\end{align*}
 	\end{block}
 	\vspace{-1.0cm}
@@ -391,8 +418,20 @@
 		\bx_t = \bx_{t - 1} + \sqrt{\sigma^2_t - \sigma^2_{t-1}} \cdot \bepsilon, \quad q(\bx_{t} | \bx_{t-1}) = \cN(\bx_{t-1}, (\sigma_t^2 - \sigma_{t-1}^2) \cdot \bI)
 	\]
 	Let turn this Markov chain to the continuous stochastic process~$\bx(t)$ taking $T \rightarrow \infty$:
+	\vspace{-0.3cm}
+	\begin{align*}
+		\bx(t) &= \bx(t - dt) + \sqrt{\sigma^2(t) - \sigma^2(t - dt)} \cdot {\color{violet}\bepsilon} \\
+		&= \bx(t - dt) + \sqrt{\frac{\sigma^2(t) - \sigma^2(t - dt)}{dt} {\color{violet}dt}} \cdot {\color{violet}\bepsilon} \\
+		&= \bx(t - dt) + \sqrt{\frac{ d [\sigma^2(t)]}{dt}} \cdot {\color{violet}d \bw}
+	\end{align*}
+	\vspace{-0.5cm}
+	\myfootnotewithlink{https://arxiv.org/abs/2011.13456}{Song Y., et al. Score-Based Generative Modeling through Stochastic Differential Equations, 2020}
+\end{frame}
+%=======
+\begin{frame}{Score matching SDE}
+	\vspace{-0.3cm}
 	\[
-		{\color{teal}\bx(t + dt)} = {\color{teal}\bx(t)} + \sqrt{\frac{\sigma^2(t + dt) - \sigma^2(t)}{dt} {\color{violet}dt}} \cdot {\color{violet}\bepsilon} = \bx(t) + \sqrt{\frac{ d [\sigma^2(t)]}{dt}} \cdot {\color{violet}d \bw}
+		\bx(t) = \bx(t - dt) + \sqrt{\frac{ d [\sigma^2(t)]}{dt}} \cdot d \bw
 	\]
 	\vspace{-0.5cm}
 	\begin{block}{Variance Exploding SDE}
@@ -400,7 +439,17 @@
 		\[
 			d \bx = \sqrt{\frac{ d [\sigma^2(t)]}{dt}} \cdot d \bw
 		\]
+		$\sigma(t)$ is a monotonically increasing function.
 	\end{block}
+	\vspace{-0.7cm}
+	\[
+		d\bx = \mathbf{f}(\bx, t) dt + g(t) d \bw, \quad \bff(\bx, t) = 0, \quad g(t) = \sqrt{\frac{ d [\sigma^2(t)]}{dt}} 
+	\]
+	\vspace{-0.5cm}
+	\begin{align*}
+		d\bx &= \left[-\frac{1}{2} \frac{ d [\sigma^2(t)]}{dt} \frac{\partial}{\partial \bx} \log p_t(\bx) \right] dt - \text{probability flow ODE} \\
+		d\bx &= \left(- \frac{ d [\sigma^2(t)]}{dt} \frac{\partial}{\partial \bx}\log p_t(\bx)\right) dt + \sqrt{\frac{ d [\sigma^2(t)]}{dt}}  d \bw - \text{reverse SDE}
+	\end{align*}
 	\myfootnotewithlink{https://arxiv.org/abs/2011.13456}{Song Y., et al. Score-Based Generative Modeling through Stochastic Differential Equations, 2020}
 \end{frame}
 %=======
