@@ -181,6 +181,132 @@
 	\tableofcontents
 \end{frame}
 %=======
+\section{SDE basics}
+%=======
+\begin{frame}{Stochastic differential equation (SDE)}
+	Let define stochastic process $\bx(t)$ with initial condition $\bx(0) \sim p_0(\bx) = \pi(\bx)$:
+	\[
+		d\bx = \mathbf{f}(\bx, t) dt + g(t) d \bw
+	\]
+	\vspace{-0.5cm}
+	\begin{itemize}
+		 \item $\mathbf{f}(\bx, t): \bbR^m \times [0, 1] \rightarrow \bbR^m$ is the \textbf{drift} function of $\bx(t)$.
+		 \item $g(t): \bbR \rightarrow \bbR$ is the \textbf{diffusion} function of $\bx(t)$.
+		 \item $\bw(t)$ is the standard Wiener process (Brownian motion):
+		 \begin{enumerate}
+		 	\item $\bw(0) = 0$ (almost surely);
+		 	\item $\bw(t)$ has independent increments;
+			 \item $\bw(t) - \bw(s) \sim \cN(0, (t - s) \bI)$, for $t > s$.
+		 \end{enumerate}
+		 \item $d \bw = \bw(t + dt) - \bw(t) = \cN(0, \bI \cdot dt ) = \bepsilon \cdot \sqrt{dt}$, where $\bepsilon \sim \cN(0, \bI)$.
+		 \item If $g(t) = 0$ we get standard ODE.
+	\end{itemize}
+\end{frame}
+%=======
+\begin{frame}{Stochastic differential equation (SDE)}
+	\[
+		d\bx = \mathbf{f}(\bx, t) dt + g(t) d \bw
+	\]
+	\vspace{-0.3cm}
+	\begin{itemize}
+		\item In contrast to ODE, initial condition $\bx(0)$ does not uniquely determine the process trajectory.
+		\item We have two sources of randomness: initial distribution $p_0(\bx)$ and Wiener process $\bw(t)$.
+	\end{itemize}
+	\begin{block}{Discretization of SDE (Euler method)}
+		\vspace{-0.3cm}
+		\[
+			\bx(t + dt) = \bx(t) + \bff(\bx(t), t) \cdot dt + g(t) \cdot \bepsilon \cdot \sqrt{dt}
+		\]
+		If $dt = 1$, then
+		\vspace{-0.3cm}
+		\[
+			\bx_{t + 1} = \bx_t + \bff(\bx_t, t) + g(t) \cdot \bepsilon
+		\]
+		\vspace{-0.7cm}
+	\end{block}
+	\begin{itemize}
+		\item At each moment $t$ we have the density $p_t(\bx) = p(\bx, t)$.
+		\item $p: \bbR^m \times [0, 1] \rightarrow \bbR_+$ is a \textbf{probability path} between $p_0(\bx)$ and $p_1(\bx)$.
+		\item How to get the distribution path $p_t(\bx)$ for $\bx(t)$?
+	\end{itemize}
+\end{frame}
+%=======
+\begin{frame}{Stochastic differential equation (SDE)}
+	\vspace{-0.4cm}
+	\[
+		d\bx = \mathbf{f}(\bx, t) dt + g(t) d \bw, \quad d \bw = \bepsilon \cdot \sqrt{dt}, \quad \bepsilon \sim \cN(0, \bI).
+	\]
+	\vspace{-0.4cm}
+ 	\begin{block}{Theorem (Kolmogorov-Fokker-Planck)}
+ 		Evolution of the distribution $p_t(\bx)$ is given by the following equation:
+ 		\vspace{-0.2cm}
+ 		\[
+ 			\frac{\partial p_t(\bx)}{\partial t} = - \text{div}\left(\bff(\bx, t) p_t(\bx)\right) + \frac{1}{2}g^2(t) \Delta_{\bx}p_t(\bx)
+ 		\]
+ 		Here
+ 		\[
+ 			\text{div} (\bv) = \sum_{i=1}^m \frac{\partial v_i(\bx)}{\partial x_i} = \text{tr}\left( \frac{\partial \bv(\bx)}{\partial \bx}  \right)
+ 		\]
+ 		\[
+ 			\Delta_{\bx}p_t(\bx) = \sum_{i=1}^m \frac{\partial^2 p_t(\bx)}{\partial x_i^2} = \text{tr}\left( \frac{\partial^2 p_t(\bx)}{\partial \bx^2}  \right)
+ 		\]
+ 		\[
+ 			\frac{\partial p_t(\bx)}{\partial t} = \text{tr}\left(- \frac{\partial}{\partial \bx} \bigl[ \mathbf{f}(\bx, t) p_t(\bx)\bigr] + \frac{1}{2} g^2(t) \frac{\partial^2 p_t(\bx)}{\partial \bx^2} \right)
+ 		\]
+ 	\end{block}
+\end{frame}
+%=======
+\begin{frame}{Stochastic differential equation (SDE)}
+ 	\begin{block}{Theorem (Kolmogorov-Fokker-Planck)}
+ 		\vspace{-0.2cm}
+ 		\[
+ 			\frac{\partial p_t(\bx)}{\partial t} = \text{tr}\left(- \frac{\partial}{\partial \bx} \bigl[ \mathbf{f}(\bx, t) p_t(\bx)\bigr] + \frac{1}{2} g^2(t) \frac{\partial^2 p_t(\bx)}{\partial \bx^2} \right)
+ 		\]
+ 	\end{block}
+ 	 \begin{itemize}
+ 	 	\item KFP theorem does not define the SDE uniquely in general case.
+ 		 \item This is the generalization of KFP theorem that we used in continuous-in-time NF:
+ 	 	\[
+ 	 		\frac{d \log p_t(\bx(t))}{d t} = - \text{tr} \left( \frac{\partial \bff(\bx, t)}{\partial \bx} \right).
+ 	 	\]
+ 	 \end{itemize}
+	\vspace{-0.3cm}
+ 	\begin{block}{Langevin SDE (special case)}
+ 		\vspace{-0.6cm}
+ 		\begin{align*}
+ 			d\bx &= {\color{violet}\mathbf{f}(\bx, t)} dt + {\color{teal}g(t)} d \bw \\
+ 			d \bx &= {\color{violet}\frac{1}{2} \frac{\partial}{\partial \bx} \log p_t(\bx)} d t + {\color{teal} 1 } \cdot d \bw
+ 		\end{align*}
+ 		\vspace{-0.4cm}
+ 	\end{block}
+ 	Let apply KFP theorem to this SDE.
+\end{frame}
+%=======
+\begin{frame}{Langevin SDE (special case)}
+	\[
+		d \bx = \frac{1}{2} \frac{\partial}{\partial \bx} \log p_t(\bx) d t + 1 \cdot d \bw
+	\]
+	\begin{multline*}
+		\frac{\partial p_t(\bx)}{\partial t} =  \text{tr} \left(- \frac{\partial}{\partial \bx}\left[ {\color{olive}p_t(\bx) \frac{1}{2} \frac{\partial}{\partial \bx} \log p_t(\bx)} \right]  + \frac{1}{2} \frac{\partial^2 p_t(\bx)}{\partial \bx^2} \right) = \\
+		= \text{tr} \left(- \frac{\partial}{\partial \bx}\left[ {\color{olive}\frac{1}{2} \frac{\partial}{\partial \bx} p_t(\bx) } \right]  + \frac{1}{2} \frac{\partial^2 p_t(\bx)}{\partial \bx^2} \right) = 0
+	\end{multline*}
+	The density $p_t(\bx) = \text{const}(t)$! \\ If $\bx(0) \sim p_0(\bx)$, then $\bx(t) \sim p_0(\bx)$.
+	\begin{block}{Discretized Langevin SDE}
+		\vspace{-0.3cm}
+		\[
+			\bx_{t + 1} - \bx_t = \frac{\eta}{2} \cdot \frac{\partial}{\partial \bx} \log p_t(\bx) + \sqrt{\eta} \cdot \bepsilon, \quad \eta \approx dt.
+		\]
+		\vspace{-0.4cm}
+	\end{block}
+	\begin{block}{Langevin dynamic}
+		\vspace{-0.3cm}
+		\[
+			\bx_{t + 1} = \bx_t + \frac{\eta}{2} \cdot \nabla_{\bx} \log p(\bx | \btheta) + \sqrt{\eta} \cdot \bepsilon, \quad \eta \approx dt.
+		\]
+		\vspace{-0.3cm}
+	\end{block}
+\end{frame}
+%=======
 \section{Probability flow ODE}
 %=======
 \begin{frame}{Probability flow ODE}
@@ -505,6 +631,12 @@
 %=======
 \begin{frame}{Summary}
 	\begin{itemize}
+		\item SDE defines stochastic process with drift and diffusion terms. ODEs are the special case of SDEs.
+		\vfill
+		\item KFP equation defines the dynamic of the probability function for the SDE. 
+		\vfill
+		\item Langevin SDE has constant probability path.
+		\vfill
 		\item There exists special probability flow ODE for each SDE that gives the same probability path.
 		\vfill
 		\item It is possible to revert SDE using score function.
