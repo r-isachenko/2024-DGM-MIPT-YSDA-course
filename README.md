@@ -29,7 +29,7 @@ The course is accompanied by practical tasks that allow you to understand the pr
 |  |  | <b>Seminar 1:</b> Introduction. Maximum likelihood estimation. Histograms. Bayes theorem. PixelCNN | [slides](seminars/seminar1/seminar1.ipynb) |
 | 2 | September, 17 | <b>Lecture 2:</b> Normalizing Flow (NF) intuition and definition. Linear NF. Gaussian autoregressive NF. Coupling layer (RealNVP). | [slides](lectures/lecture2/Lecture2.pdf) |
 |  |  | <b>Seminar 2:</b> Planar and Radial Flows. Forward vs Reverse KL. | [slides](seminars/seminar2/seminar2.ipynb) |
-| 3 | September, 24 | <b>Lecture 3:</b> Forward and reverse KL divergence for NF. | [slides](lectures/lecture3/Lecture3.pdf) |
+| 3 | September, 24 | <b>Lecture 3:</b> Forward and reverse KL divergence for NF. Latent variable models (LVM). Variational lower bound (ELBO). EM-algorithm. | [slides](lectures/lecture3/Lecture3.pdf) |
 |  |  | <b>Seminar 3:</b> Forward vs Reverse KL. RealNVP | [slides](seminars/seminar3/seminar3.ipynb) |
 | 4 | October, 1 | <b>Lecture 4:</b> Amortized inference, ELBO gradients, reparametrization trick. Variational Autoencoder (VAE). NF as VAE model. Discrete VAE latent representations. | [slides](lectures/lecture4/Lecture4.pdf) |
 |  |  | <b>Seminar 4:</b> Gaussian Mixture Model (GMM). GMM and MLE. ELBO and EM-algorithm. GMM via EM-algorithm. Variational EM algorithm for GMM. | [slides](seminars/seminar4/seminar4.ipynb) |
@@ -47,7 +47,7 @@ The course is accompanied by practical tasks that allow you to understand the pr
 |  |  | <b>Seminar 10:</b>  Denoising diffusion probabilistic model (DDPM). Denoising Diffusion Implicit Models (DDIM).| [slides](seminars/seminar10/seminar10.ipynb) |
 | 11 | November, 19 | <b>Lecture 11:</b> Continuous-in-time NF and neural ODE. Continuity equation for NF log-likelihood. FFJORD and Hutchinson's trace estimator. Adjoint method for continuous-in-time NF.  | [slides](lectures/lecture11/Lecture11.pdf) |
 |  |  | <b>Seminar 11:</b> Guidance. CLIP, GLIDE, DALL-E 2, Imagen, Latent Diffusion Model. | [slides](seminars/seminar11/seminar11.ipynb) |
-| 12 | November, 26 | <b>Lecture 12:</b> SDE basics. Kolmogorov-Fokker-Planck equation. Probability flow ODF. Reverse SDE. Variance Preserving and Variance Exploding SDEs. | [slides](lectures/lecture12/Lecture12.pdf) |
+| 12 | November, 26 | <b>Lecture 12:</b> SDE basics. Kolmogorov-Fokker-Planck equation. Probability flow ODE. Reverse SDE. Variance Preserving and Variance Exploding SDEs. | [slides](lectures/lecture12/Lecture12.pdf) |
 <!---
 |  |  | <b>Seminar 12:</b>  | [slides](seminars/seminar11/seminar11.ipynb) |
 | 13 | December, 3 | <b>Lecture 13:</b>  | [slides](lectures/lecture13/Lecture13.pdf) |
