@@ -17,6 +17,60 @@
 \end{frame}
 %=======
 \begin{frame}{Recap of previous lecture}
+	\vspace{-0.2cm}
+	\begin{block}{SDE basics}
+		Let define stochastic process $\bx(t)$ with initial condition $\bx(0) \sim p_0(\bx)$:
+		\[
+			d\bx = \mathbf{f}(\bx, t) dt + g(t) d \bw, 
+		\]
+		where $\bw(t)$ is the standard Wiener process (Brownian motion)
+		\vspace{-0.2cm}
+		\[		
+			\bw(t) - \bw(s) \sim \cN(0, (t - s) \bI), \quad d \bw = \bepsilon \cdot \sqrt{dt}, \, \text{where } \bepsilon \sim \cN(0, \bI).
+		\]
+	\end{block}
+	\vspace{-0.3cm}
+	\begin{block}{Discretization of SDE (Euler method)}
+		\vspace{-0.3cm}
+		\[
+			\bx(t + dt) = \bx(t) + \bff(\bx(t), t) \cdot dt + g(t) \cdot \bepsilon \cdot \sqrt{dt}
+		\]
+		\vspace{-0.3cm}
+	\end{block}
+	\begin{itemize}
+		\item At each moment $t$ we have the density $p_t(\bx) = p(\bx, t)$.
+		\item $p: \bbR^m \times [0, 1] \rightarrow \bbR_+$ is a \textbf{probability path} between $p_0(\bx)$ and $p_1(\bx)$.
+	\end{itemize}
+\end{frame}
+%=======
+\begin{frame}{Recap of previous lecture}
+ 	\begin{block}{Theorem (Kolmogorov-Fokker-Planck)}
+ 		Evolution of the distribution $p_t(\bx)$ is given by the following equation:
+ 		\vspace{-0.3cm}
+ 		\[
+ 			\frac{\partial p_t(\bx)}{\partial t} = - \text{div}\left(\bff(\bx, t) p_t(\bx)\right) + \frac{1}{2}g^2(t) \Delta_{\bx}p_t(\bx)
+ 		\]
+ 		\vspace{-0.5cm}
+ 	\end{block}
+ 	\begin{block}{Langevin SDE (special case)}
+ 		\vspace{-0.3cm}
+ 		\[
+ 			d \bx = {\color{violet}\frac{1}{2} \frac{\partial}{\partial \bx} \log p_t(\bx)} d t + {\color{teal} 1 } \cdot d \bw
+ 		\]
+ 		\vspace{-0.3cm}
+ 	\end{block}
+ 	The density $p(\bx | \btheta)$ is a \textbf{stationary} distribution for the SDE.
+	\begin{block}{Langevin dynamics}
+		Samples from the following dynamics will comes from $p(\bx | \btheta)$ under mild regularity conditions for small enough $\eta$.
+		\vspace{-0.2cm}
+		\[
+			\bx_{t + 1} = \bx_t + \frac{\eta}{2} \nabla_{\bx_t} \log p(\bx_t | \btheta) + \sqrt{\eta} \cdot \bepsilon, \quad \bepsilon \sim \cN(0, \bI).
+		\]
+	\end{block}
+	\myfootnotewithlink{https://www.stats.ox.ac.uk/~teh/research/compstats/WelTeh2011a.pdf}{Welling M. Bayesian Learning via Stochastic Gradient Langevin Dynamics, 2011}
+\end{frame}
+%=======
+\begin{frame}{Recap of previous lecture}
 	\vspace{-0.5cm}
 	\[
 		d\bx = \mathbf{f}(\bx, t) dt + g(t) d \bw - \text{SDE with the probability path } p_t(\bx)

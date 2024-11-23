@@ -13,43 +13,69 @@
 \end{frame}
 %=======
 \begin{frame}{Recap of previous lecture}
-	\begin{block}{Continuous-in-time dynamic (neural ODE)}
-		\vspace{-0.7cm}
+	\begin{block}{Continuous-in-time dynamics}
+		Consider Ordinary Differential Equation (ODE)
+		\vspace{-0.3cm}
 		\begin{align*}
-		   \frac{d \bz(t)}{dt} &= \bff_{\btheta}(\bz(t), t); \quad \text{with initial condition }\bz(0) = \bz_0. \\
-		   \bz(t_1) &= \int^{1}_{0} \bff_{\btheta}(\bz(t), t) d t  + \bz_0 \approx \text{ODESolve}(\bz(0), \bff_{\btheta}, t_0=0, t_1=1).
+		   \frac{d \bx(t)}{dt} &= \bff_{\btheta}(\bx(t), t); \quad \text{with initial condition }\bx(0) = \bx_0. \\
+		   \bx(1) &= \int^{1}_{0} \bff_{\btheta}(\bx(t), t) d t  + \bx_0
 		\end{align*}
-		\vspace{-0.7cm}
-	\end{block}	
-	\begin{block}{Euler update step}
 		\vspace{-0.6cm}
-		\[
-   \frac{\bz(t + \Delta t) - \bz(t)}{\Delta t} = \bff_{\btheta}(\bz(t), t) \,\, \Rightarrow \,\, \bz(t + \Delta t) = \bz(t) + \Delta t \cdot \bff_{\btheta}(\bz(t), t)
-		\]
-		\vspace{-0.7cm}
-	\end{block}	
-	\begin{block}{Theorem (Picard)}
-		If $\bff$ is uniformly Lipschitz continuous in $\bz$ and continuous in $t$, then the ODE has a \textbf{unique} solution.
 	\end{block}
-		\vspace{-0.7cm}
-		\begin{align*}
-			\bx &= \bz(1) = \bz(0) + \int_{0}^{1} \bff_{\btheta}(\bz(t), t) dt \\
-			\bz &= \bz(0) = \bz(1) + \int_{1}^{0} \bff_{\btheta}(\bz(t), t) dt
-		\end{align*}
+	Here $\bff_{\btheta}: \bbR^m \times [0, 1] \rightarrow \bbR^m$ is a vector field.
+	\begin{block}{Euler update step}
+		\vspace{-0.3cm}
+		\[
+  			\bx(t + \Delta t) = \bx(t) + \Delta t \cdot \bff_{\btheta}(\bx(t), t)
+		\]
+	\end{block}
+	\begin{itemize}
+		\item Euler method is the simplest version of the ODESolve that is unstable in practice.
+		\item It is possible to use more sophisticated numerical methods instead if Euler (e.x. Runge-Kutta methods).
+	\end{itemize}
 	\myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}   
 \end{frame}
 %=======
 \begin{frame}{Recap of previous lecture}
-	\begin{block}{Theorem (Kolmogorov-Fokker-Planck: special case)}
-		If $\bff$ is uniformly Lipschitz continuous in $\bz$ and continuous in $t$, then
-		\[
-			\frac{d \log p(\bz(t), t)}{d t} = - \text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right).
-		\]
-		\[
-			\log p_1(\bz(1)) = \log p_0(\bz(0)) - \int_{0}^{1} \text{tr}  \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) dt.
-		\]
+	\begin{minipage}[t]{0.6\columnwidth}
+		\begin{itemize}
+			\item $\bx(0) \sim p(\bx(0))$.
+		 	\item $\bx(1) \sim p(\bx(1))$.
+			\item$p_t(\bx) = p(\bx, t)$ is the \textbf{probability path} between $p_0(\bx)$ and $p_1(\bx)$.
+			\item $p_0(\bx) = \cN(0, \bI)$ is the base distribution and $p_1(\bx) = \pi(\bx)$ is the data distribution.
+		\end{itemize}
+		\vspace{0.2cm}
+	\end{minipage}%
+	\begin{minipage}[t]{0.4\columnwidth}	
+		\vspace{-0.7cm}
+		\begin{figure}
+			\centering
+			\includegraphics[width=\linewidth]{figs/cnf_flow.png}
+		\end{figure}
+	\end{minipage}
+	\vspace{-0.5cm}
+	\begin{block}{Theorem (Picard)}
+		If $\bff$ is uniformly Lipschitz continuous in $\bx$ and continuous in $t$, then the ODE has a \textbf{unique} solution.
 	\end{block}
-	\vspace{-0.3cm}
+	\vspace{-0.7cm}
+	\[
+		\bx(1) = \bx(0) + \int_{0}^{1} \bff_{\btheta}(\bx(t), t) dt; \quad \bx(0) = \bx(1) + \int_{1}^{0} \bff_{\btheta}(\bx(t), t) dt
+	\]
+	\myfootnotewithlink{https://arxiv.org/abs/1810.01367}{Grathwohl W. et al. FFJORD: Free-form Continuous Dynamics for Scalable Reversible Generative Models, 2018}  
+\end{frame}
+%=======
+\begin{frame}{Recap of previous lecture}
+	\begin{block}{Theorem (continuity equation)}
+		If $\bff$ is uniformly Lipschitz continuous in $\bx$ and continuous in $t$, then
+		\[
+			\frac{d \log p_t(\bx(t))}{d t} = - \text{tr} \left( \frac{\partial \bff(\bx(t), t)}{\partial \bx(t)} \right)
+		\]
+		\vspace{-0.3cm}
+		\[
+			\log p_1(\bx(1)) = \log p_0(\bx(0)) - \int_{0}^{1} \text{tr}  \left( \frac{\partial \bff(\bx(t), t)}{\partial \bx(t)} \right) dt.
+		\]
+		\vspace{-0.3cm}
+	\end{block}
 	\begin{itemize}
 		\item \textbf{Discrete-in-time NF}: evaluation of determinant of the Jacobian costs $O(m^3)$ (we need invertible $\bff$).
 		\item \textbf{Continuous-in-time NF}: getting the trace of the Jacobian costs $O(m^2)$ (we need smooth $\bff$).
@@ -57,7 +83,7 @@
 	\begin{block}{Hutchinson's trace estimator}
 		\vspace{-0.3cm}
 		\[
-  \log p_1(\bz(1)) = \log p_0(\bz(0)) - \mathbb{E}_{p(\bepsilon)} \int_{0}^{1} \left[ {\color{violet}\bepsilon^T \frac{\partial \bff}{\partial \bz}} \bepsilon \right] dt.
+	  		\log p_1(\bx(1)) = \log p_0(\bx(0)) - \mathbb{E}_{p(\bepsilon)} \int_{0}^{1} \left[ {\color{violet}\bepsilon^T \frac{\partial \bff}{\partial \bx}} \bepsilon \right] dt.
 		\]
 	\end{block}
 	\myfootnotewithlink{https://arxiv.org/abs/1810.01367}{Grathwohl W. et al. FFJORD: Free-form Continuous Dynamics for Scalable Reversible Generative Models, 2018} 
@@ -65,40 +91,38 @@
 %=======
 \begin{frame}{Recap of previous lecture}
 	\begin{block}{Forward pass (Loss function)}
+		\vspace{-0.7cm}
+		\[
+			L(\bx) = - \log p_1(\bx(1) | \btheta) = - \log p_0(\bx(0)) + \int_{0}^{1} \text{tr} \left( \frac{\partial \bff_{\btheta}(\bx(t), t)}{\partial \bx(t)} \right) dt
+		\]
+	\end{block}
+	\vspace{-0.5cm}
+	\begin{block}{Adjoint functions}
 		\vspace{-0.3cm}
 		\[
-			\bz = \bx + \int_{1}^{0} \bff_{\btheta}(\bz(t), t) dt, \quad L(\bz) = - \log p(\bx | \btheta)
-		\]
-		\[
-			L(\bz) = - \log p(\bz) + \int_{0}^{1} \text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) dt
+			\ba_{\bx}(t) = \frac{\partial L}{\partial \bx(t)}; \quad \ba_{\btheta}(t) = \frac{\partial L}{\partial \btheta(t)}.
 		\]
 		\vspace{-0.5cm}
 	\end{block}
-	\begin{block}{Adjoint functions}
-		\vspace{-0.4cm}
-		\[
-			\ba_{\bz}(t) = \frac{\partial L}{\partial \bz(t)}; \quad \ba_{\btheta}(t) = \frac{\partial L}{\partial \btheta(t)}.
-		\]
-		These functions show how the gradient of the loss depends on the hidden state~$\bz(t)$ and parameters $\btheta$.
-		\vspace{-0.3cm}
-	\end{block}
-
 	\begin{block}{Theorem (Pontryagin)}
-		\vspace{-0.6cm}
+		\vspace{-0.5cm}
 		\[
-		\frac{d \ba_{\bz}(t)}{dt} = - \ba_{\bz}(t)^T \cdot \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz}; \quad \frac{d \ba_{\btheta}(t)}{dt} = - \ba_{\bz}(t)^T \cdot \frac{\partial \bff_{\btheta}(\bz(t),  t)}{\partial \btheta}.
+		\frac{d \ba_{\bx}(t)}{dt} = - \ba_{\bx}(t)^T \cdot \frac{\partial \bff_{\btheta}(\bx(t), t)}{\partial \bx}; \quad \frac{d \ba_{\btheta}(t)}{dt} = - \ba_{\bx}(t)^T \cdot \frac{\partial \bff_{\btheta}(\bx(t),  t)}{\partial \btheta}.
 		\]
 		\vspace{-0.7cm}
+		\begin{align*}
+			\frac{\partial L}{\partial \btheta(0)} &= \ba_{\btheta}(0) =  - \int_{1}^{0} \ba_{\bx}(t)^T \frac{\partial \bff_{\btheta}(\bx(t), t)}{\partial \btheta(t)} dt + 0\\
+			\frac{\partial L}{\partial \bx(0)} &= \ba_{\bx}(0) =  - \int_{1}^{0} \ba_{\bx}(t)^T \frac{\partial \bff_{\btheta}(\bx(t), t)}{\partial \bx(t)} dt + \frac{\partial L}{\partial \bx(1)}
+		\end{align*}
 	\end{block}
-
-	\myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}     
+	\myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}   
 \end{frame}
 %=======
 \begin{frame}{Recap of previous lecture}
 	\begin{block}{Forward pass}
 		\vspace{-0.3cm}
 		\[
-		\bz = \bz(0) = \int^{1}_{0} \bff_{\btheta}(\bz(t), t) d t  + \bx \quad \Rightarrow \quad \text{ODE Solver}
+		\bx(1) = \bx(0) + \int^{1}_{0} \bff_{\btheta}(\bx(t), t) d t \quad \Rightarrow \quad \text{ODE Solver}
 		\]
 		\vspace{-0.4cm}
 	\end{block}
@@ -108,9 +132,9 @@
 			\left.
 			{\footnotesize 
 				\begin{aligned}
-					\frac{\partial L}{\partial \btheta(t_1)} &= \ba_{\btheta}(1) =  - \int_{0}^{1} \ba_{\bz}(t)^T \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \btheta(t)} dt + 0 \\
-					\frac{\partial L}{\partial \bz(1)} &= \ba_{\bz}(1) =  - \int_{0}^{1} \ba_{\bz}(t)^T \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} dt + \frac{\partial L}{\partial \bz(0)} \\
-					\bz(1) &= - \int^{0}_{1} \bff_{\btheta}(\bz(t), t) d t  + \bz_0.
+					\frac{\partial L}{\partial \btheta(0)} &= \ba_{\btheta}(0) =  - \int_{1}^{0} \ba_{\bx}(t)^T \frac{\partial \bff_{\btheta}(\bx(t), t)}{\partial \btheta(t)} dt + 0 \\
+					\frac{\partial L}{\partial \bx(0)} &= \ba_{\bx}(0) =  - \int_{1}^{0} \ba_{\bx}(t)^T \frac{\partial \bff_{\btheta}(\bx(t), t)}{\partial \bx(t)} dt + \frac{\partial L}{\partial \bx(1)} \\
+					\bx(0) &= - \int^{1}_{0} \bff_{\btheta}(\bx(t), t) d t  + \bx(1).
 				\end{aligned}
 			}
 			\right\rbrace
@@ -121,60 +145,6 @@
 	\end{block}
 	\textbf{Note:} These scary formulas are the standard backprop in the discrete case.
 	\myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}   
-\end{frame}
-%=======
-\begin{frame}{Recap of previous lecture}
-	\vspace{-0.2cm}
-	\begin{block}{SDE basics}
-		Let define stochastic process $\bx(t)$ with initial condition $\bx(0) \sim p_0(\bx)$:
-		\[
-			d\bx = \mathbf{f}(\bx, t) dt + g(t) d \bw, 
-		\]
-		where $\bw(t)$ is the standard Wiener process (Brownian motion)
-		\vspace{-0.2cm}
-		\[		
-			\bw(t) - \bw(s) \sim \cN(0, (t - s) \bI), \quad d \bw = \bepsilon \cdot \sqrt{dt}, \, \text{where } \bepsilon \sim \cN(0, \bI).
-		\]
-	\end{block}
-	\vspace{-0.3cm}
-	\begin{block}{Discretization of SDE (Euler method)}
-		\vspace{-0.3cm}
-		\[
-			\bx(t + dt) = \bx(t) + \bff(\bx(t), t) \cdot dt + g(t) \cdot \bepsilon \cdot \sqrt{dt}
-		\]
-		\vspace{-0.3cm}
-	\end{block}
-	\begin{itemize}
-		\item At each moment $t$ we have the density $p_t(\bx) = p(\bx, t)$.
-		\item $p: \bbR^m \times [0, 1] \rightarrow \bbR_+$ is a \textbf{probability path} between $p_0(\bx)$ and $p_1(\bx)$.
-	\end{itemize}
-\end{frame}
-%=======
-\begin{frame}{Recap of previous lecture}
- 	\begin{block}{Theorem (Kolmogorov-Fokker-Planck)}
- 		Evolution of the distribution $p_t(\bx)$ is given by the following equation:
- 		\vspace{-0.3cm}
- 		\[
- 			\frac{\partial p_t(\bx)}{\partial t} = - \text{div}\left(\bff(\bx, t) p_t(\bx)\right) + \frac{1}{2}g^2(t) \Delta_{\bx}p_t(\bx)
- 		\]
- 		\vspace{-0.5cm}
- 	\end{block}
- 	\begin{block}{Langevin SDE (special case)}
- 		\vspace{-0.3cm}
- 		\[
- 			d \bx = {\color{violet}\frac{1}{2} \frac{\partial}{\partial \bx} \log p_t(\bx)} d t + {\color{teal} 1 } \cdot d \bw
- 		\]
- 		\vspace{-0.3cm}
- 	\end{block}
- 	The density $p(\bx | \btheta)$ is a \textbf{stationary} distribution for the SDE.
-	\begin{block}{Langevin dynamics}
-		Samples from the following dynamics will comes from $p(\bx | \btheta)$ under mild regularity conditions for small enough $\eta$.
-		\vspace{-0.2cm}
-		\[
-			\bx_{t + 1} = \bx_t + \frac{\eta}{2} \nabla_{\bx_t} \log p(\bx_t | \btheta) + \sqrt{\eta} \cdot \bepsilon, \quad \bepsilon \sim \cN(0, \bI).
-		\]
-	\end{block}
-	\myfootnotewithlink{https://www.stats.ox.ac.uk/~teh/research/compstats/WelTeh2011a.pdf}{Welling M. Bayesian Learning via Stochastic Gradient Langevin Dynamics, 2011}
 \end{frame}
 %=======
 \begin{frame}{Outline}
@@ -341,7 +311,7 @@
 		Then there exists ODE with identical probability path $p_t(\bx)$ of the form
 		\vspace{-0.3cm}
 		\[
-			d\bx = \left[\mathbf{f}(\bx, t) -\frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p_t(\bx) \right] dt
+			d\bx = \left(\mathbf{f}(\bx, t) -\frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p_t(\bx) \right) dt
 		\]
 		\vspace{-0.7cm}
 	\end{block}
@@ -365,7 +335,7 @@
 		Then there exists ODE with identical probabilities distribution $p_t(\bx)$ of the form
 		\vspace{-0.3cm}
 		\[
-			d\bx = \left[\mathbf{f}(\bx, t) -\frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p_t(\bx) \right] dt
+			d\bx = \left(\mathbf{f}(\bx, t) -\frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p_t(\bx) \right) dt
 		\]
 		\vspace{-0.7cm}
 	\end{block}
@@ -378,7 +348,7 @@
  	\end{block}
  	\vspace{-1.0cm}
  	\[
- 		d \bx = \tilde{\bff}(\bx, t) dt + 0 \cdot d \bw = \left[\mathbf{f}(\bx, t) -\frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p_t(\bx) \right] dt
+ 		d \bx = \tilde{\bff}(\bx, t) dt + 0 \cdot d \bw = \left(\mathbf{f}(\bx, t) -\frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p_t(\bx) \right) dt
  	\]
 	\myfootnotewithlink{https://arxiv.org/abs/2011.13456}{Song Y., et al. Score-Based Generative Modeling through Stochastic Differential Equations, 2020}
 \end{frame}
@@ -387,7 +357,7 @@
 	\vspace{-0.5cm}
 	\begin{align*}
 		d\bx &= \mathbf{f}(\bx, t) dt + g(t) d \bw - \text{SDE} \\
-		d\bx &= \left[\mathbf{f}(\bx, t) -\frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p_t(\bx) \right] dt  - \text{probability flow ODE}
+		d\bx &= \left(\mathbf{f}(\bx, t) -\frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p_t(\bx) \right) dt  - \text{probability flow ODE}
 	\end{align*}
 	\vspace{-0.3cm}
 	\begin{itemize}
@@ -462,23 +432,23 @@
 			{\footnotesize
 			\begin{align*}
 				d\bx &= \mathbf{f}(\bx, t) dt + g(t) d \bw \\
-				d\bx &= \left[\mathbf{f}(\bx, t) -\frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p_t(\bx) \right] dt
+				d\bx &= \left(\mathbf{f}(\bx, t) -\frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p_t(\bx) \right) dt
 			\end{align*}
 			}
 			\item Revert probability flow ODE
 			\vspace{-0.1cm}
 			{\footnotesize
 			\begin{align*}
-				d\bx &= \left[\mathbf{f}(\bx, t) -\frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p_t(\bx) \right] dt \\
-				d\bx &= \left[- \mathbf{f}(\bx, 1 - \tau) + \frac{1}{2} g^2(1 - \tau) \frac{\partial}{\partial \bx} \log p_{1 - \tau}(\bx) \right] d \tau
+				d\bx &= \left(\mathbf{f}(\bx, t) -\frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p_t(\bx) \right) dt \\
+				d\bx &= \left(- \mathbf{f}(\bx, 1 - \tau) + \frac{1}{2} g^2(1 - \tau) \frac{\partial}{\partial \bx} \log p_{1 - \tau}(\bx) \right) d \tau
 			\end{align*}
 			}
 			\item Convert reverse probability flow ODE to reverse SDE
 			\vspace{-0.1cm}
 			{\footnotesize
 			\begin{align*}
-				d\bx &= \left[- \mathbf{f}(\bx, 1 - \tau) + \frac{1}{2} g^2(1 - \tau) \frac{\partial}{\partial \bx} \log p_{1 - \tau}(\bx) \right] d \tau \\
-				d\bx &= \left[- \mathbf{f}(\bx, 1 - \tau) + g^2(1 - \tau) \frac{\partial}{\partial \bx} \log p_{1 - \tau}(\bx) \right] d\tau + g(1 - \tau) d \bw
+				d\bx &= \left(- \mathbf{f}(\bx, 1 - \tau) + \frac{1}{2} g^2(1 - \tau) \frac{\partial}{\partial \bx} \log p_{1 - \tau}(\bx) \right) d \tau \\
+				d\bx &= \left(- \mathbf{f}(\bx, 1 - \tau) + g^2(1 - \tau) \frac{\partial}{\partial \bx} \log p_{1 - \tau}(\bx) \right) d\tau + g(1 - \tau) d \bw
 			\end{align*}
 			}
 		\end{itemize}
@@ -499,7 +469,7 @@
 	\begin{block}{Proof (continued)}
 		\vspace{-0.7cm}
 		\[
-			d\bx = \left[- \mathbf{f}(\bx, 1 - \tau) + g^2(1 - \tau) \frac{\partial}{\partial \bx} \log p_{1 - \tau}(\bx) \right] d \tau + g(1 - \tau) d \bw
+			d\bx = \left(- \mathbf{f}(\bx, 1 - \tau) + g^2(1 - \tau) \frac{\partial}{\partial \bx} \log p_{1 - \tau}(\bx) \right) d \tau + g(1 - \tau) d \bw
 		\]
 		\[
 			d\bx = \left(\mathbf{f}(\bx, t) - g^2(t) \frac{\partial}{\partial \bx}\log p_t(\bx)\right) dt + g(t) d \bw
@@ -513,7 +483,7 @@
 	\vspace{-0.5cm}
 	\begin{align*}
 		d\bx &= \mathbf{f}(\bx, t) dt + g(t) d \bw - \text{SDE} \\
-		d\bx &= \left[\mathbf{f}(\bx, t) -\frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p_t(\bx) \right] dt - \text{probability flow ODE} \\
+		d\bx &= \left(\mathbf{f}(\bx, t) -\frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p_t(\bx) \right) dt - \text{probability flow ODE} \\
 		d\bx &= \left(\mathbf{f}(\bx, t) - g^2(t) \frac{\partial}{\partial \bx}\log p_t(\bx)\right) dt + g(t) d \bw - \text{reverse SDE}
 	\end{align*}
 	\vspace{-0.5cm}
@@ -573,7 +543,7 @@
 	\]
 	\vspace{-0.5cm}
 	\begin{align*}
-		d\bx &= \left[-\frac{1}{2} \frac{ d [\sigma^2(t)]}{dt} \frac{\partial}{\partial \bx} \log p_t(\bx) \right] dt - \text{probability flow ODE} \\
+		d\bx &= \left(-\frac{1}{2} \frac{ d [\sigma^2(t)]}{dt} \frac{\partial}{\partial \bx} \log p_t(\bx) \right) dt - \text{probability flow ODE} \\
 		d\bx &= \left(- \frac{ d [\sigma^2(t)]}{dt} \frac{\partial}{\partial \bx}\log p_t(\bx)\right) dt + \sqrt{\frac{ d [\sigma^2(t)]}{dt}}  d \bw - \text{reverse SDE}
 	\end{align*}
 	\myfootnotewithlink{https://arxiv.org/abs/2011.13456}{Song Y., et al. Score-Based Generative Modeling through Stochastic Differential Equations, 2020}
@@ -604,7 +574,25 @@
 \end{frame}
 %=======
 \begin{frame}{Diffusion SDE}
-	\vspace{-0.3cm}
+	\begin{block}{Variance Preserving SDE}
+		\vspace{-0.3cm}
+		\[
+			d \bx = - \frac{1}{2} \beta(t) \bx(t) dt + \sqrt{\beta(t)} \cdot d \bw
+		\]
+		\[
+			\bff(\bx, t) = - \frac{1}{2} \beta(t) \bx(t) , \quad g(t) = \sqrt{\beta(t)} 
+		\]
+	\end{block}
+	Variance is preserved if $\bx(0)$ has a unit variance.
+	\begin{align*}
+		d\bx &= \left(- \frac{1}{2} \beta(t) \bx(t) - \frac{1}{2} \beta(t) \frac{\partial}{\partial \bx} \log p_t(\bx) \right) dt - \text{probability flow ODE} \\
+		d\bx &= \left(- \frac{1}{2} \beta(t) \bx(t) - \beta(t) \frac{\partial}{\partial \bx} \log p_t(\bx)\right) dt + \sqrt{\beta(t)} d \bw - \text{reverse SDE}
+	\end{align*}
+	\myfootnotewithlink{https://arxiv.org/abs/2011.13456}{Song Y., et al. Score-Based Generative Modeling through Stochastic Differential Equations, 2020}
+\end{frame}
+%=======
+\begin{frame}{Diffusion SDE}
+	\vspace{-0.5cm}
 	\[
 		d\bx = \mathbf{f}(\bx, t) dt + g(t) d \bw
 	\]
@@ -614,7 +602,7 @@
 		\[
 			d \bx = \sqrt{\frac{ d [\sigma^2(t)]}{dt}} \cdot d \bw, \quad \bff(\bx, t) = 0, \quad g(t) = \sqrt{\frac{ d [\sigma^2(t)]}{dt}} 
 		\]
-		Variance grows since $\sigma(t)$ is a monotonically increasing function.
+		\vspace{-0.5cm}
 	\end{block}
 	\begin{block}{Variance Preserving SDE (DDPM)}
 		\vspace{-0.3cm}
@@ -624,9 +612,70 @@
 		\[
 			\bff(\bx, t) = - \frac{1}{2} \beta(t) \bx(t) , \quad g(t) = \sqrt{\beta(t)} 
 		\]
-		Variance is preserved if $\bx(0)$ has a unit variance.
+		\vspace{-0.3cm}
 	\end{block}
+	Is it possible to train score-based generative model (DDPM or NCSN) in continuous time?
 	\myfootnotewithlink{https://arxiv.org/abs/2011.13456}{Song Y., et al. Score-Based Generative Modeling through Stochastic Differential Equations, 2020}
+\end{frame}
+%=======
+\section{Score-based generative models through SDEs}
+%=======
+\begin{frame}{Score-based generative models through SDEs}
+	\begin{block}{Discrete-in-time objective}
+		\vspace{-0.3cm}
+		\[
+			\bbE_{\pi(\bx_0)} \bbE_{t \sim U\{1, T\}} \bbE_{q(\bx_t | \bx_0)}\bigl\| \bs_{\btheta, t}(\bx_t) - \nabla_{\bx_t} \log q(\bx_t | \bx_0) \bigr\|^2_2 
+		\]
+		\vspace{-0.3cm}
+	\end{block}
+	\begin{block}{Continuous-in-time objective}
+		\vspace{-0.5cm}
+		\[
+			\bbE_{\pi(\bx(0))} \bbE_{t \sim U[0, 1]} \bbE_{q(\bx(t) | \bx(0))}\bigl\| \bs_{\btheta}(\bx(t), t) - {\color{teal}\nabla_{\bx(t)} \log q(\bx(t) | \bx(0))} \bigr\|^2_2 
+		\]
+		\vspace{-0.5cm}
+	\end{block}
+	\begin{figure}
+		\includegraphics[width=0.8\linewidth]{figs/sbgm}
+	\end{figure}
+	\myfootnotewithlink{https://arxiv.org/abs/2011.13456}{Song Y., et al. Score-Based Generative Modeling through Stochastic Differential Equations, 2020}
+\end{frame}
+%=======
+\begin{frame}{Score-based generative models through SDEs}
+	\vspace{-0.3cm}
+	\begin{block}{Continuous-in-time objective}
+		\vspace{-0.5cm}
+		\[
+			\bbE_{\pi(\bx(0))} \bbE_{t \sim U[0, 1]} \bbE_{q(\bx(t) | \bx(0))}\bigl\| \bs_{\btheta}(\bx(t), t) - {\color{teal}\nabla_{\bx(t)} \log q(\bx(t) | \bx(0))} \bigr\|^2_2 
+		\]
+		\vspace{-0.7cm}
+	\end{block}
+	\[
+		q(\bx(t) | \bx(0)) = \cN\left(\bmu(\bx_t, \bx_0), \bSigma(\bx_t, \bx_0)\right)
+	\]
+	\vspace{-0.5cm}
+	\begin{block}{Theorem}
+		Moments of the SDE $d\bx = \mathbf{f}(\bx, t) dt + g(t) d \bw$ satisfies the equations
+		\[
+			\frac{d \bmu(\bx_t, \bx_0)}{dt} = \bbE \left[ \bff(\bx(t), t) | \bx(0)\right]
+		\]
+		\[
+			\frac{d \bSigma(\bx_t, \bx_0)}{dt} = \bbE \left[ \bff \cdot (\bx(t) - \bmu)^T + (\bx(t) - \bmu) \cdot \bff^T | \bx(0)\right] + g^2(t) \bI
+		\]
+	\end{block}
+	Let prove the first one.
+	\myfootnotewithlink{https://users.aalto.fi/~asolin/sde-book/sde-book.pdf}{Särkkä S., Solin A. Applied stochastic differential equations, 2019}
+
+\end{frame}
+%=======
+\begin{frame}{Score-based generative models through SDEs}
+	Prove
+	
+	Kernels for DDPM and NCSN
+	
+	Final algorithm
+	\myfootnotewithlink{https://users.aalto.fi/~asolin/sde-book/sde-book.pdf}{Särkkä S., Solin A. Applied stochastic differential equations, 2019}
+
 \end{frame}
 %=======
 \begin{frame}{Summary}
