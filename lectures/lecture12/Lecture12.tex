@@ -651,36 +651,102 @@
 		\vspace{-0.7cm}
 	\end{block}
 	\[
-		q(\bx(t) | \bx(0)) = \cN\left(\bmu(\bx_t, \bx_0), \bSigma(\bx_t, \bx_0)\right)
+		q(\bx(t) | \bx(0)) = \cN\Bigl(\bmu(\bx(t), \bx(0)), \bSigma(\bx(t), \bx(0))\Bigr)
 	\]
 	\vspace{-0.5cm}
 	\begin{block}{Theorem}
 		Moments of the SDE $d\bx = \mathbf{f}(\bx, t) dt + g(t) d \bw$ satisfies the equations
 		\[
-			\frac{d \bmu(\bx_t, \bx_0)}{dt} = \bbE \left[ \bff(\bx(t), t) | \bx(0)\right]
+			\frac{d \bmu(\bx(t), \bx(0))}{dt} = \bbE \left[ \bff(\bx(t), t) | \bx(0)\right]
 		\]
 		\[
-			\frac{d \bSigma(\bx_t, \bx_0)}{dt} = \bbE \left[ \bff \cdot (\bx(t) - \bmu)^T + (\bx(t) - \bmu) \cdot \bff^T | \bx(0)\right] + g^2(t) \bI
+			\frac{d \bSigma(\bx(t), \bx(0))}{dt} = \bbE \left[ \bff \cdot (\bx(t) - \bmu)^T + (\bx(t) - \bmu) \cdot \bff^T | \bx(0)\right] + g^2(t) \cdot \bI
 		\]
 	\end{block}
 	Let prove the first one.
 	\myfootnotewithlink{https://users.aalto.fi/~asolin/sde-book/sde-book.pdf}{Särkkä S., Solin A. Applied stochastic differential equations, 2019}
-
 \end{frame}
 %=======
 \begin{frame}{Score-based generative models through SDEs}
-	Prove
-	
-	Kernels for DDPM and NCSN
-	
-	Final algorithm
+	\begin{block}{Theorem}
+		\vspace{-0.3cm}
+		\[
+			\frac{d \bmu(\bx(t), \bx(0))}{dt} = \bbE \left[ \bff(\bx(t), t) | \bx(0)\right]
+		\]
+		\vspace{-0.5cm}
+	\end{block}
+	\begin{block}{Proof}
+		\vspace{-0.7cm}
+		\begin{align*}
+			\bbE\left[{\color{violet}d\bx} | \bx(0) \right] &= \bbE\left[{\color{violet}\mathbf{f}(\bx, t) dt} | \bx(0) \right] + \bbE\left[{\color{violet}g(t) d \bw} | \bx(0) \right] \\
+			&= \bbE\left[\mathbf{f}(\bx, t) | \bx(0) \right] dt + g(t) \bbE\left[d \bw | \bx(0) \right] \\
+			&= \bbE\left[\mathbf{f}(\bx, t) | \bx(0) \right] dt
+		\end{align*}
+		\[
+			\frac{d \bbE\left[\bx | \bx(0) \right]}{dt} = \frac{d \bmu(\bx(t), \bx(0))}{dt} = \bbE\left[\mathbf{f}(\bx, t) | \bx(0) \right] 
+		\]
+	\end{block}
+	\vspace{-0.3cm}
+	\begin{block}{Examples}
+		\vspace{-0.5cm}
+		\[
+			\textbf{NCSN:} \quad	\mathbf{f}(\bx, t) = 0 \quad \Rightarrow \quad \bmu = \bx(0)
+		\]
+		\[
+			\textbf{DDPM:} \quad \mathbf{f}(\bx, t) = - \frac{1}{2} \beta(t) \bx(t) \quad \Rightarrow \quad \bmu = \bx(0) \exp\left(- \frac{1}{2} \int_0^t \beta(s)ds\right)
+		\]
+	\end{block}
 	\myfootnotewithlink{https://users.aalto.fi/~asolin/sde-book/sde-book.pdf}{Särkkä S., Solin A. Applied stochastic differential equations, 2019}
-
+\end{frame}
+%=======
+\begin{frame}{Score-based generative models through SDEs}
+	\begin{block}{Training}
+		\vspace{-0.5cm}
+		\[
+			\bbE_{\pi(\bx(0))} \bbE_{t \sim U[0, 1]} \bbE_{q(\bx(t) | \bx(0))}\bigl\| \bs_{\btheta}(\bx(t), t) - {\color{teal}\nabla_{\bx(t)} \log q(\bx(t) | \bx(0))} \bigr\|^2_2 
+		\]
+		\vspace{-0.7cm}
+	\end{block}
+	\[
+		q(\bx(t) | \bx(0)) = \cN\Bigl(\bmu(\bx(t), \bx(0)), \bSigma(\bx(t), \bx(0))\Bigr)
+	\]
+	\vspace{-0.5cm}
+	\begin{block}{NCSN}
+		\vspace{-0.3cm}
+		\[
+			q(\bx(t) | \bx(0)) = \cN\left(\bx(0), \left[\sigma^2(t) - \sigma^2(0)\right] \cdot \bI\right)
+		\]
+		\vspace{-0.5cm}
+	\end{block}
+	\begin{block}{DDPM}
+		\vspace{-0.3cm}
+		\[
+			q(\bx(t) | \bx(0)) = \cN\left(\bx(0) e^{-\frac{1}{2} \int_0^t\beta(s)ds}, \left(1 - e^{- \int_0^t\beta(s)ds}\right) \cdot \bI\right)
+		\]
+		\vspace{-0.5cm}
+	\end{block}
+	
+	\myfootnotewithlink{https://arxiv.org/abs/2011.13456}{Song Y., et al. Score-Based Generative Modeling through Stochastic Differential Equations, 2020}
+\end{frame}
+%=======
+\begin{frame}{Score-based generative models through SDEs}
+	\begin{block}{Sampling}
+		Solve reverse SDE using numerical solvers (ODESolve).
+		\begin{figure}
+			\includegraphics[width=0.8\linewidth]{figs/sbgm}
+		\end{figure}
+		\vspace{-0.5cm}
+	\end{block}
+	\begin{itemize}
+		\item Discretization of the reverse SDE gives us the ancestral sampling.
+		\item If we use probability flow instead of SDE than the reverse ODE gives us the DDIM sampling.
+	\end{itemize}
+	\myfootnotewithlink{https://arxiv.org/abs/2011.13456}{Song Y., et al. Score-Based Generative Modeling through Stochastic Differential Equations, 2020}
 \end{frame}
 %=======
 \begin{frame}{Summary}
 	\begin{itemize}
-		\item SDE defines stochastic process with drift and diffusion terms. ODEs are the special case of SDEs.
+		\item SDE defines a stochastic process with drift and diffusion terms. ODEs are the special case of SDEs.
 		\vfill
 		\item KFP equation defines the dynamic of the probability function for the SDE. 
 		\vfill
@@ -688,9 +754,11 @@
 		\vfill
 		\item There exists special probability flow ODE for each SDE that gives the same probability path.
 		\vfill
-		\item It is possible to revert SDE using score function.
+		\item It is possible to revert SDE using the score function.
 		\vfill
 		\item Score matching (NCSN) and diffusion models (DDPM) are the discretizations of the SDEs (variance exploding and variance preserving).
+		\vfill
+		\item It is possible to train the continuous-in-time score-based generative models through forward and reverse SDEs.
 	\end{itemize}
 \end{frame}
 \end{document} 
