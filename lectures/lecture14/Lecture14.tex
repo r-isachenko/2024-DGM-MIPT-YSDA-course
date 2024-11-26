@@ -16,6 +16,83 @@
 	\tableofcontents
 \end{frame}
 %=======
+\section{Latent models}
+%=======
+\subsection{Score-based models}
+%=======
+\begin{frame}{Latent models}
+	\begin{figure}
+		\includegraphics[width=\linewidth]{figs/latent_diffusion}
+	\end{figure}
+	\begin{figure}
+		\includegraphics[width=\linewidth]{figs/latent_flow_matching}
+	\end{figure}
+
+	\myfootnote{\href{https://arxiv.org/abs/2307.08698}{Dao Q. et al. Flow Matching in Latent Space, 2023} \\ \href{https://neurips2023-ldm-tutorial.github.io/}{NeurIPS 2023 Tutorial: Latent Diffusion Models: Is the Generative AI Revolution Happening in Latent Space?}}
+\end{frame}
+%=======
+\subsection{Autoregressive models}
+%=======
+\begin{frame}{Vector Quantized VAE (VQ-VAE) }
+	\begin{block}{Vector quantization}
+		Define the dictionary space $\{\be_k\}_{k=1}^K$, where $\be_k \in \bbR^C$, $K$ is the size of the dictionary.
+		\vspace{-0.5cm}
+		\begin{minipage}[t]{0.45\columnwidth}
+			\[
+				\bz_q = \bq (\bz) = \be_{k^*}
+			\] 
+			Here $k^* = \argmin_k \| \bz - \be_k \|$.
+		\end{minipage}%
+		\begin{minipage}[t]{0.55\columnwidth}
+			\vspace{-0.5cm}
+			\begin{figure}
+				\includegraphics[width=\linewidth]{figs/fqgan_cnn}
+			\end{figure}
+		\end{minipage}		
+	\end{block}
+	\[
+		\cL_{\bphi, \btheta}(\bx)  =  \log p(\bx | \bz_q, \btheta) - \log K
+	\]
+	\vspace{-0.5cm}
+	\begin{figure}
+		\centering
+		\includegraphics[width=\linewidth]{figs/vqvae}
+	\end{figure}
+	\myfootnote{\href{https://arxiv.org/abs/2004.02088}{Zhao Y. et al. Feature Quantization Improves GAN Training, 2020} \\ \href{https://arxiv.org/abs/1711.00937}{Oord A., Vinyals O., Kavukcuoglu K. Neural Discrete Representation Learning, 2017}}
+\end{frame}
+%=======
+\begin{frame}{Vector Quantized GAN}
+	\begin{figure}
+		\includegraphics[width=\linewidth]{figs/vqgan}
+	\end{figure}
+	
+	\myfootnotewithlink{https://arxiv.org/abs/2012.09841}{Esser P. et al. Taming Transformers for High-Resolution Image Synthesis, 2020}
+\end{frame}
+%=======
+\begin{frame}{LlamaGen}
+	\begin{figure}
+		\includegraphics[width=\linewidth]{figs/llamagen_samples}
+	\end{figure}
+	
+	\myfootnotewithlink{https://arxiv.org/pdf/2406.06525}{Sun P. et al. Autoregressive Model Beats Diffusion: Llama for Scalable Image Generation, 2024}
+\end{frame}
+%=======
+\begin{frame}{Visual Autoregressive Modeling (VAR)}
+	\begin{figure}
+		\includegraphics[width=\linewidth]{figs/var_idea}
+	\end{figure}
+	
+	\myfootnotewithlink{https://arxiv.org/pdf/2404.02905}{Tean K. et al. Visual Autoregressive Modeling: Scalable Image Generation via Next-Scale Prediction, 2024}
+\end{frame}
+%=======
+\begin{frame}{Visual Autoregressive Modeling (VAR)}
+	\begin{figure}
+		\includegraphics[width=\linewidth]{figs/var_training}
+	\end{figure}
+	
+	\myfootnotewithlink{https://arxiv.org/pdf/2404.02905}{Tean K. et al. Visual Autoregressive Modeling: Scalable Image Generation via Next-Scale Prediction, 2024}
+\end{frame}
+%=======
 \section{The worst course overview}
 %=======
 \begin{frame}{The worst course overview :)}
