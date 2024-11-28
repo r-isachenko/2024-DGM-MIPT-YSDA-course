@@ -74,9 +74,8 @@
 	\vspace{-0.5cm}
 	\begin{block}{Probability flow ODE}
 		There exists ODE with identical the probability path $p_t(\bx)$ of the form
-		\vspace{-0.3cm}
 		\[
-			d\bx = \left[\mathbf{f}(\bx, t) -\frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p_t(\bx) \right] dt
+			d\bx = \left(\mathbf{f}(\bx, t) -\frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p_t(\bx) \right) dt
 		\]
 		\vspace{-0.3cm}
 	\end{block}
@@ -104,7 +103,7 @@
 		There exists the reverse SDE for the SDE $d\bx = \mathbf{f}(\bx, t) dt + g(t) d \bw$ that has the following form
 		\vspace{-0.3cm}
 		\[
-			d\bx = \left(\mathbf{f}(\bx, t) {\color{violet}- g^2(t) \frac{\partial \log p_t(\bx)}{\partial \bx}}\right) dt + g(t) d \bw, \quad dt < 0
+			d\bx = \left(\mathbf{f}(\bx, t) {\color{violet}- g^2(t) \frac{\partial}{\partial \bx}\log p_t(\bx)}\right) dt + g(t) d \bw, \quad dt < 0
 		\] 
 	\end{block}
 	\vspace{-0.5cm}
@@ -122,17 +121,12 @@
 	\vspace{-0.5cm}
 	\begin{align*}
 		d\bx &= \mathbf{f}(\bx, t) dt + g(t) d \bw - \text{SDE} \\
-		d\bx &= \left[\mathbf{f}(\bx, t) -\frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p_t(\bx) \right] dt - \text{probability flow ODE} \\
-		d\bx &= \left(\mathbf{f}(\bx, t) - g^2(t) \frac{\partial \log p_t(\bx)}{\partial \bx}\right) dt + g(t) d \bw - \text{reverse SDE}
+		d\bx &= \left(\mathbf{f}(\bx, t) -\frac{1}{2} g^2(t) \frac{\partial}{\partial \bx} \log p_t(\bx) \right) dt - \text{probability flow ODE} \\
+		d\bx &= \left(\mathbf{f}(\bx, t) - g^2(t) \frac{\partial }{\partial \bx}\log p_t(\bx)\right) dt + g(t) d \bw - \text{reverse SDE}
 	\end{align*}
 	\vspace{-0.5cm}
-	\begin{itemize}
-		\item We got the way to transform one distribution to another via SDE with some probability path $p_t(\bx)$.
-		\item We are able to revert this process with the score function.
-	\end{itemize}
-	\vspace{-0.3cm}
 	\begin{figure}
-		\includegraphics[width=0.9\linewidth]{figs/sde}
+		\includegraphics[width=\linewidth]{figs/sde}
 	\end{figure}
 	\myfootnotewithlink{https://arxiv.org/abs/2011.13456}{Song Y., et al. Score-Based Generative Modeling through Stochastic Differential Equations, 2020}
 \end{frame}
@@ -299,21 +293,21 @@
 	\begin{block}{Continuous-in-time NF}
 		\vspace{-0.2cm}
 		\[
-		   \frac{d \bz(t)}{dt} = \bff_{\btheta}(\bz(t), t); \quad \text{with initial condition }\bz(0) = \bz_0. 
+		   \frac{d \bx(t)}{dt} = \bff_{\btheta}(\bx(t), t); \quad \text{with initial condition }\bx(0) = \bx_0. 
 		\]
 		\vspace{-0.3cm}
 	\end{block}	
-	\begin{block}{Theorem (Kolmogorov-Fokker-Planck: special case)}
-		If $\bff$ is uniformly Lipschitz continuous in $\bz$ and continuous in $t$, then
+	\begin{block}{Theorem (continuity equation)}
+		If $\bff$ is uniformly Lipschitz continuous in $\bx$ and continuous in $t$, then
 		\[
-			\frac{d \log p_t(\bz(t))}{d t} = - \text{tr} \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right).
+			\frac{d \log p_t(\bx(t))}{d t} = - \text{tr} \left( \frac{\partial \bff_{\btheta}(\bx(t), t)}{\partial \bx(t)} \right).
 		\]
 		\[
-			\log p_1(\bz(1)) = \log p_0(\bz(0)) - \int_{0}^{1} \text{tr}  \left( \frac{\partial \bff_{\btheta}(\bz(t), t)}{\partial \bz(t)} \right) dt.
+			\log p_1(\bx(1)) = \log p_0(\bx(0)) - \int_{0}^{1} \text{tr}  \left( \frac{\partial \bff_{\btheta}(\bx(t), t)}{\partial \bx(t)} \right) dt.
 		\]
 	\end{block}
 	\begin{itemize}
-		\item Solving KFP using adjoint method is comlicated and unstable process.
+		\item Solving the continuity equation using the adjoint method is complicated and unstable process.
 		\item Flow matching generalizes these models and gives the alternative way to solve the continuous dynamics.
 	\end{itemize}
 \end{frame}
