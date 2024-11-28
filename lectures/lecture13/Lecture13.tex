@@ -167,6 +167,132 @@
 	\tableofcontents
 \end{frame}
 %=======
+\section{Score-based generative models through SDEs}
+%=======
+\begin{frame}{Score-based generative models through SDEs}
+	\begin{block}{Discrete-in-time objective}
+		\vspace{-0.3cm}
+		\[
+			\bbE_{\pi(\bx_0)} \bbE_{t \sim U\{1, T\}} \bbE_{q(\bx_t | \bx_0)}\bigl\| \bs_{\btheta, t}(\bx_t) - \nabla_{\bx_t} \log q(\bx_t | \bx_0) \bigr\|^2_2 
+		\]
+		\vspace{-0.3cm}
+	\end{block}
+	\begin{block}{Continuous-in-time objective}
+		\vspace{-0.5cm}
+		\[
+			\bbE_{\pi(\bx(0))} \bbE_{t \sim U[0, 1]} \bbE_{q(\bx(t) | \bx(0))}\bigl\| \bs_{\btheta}(\bx(t), t) - {\color{teal}\nabla_{\bx(t)} \log q(\bx(t) | \bx(0))} \bigr\|^2_2 
+		\]
+		\vspace{-0.5cm}
+	\end{block}
+	\begin{figure}
+		\includegraphics[width=0.8\linewidth]{figs/sbgm}
+	\end{figure}
+	\myfootnotewithlink{https://arxiv.org/abs/2011.13456}{Song Y., et al. Score-Based Generative Modeling through Stochastic Differential Equations, 2020}
+\end{frame}
+%=======
+\begin{frame}{Score-based generative models through SDEs}
+	\vspace{-0.3cm}
+	\begin{block}{Continuous-in-time objective}
+		\vspace{-0.5cm}
+		\[
+			\bbE_{\pi(\bx(0))} \bbE_{t \sim U[0, 1]} \bbE_{q(\bx(t) | \bx(0))}\bigl\| \bs_{\btheta}(\bx(t), t) - {\color{teal}\nabla_{\bx(t)} \log q(\bx(t) | \bx(0))} \bigr\|^2_2 
+		\]
+		\vspace{-0.7cm}
+	\end{block}
+	\[
+		q(\bx(t) | \bx(0)) = \cN\Bigl(\bmu(\bx(t), \bx(0)), \bSigma(\bx(t), \bx(0))\Bigr)
+	\]
+	\vspace{-0.5cm}
+	\begin{block}{Theorem}
+		Moments of the SDE $d\bx = \mathbf{f}(\bx, t) dt + g(t) d \bw$ satisfies the equations
+		\[
+			\frac{d \bmu(\bx(t), \bx(0))}{dt} = \bbE \left[ \bff(\bx(t), t) | \bx(0)\right]
+		\]
+		\[
+			\frac{d \bSigma(\bx(t), \bx(0))}{dt} = \bbE \left[ \bff \cdot (\bx(t) - \bmu)^T + (\bx(t) - \bmu) \cdot \bff^T | \bx(0)\right] + g^2(t) \cdot \bI
+		\]
+	\end{block}
+	Let prove the first one.
+	\myfootnotewithlink{https://users.aalto.fi/~asolin/sde-book/sde-book.pdf}{Särkkä S., Solin A. Applied stochastic differential equations, 2019}
+\end{frame}
+%=======
+\begin{frame}{Score-based generative models through SDEs}
+	\begin{block}{Theorem}
+		\vspace{-0.3cm}
+		\[
+			\frac{d \bmu(\bx(t), \bx(0))}{dt} = \bbE \left[ \bff(\bx(t), t) | \bx(0)\right]
+		\]
+		\vspace{-0.5cm}
+	\end{block}
+	\begin{block}{Proof}
+		\vspace{-0.7cm}
+		\begin{align*}
+			\bbE\left[{\color{violet}d\bx} | \bx(0) \right] &= \bbE\left[{\color{violet}\mathbf{f}(\bx, t) dt} | \bx(0) \right] + \bbE\left[{\color{violet}g(t) d \bw} | \bx(0) \right] \\
+			&= \bbE\left[\mathbf{f}(\bx, t) | \bx(0) \right] dt + g(t) \bbE\left[d \bw | \bx(0) \right] \\
+			&= \bbE\left[\mathbf{f}(\bx, t) | \bx(0) \right] dt
+		\end{align*}
+		\[
+			\frac{d \bbE\left[\bx | \bx(0) \right]}{dt} = \frac{d \bmu(\bx(t), \bx(0))}{dt} = \bbE\left[\mathbf{f}(\bx, t) | \bx(0) \right] 
+		\]
+	\end{block}
+	\vspace{-0.3cm}
+	\begin{block}{Examples}
+		\vspace{-0.5cm}
+		\[
+			\textbf{NCSN:} \quad	\mathbf{f}(\bx, t) = 0 \quad \Rightarrow \quad \bmu = \bx(0)
+		\]
+		\[
+			\textbf{DDPM:} \quad \mathbf{f}(\bx, t) = - \frac{1}{2} \beta(t) \bx(t) \quad \Rightarrow \quad \bmu = \bx(0) \exp\left(- \frac{1}{2} \int_0^t \beta(s)ds\right)
+		\]
+	\end{block}
+	\myfootnotewithlink{https://users.aalto.fi/~asolin/sde-book/sde-book.pdf}{Särkkä S., Solin A. Applied stochastic differential equations, 2019}
+\end{frame}
+%=======
+\begin{frame}{Score-based generative models through SDEs}
+	\begin{block}{Training}
+		\vspace{-0.5cm}
+		\[
+			\bbE_{\pi(\bx(0))} \bbE_{t \sim U[0, 1]} \bbE_{q(\bx(t) | \bx(0))}\bigl\| \bs_{\btheta}(\bx(t), t) - {\color{teal}\nabla_{\bx(t)} \log q(\bx(t) | \bx(0))} \bigr\|^2_2 
+		\]
+		\vspace{-0.7cm}
+	\end{block}
+	\[
+		q(\bx(t) | \bx(0)) = \cN\Bigl(\bmu(\bx(t), \bx(0)), \bSigma(\bx(t), \bx(0))\Bigr)
+	\]
+	\vspace{-0.5cm}
+	\begin{block}{NCSN}
+		\vspace{-0.3cm}
+		\[
+			q(\bx(t) | \bx(0)) = \cN\left(\bx(0), \left[\sigma^2(t) - \sigma^2(0)\right] \cdot \bI\right)
+		\]
+		\vspace{-0.5cm}
+	\end{block}
+	\begin{block}{DDPM}
+		\vspace{-0.3cm}
+		\[
+			q(\bx(t) | \bx(0)) = \cN\left(\bx(0) e^{-\frac{1}{2} \int_0^t\beta(s)ds}, \left(1 - e^{- \int_0^t\beta(s)ds}\right) \cdot \bI\right)
+		\]
+		\vspace{-0.5cm}
+	\end{block}
+	
+	\myfootnotewithlink{https://arxiv.org/abs/2011.13456}{Song Y., et al. Score-Based Generative Modeling through Stochastic Differential Equations, 2020}
+\end{frame}
+%=======
+\begin{frame}{Score-based generative models through SDEs}
+	\begin{block}{Sampling}
+		Solve reverse SDE using numerical solvers (ODESolve).
+		\begin{figure}
+			\includegraphics[width=0.8\linewidth]{figs/sbgm}
+		\end{figure}
+		\vspace{-0.5cm}
+	\end{block}
+	\begin{itemize}
+		\item Discretization of the reverse SDE gives us the ancestral sampling.
+		\item If we use probability flow instead of SDE than the reverse ODE gives us the DDIM sampling.
+	\end{itemize}
+	\myfootnotewithlink{https://arxiv.org/abs/2011.13456}{Song Y., et al. Score-Based Generative Modeling through Stochastic Differential Equations, 2020}
+\end{frame}
+%=======
 \section{Flow Matching}
 %=======
 \begin{frame}{Flow Matching}
@@ -636,6 +762,8 @@
 %=======
 \begin{frame}{Summary}
 	\begin{itemize}
+		\item It is possible to train the continuous-in-time score-based generative models through forward and reverse SDEs.
+		\vfill
 		\item
 	\end{itemize}
 \end{frame}
