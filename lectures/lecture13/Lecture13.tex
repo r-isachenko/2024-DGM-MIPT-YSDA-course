@@ -1,9 +1,6 @@
 \input{../utils/preamble}
 \createdgmtitle{13}
 
-\usepackage{tikz}
-
-\usetikzlibrary{arrows,shapes,positioning,shadows,trees}
 %--------------------------------------------------------------------------------
 \begin{document}
 %--------------------------------------------------------------------------------
@@ -434,34 +431,35 @@
 \end{frame}
 %=======
 \begin{frame}{Conditional Flow Matching}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.75\linewidth]{figs/cfm_uncond_to_cond}
+	\end{figure}
+	\begin{itemize}
+		\item We do not want to model $p_t(\bx)$ because it is complex.
+		\item We showed that it is possible to solve CFM task instead of FM task.
+		\item Let choose the convenient conditioning latent variable $\bz$.
+		\item Let parametrize $p_t(\bx | \bz)$ instead of $p_t(\bx)$. It must satisfy the following constraints
+		\[
+			p(\bx) = \bbE_{p(\bz)} p_0(\bx | \bz); \quad \pi(\bx) = \bbE_{p(\bz)} p_1(\bx | \bz)
+		\]
+	\end{itemize}
+	\myfootnotewithlink{https://dl.heeere.com/conditional-flow-matching/blog/conditional-flow-matching}{image credit: A Visual Dive into Conditional Flow Matching}
+\end{frame}
+%=======
+\begin{frame}{Conditional Flow Matching}
 	\vspace{-0.2cm}
 	\[
 		\bbE_{t \sim U[0, 1]} \bbE_{\bz \sim p(\bz)} \bbE_{\bx \sim p_t(\bx | \bz)}\left\| \bff(\bx, \bz, t) - \bff_{\btheta}(\bx, t) \right\|^2 \rightarrow \min_{\btheta}
 	\]
 	\vspace{-0.3cm}
-	\begin{block}{Idea of CFM}
-		\begin{itemize}
-			\item We do not want to model $p_t(\bx)$ because it is complex.
-			\item We showed that it is possible to solve CFM task instead of FM task.
-			\item Let choose the convenient conditioning latent variable $\bz$.
-			\item Let parametrize $p_t(\bx | \bz)$ instead of $p_t(\bx)$. It must satisfy the following constraints
-			\vspace{-0.2cm}
-			\[
-				p(\bx) = \bbE_{p(\bz)} p_0(\bx | \bz); \quad \pi(\bx) = \bbE_{p(\bz)} p_1(\bx | \bz)
-			\]
-		\end{itemize}
-		\vspace{-0.7cm}
-	\end{block}
 	\begin{block}{What is left?}
 		\begin{itemize}
 			\item How to choose the conditioning latent variable $\bz$?
 			\item How to define $p_t(\bx | \bz)$ which follows the constraints?
 		\end{itemize}
 	\end{block}
-	\myfootnotewithlink{https://arxiv.org/abs/2302.00482}{Tong A., et al. Improving and Generalizing Flow-Based Generative Models with Minibatch Optimal Transport, 2023}
-\end{frame}
-%=======
-\begin{frame}{Flow Matching}
+	\vspace{-0.3cm}
 	\begin{block}{Gaussian conditional probability path}
 		\vspace{-0.3cm}
 		\[
@@ -476,6 +474,17 @@
 			\bx_t = \bmu_t(\bz) + \bsigma_t(\bz) \odot \bx_0, \quad {\color{violet} \bx_0 \sim p_0(\bx) = \cN(0, \bI)}
 		\]
 	\end{itemize}
+	\myfootnotewithlink{https://arxiv.org/abs/2302.00482}{Tong A., et al. Improving and Generalizing Flow-Based Generative Models with Minibatch Optimal Transport, 2023}
+\end{frame}
+%=======
+\begin{frame}{Flow Matching}
+	\begin{block}{Gaussian conditional probability path}
+		\vspace{-0.3cm}
+		\[
+			p_t(\bx | \bz) = \cN\left(\bmu_t(\bz), \bsigma_t^2(\bz)\right); \quad \bx_t = \bmu_t(\bz) + \bsigma_t(\bz) \odot \bx_0
+		\]
+		\vspace{-0.5cm}
+	\end{block}
 	\begin{block}{Theorem}
 		\vspace{-0.3cm}
 		\[
@@ -484,9 +493,9 @@
 		\vspace{-0.3cm}
 	\end{block}
 	\begin{block}{Proof}
-	\vspace{-0.5cm}
+	\vspace{-0.3cm}
 	\[
-		\frac{d\bx}{dt} = \bff(\bx, \bz, t) \quad \bx_0 = \frac{1}{\bsigma_t(\bz)} \odot (\bx_t - \bmu_t(\bz))
+		\frac{d\bx}{dt} = \bff(\bx, \bz, t); \quad \bx_0 = \frac{1}{\bsigma_t(\bz)} \odot (\bx_t - \bmu_t(\bz))
 	\]
 	\[
 		\frac{d\bx}{dt} = \bmu_t'(\bz) + \bsigma_t'(\bz) \odot \bx_0 =  \bmu_t'(\bz) + \frac{\bsigma_t'(\bz)}{\bsigma_t(\bz)} \odot (\bx - \bmu_t(\bz))
@@ -509,7 +518,7 @@
 	\[
 		p_t(\bx) = \int p_t(\bx | \bx_1) p_1(\bx_1) d \bx_1
 	\]
-	We need to ensure boundary conditions:
+	We need to ensure boundary constraints:
 	\[
 		\begin{cases}
 			p_0(\bx) = p(\bx)= \cN(0, \bI); \\
@@ -615,6 +624,8 @@
 	\end{minipage}
 	\myfootnotewithlink{https://mlg.eng.cam.ac.uk/blog/2024/01/20/flow-matching.html}{image credit: https://mlg.eng.cam.ac.uk/blog/2024/01/20/flow-matching.html}
 \end{frame}
+%=======
+\subsection{Link with score-based models}
 %=======
 \begin{frame}{Flow Matching}
 	\begin{block}{Flow matching probability path}
