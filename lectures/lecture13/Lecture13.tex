@@ -289,57 +289,60 @@
 %=======
 \section{Flow Matching}
 %=======
-\begin{frame}{Flow Matching}
-	\begin{block}{Continuous-in-time NF}
-		\vspace{-0.2cm}
-		\[
-		   \frac{d \bx(t)}{dt} = \bff_{\btheta}(\bx(t), t); \quad \text{with initial condition }\bx(0) = \bx_0. 
-		\]
-		\vspace{-0.3cm}
-	\end{block}	
-	\begin{block}{Theorem (continuity equation)}
-		If $\bff$ is uniformly Lipschitz continuous in $\bx$ and continuous in $t$, then
-		\[
-			\frac{d \log p_t(\bx(t))}{d t} = - \text{tr} \left( \frac{\partial \bff_{\btheta}(\bx(t), t)}{\partial \bx(t)} \right).
-		\]
-		\[
-			\log p_1(\bx(1)) = \log p_0(\bx(0)) - \int_{0}^{1} \text{tr}  \left( \frac{\partial \bff_{\btheta}(\bx(t), t)}{\partial \bx(t)} \right) dt.
-		\]
-	\end{block}
-	\begin{itemize}
-		\item Solving the continuity equation using the adjoint method is complicated and unstable process.
-		\item Flow matching generalizes these models and gives the alternative way to solve the continuous dynamics.
-	\end{itemize}
-\end{frame}
-%=======
-\begin{frame}{Flow Matching}
-	Let consider ODE dynamic $\bx_t = \bx(t)$ in time interval $t \in [0, 1]$
+\begin{frame}{Continuous-in-time NF}
+	Let consider ODE dynamic $\bx(t)$ in time interval $t \in [0, 1]$
 	\begin{itemize}
 	\item $\bx_0 \sim p_0(\bx) = p(\bx)$, $\bx_1 \sim p_1(\bx) =  \pi(\bx)$;
 	\item $p(\bx)$ is a base distribution ($\cN(0, \bI)$) and $\pi(\bx)$ is a true data distribution.
 	\end{itemize} 
-	\textbf{Note:} the difference with the diffusion models (and CNF) in the opposite time direction.
+	\textbf{Note:} the time direction is the same as for CNF (opposite to score-based SDE models).
 	\[
-		\frac{d \bx}{dt} = \bu (\bx, t),
+		\frac{d \bx}{dt} = \bff (\bx, t),  \quad \text{with initial condition }\bx(0) = \bx_0.
 	\]
-	$\bu (\bx, t): \bbR^m \times [0, 1] \rightarrow \bbR^m$ is a vector field.
-	\[
-		\frac{\partial p_t(\bx)}{\partial t} = - \text{div}\left(\bu(\bx, t) p_t(\bx)\right) 
-	\]
-	
-	If we know the true vector field $\bu (\bx, t)$, then KFP equation gives us the way to compute the density $p_t(\bx)$.
+	\vspace{-0.3cm}
+	\begin{block}{KFP theorem (continuity equation)}
+		\vspace{-0.5cm}
+		\[
+			\frac{\partial p_t(\bx)}{\partial t} = - \text{div}\left(\bff(\bx, t) p_t(\bx)\right) \Leftrightarrow \frac{d \log p_t(\bx(t))}{d t} = - \text{tr} \left( \frac{\partial \bff(\bx(t), t)}{\partial \bx(t)} \right)
+		\]
+		\vspace{-0.3cm}
+	\end{block}
+	\myfootnotewithlink{https://arxiv.org/abs/1806.07366}{Chen R. T. Q. et al. Neural Ordinary Differential Equations, 2018}   
+\end{frame}
+%=======
+\begin{frame}{Continuous-in-time NF}
+	\begin{block}{KFP theorem (continuity equation)}
+		\vspace{-0.5cm}
+		\[
+			\frac{\partial p_t(\bx)}{\partial t} = - \text{div}\left(\bff(\bx, t) p_t(\bx)\right) \Leftrightarrow \frac{d \log p_t(\bx(t))}{d t} = - \text{tr} \left( \frac{\partial \bff(\bx(t), t)}{\partial \bx(t)} \right)
+		\]
+		\vspace{-0.3cm}
+	\end{block}
+	\begin{itemize}
+		\item If we know the true vector field $\bff (\bx, t)$, then KFP equation (or continuity equation) gives us the way to compute the density $p_t(\bx)$.
+		\item Solving the continuity equation using the adjoint method is complicated and unstable process.
+		\item \textbf{Flow matching} generalizes these models and gives the alternative way to solve the Neural ODE.
+	\end{itemize}
+	\begin{block}{Flow Matching}
+		\vspace{-0.3cm}
+		\[
+			\bbE_{t \sim U[0, 1]} \bbE_{\bx \sim p_t(\bx)}\left\| \bff(\bx, t) - \bff_{\btheta}(\bx, t) \right\|^2 \rightarrow \min_{\btheta}
+		\]
+		\vspace{-0.3cm}
+	\end{block}
 	\myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
 \end{frame}
 %=======
 \begin{frame}{Flow Matching}
-	\begin{block}{Flow Matching}
-		\[
-			\bbE_{t \sim U[0, 1]} \bbE_{\bx \sim p_t(\bx)}\left\| \bu(\bx, t) - \bu_{\btheta}(\bx, t) \right\|^2 \rightarrow \min_{\btheta}
-		\]
-	\end{block}
+	\vspace{-0.3cm}
+	\[
+		\bbE_{t \sim U[0, 1]} \bbE_{\bx \sim p_t(\bx)}\left\| \bff(\bx, t) - \bff_{\btheta}(\bx, t) \right\|^2 \rightarrow \min_{\btheta}
+	\]
+	\vspace{-0.3cm}
 	\begin{itemize}
-		\item There exists infinite number of possible $\bu(\bx, t)$ between $\pi(\bx)$ and $p(\bx)$.
-		\item The true vector field  $\bu(\bx, t)$ is \textbf{unknown}.
+		\item There exists infinite number of possible $\bff(\bx, t)$ between $\pi(\bx)$ and $p(\bx)$.
+		\item The true vector field  $\bff(\bx, t)$ is \textbf{unknown}.
+		\item We need to select the "best" $\bff(\bx, t)$ and makes the objective tractable.
 	\end{itemize}
 	\begin{minipage}[t]{0.5\columnwidth}
 		\begin{figure}
@@ -357,59 +360,65 @@
 \end{frame}
 %=======
 \begin{frame}{Flow Matching}
+	\vspace{-0.5cm}
 	\begin{block}{Latent variable model}
+		Let introduce the latent variable $\bz$:
 		\[
 			p_t(\bx) = \int p_t(\bx | \bz) p(\bz) d \bz 
 		\]
+		\vspace{-0.5cm}
 	\end{block}
 	Here $p_t(\bx | \bz)$ is a \textbf{conditional probability path}.
 	
 	The conditional probability path $p_t(\bx | \bz)$ satisfies KFP theorem
 	\[
-		{\color{violet}\frac{\partial p_t(\bx | \bz)}{\partial t} = - \text{div}\left(\bu(\bx, \bz, t) p_t(\bx | \bz)\right)},
+		{\color{violet}\frac{\partial p_t(\bx | \bz)}{\partial t} = - \text{div}\left(\bff(\bx, \bz, t) p_t(\bx | \bz)\right)},
 	\]
-	where $\bu(\bx, \bz, t)$ is a \textbf{conditional vector field}.
+	where $\bff(\bx, \bz, t)$ is a \textbf{conditional vector field}.
 	\[
-		\frac{d\bx}{dt} = \bu(\bx, t) \quad \Rightarrow \quad \frac{d\bx}{dt} = \bu(\bx, \bz, t)
+		\frac{d\bx}{dt} = \bff(\bx, t) \quad \Rightarrow \quad \frac{d\bx}{dt} = \bff(\bx, \bz, t)
 	\]
 	\vspace{-0.3cm}
+	What is the relationship between $\bff(\bx, t)$ and $\bff(\bx, \bz, t)$?
 	\myfootnotewithlink{https://arxiv.org/abs/2302.00482}{Tong A., et al. Improving and Generalizing Flow-Based Generative Models with Minibatch Optimal Transport, 2023}
 \end{frame}
 %=======
 \begin{frame}{Flow Matching}
 	\[
-		{\color{violet}\frac{\partial p_t(\bx | \bz)}{\partial t} = - \text{div}\left(\bu(\bx, \bz, t) p_t(\bx | \bz)\right)},
+		{\color{violet}\frac{\partial p_t(\bx | \bz)}{\partial t} = - \text{div}\left(\bff(\bx, \bz, t) p_t(\bx | \bz)\right)},
 	\]
+	\vspace{-0.3cm}
 	\begin{block}{Theorem}
-		\vspace{-0.3cm}
+		The following vector field generates the probability path $p_t(\bx)$.
+		\vspace{-0.2cm}
 		\[
-			\bu(\bx, t) = {\color{teal}\int \bu(\bx, \bz, t)} \frac{\color{teal}p_t(\bx | \bz) p(\bz)}{p_t(\bx)} {\color{teal}d \bz}
+			\bff(\bx, t) = \bbE_{p_t(\bz | \bx)} \bff(\bx, \bz, t)  = {\color{teal}\int \bff(\bx, \bz, t)} \frac{\color{teal}p_t(\bx | \bz) p(\bz)}{p_t(\bx)} {\color{teal}d \bz}
 		\]
-		\vspace{-0.4cm}
+		\vspace{-0.5cm}
 	\end{block}
 	\begin{block}{Proof}
-		\vspace{-0.5cm}
+		\vspace{-0.7cm}
 		\begin{multline*}
 			\frac{\partial p_t(\bx)}{\partial t} = \frac{\partial}{\partial t} \int p_t(\bx | \bz) p(\bz) d \bz =  \int \left( {\color{violet} \frac{\partial p_t(\bx | \bz)}{\partial t} } \right) p(\bz) d \bz = \\
-			= \int \left( {\color{violet} - \text{div}\left(\bu(\bx, \bz, t) p_t(\bx | \bz)\right) } \right) p(\bz) d \bz = \\
-			= - \text{div} \left({\color{teal}\int \bu(\bx, \bz, t) p_t(\bx | \bz) p(\bz) d \bz }\right) = - \text{div}  \left(\bu(\bx, t) p_t(\bx)\right)
+			= \int \left( {\color{violet} - \text{div}\left(\bff(\bx, \bz, t) p_t(\bx | \bz)\right) } \right) p(\bz) d \bz = \\
+			= - \text{div} \left({\color{teal}\int \bff(\bx, \bz, t) p_t(\bx | \bz) p(\bz) d \bz }\right) = - \text{div}  \left(\bff(\bx, t) p_t(\bx)\right)
 		\end{multline*}
 	\end{block}
 	\myfootnotewithlink{https://arxiv.org/abs/2302.00482}{Tong A., et al. Improving and Generalizing Flow-Based Generative Models with Minibatch Optimal Transport, 2023}
 \end{frame}
 %=======
 \begin{frame}{Flow Matching}
-	\begin{block}{Flow Matching}
+	\begin{block}{Flow Matching (FM)}
 		\vspace{-0.3cm}
 		\[
-			\bbE_{t \sim U[0, 1]} \bbE_{\bx \sim p_t(\bx)}\left\| \bu(\bx, t) - \bu_{\btheta}(\bx, t) \right\|^2 \rightarrow \min_{\btheta}
+			\bbE_{t \sim U[0, 1]} \bbE_{\bx \sim p_t(\bx)}\left\| \bff(\bx, t) - \bff_{\btheta}(\bx, t) \right\|^2 \rightarrow \min_{\btheta}
 		\]
 		\vspace{-0.3cm}
 	\end{block}
-	\begin{block}{Conditional Flow Matching}
+	\begin{block}{Conditional Flow Matching (CFM)}
 		\vspace{-0.3cm}
 		\[
-			\bbE_{t \sim U[0, 1]} \bbE_{\bz \sim p(\bz)} \bbE_{\bx \sim p_t(\bx | \bz)}\left\| \bu(\bx, \bz, t) - \bu_{\btheta}(\bx, t) \right\|^2 \rightarrow \min_{\btheta}
+			\bbE_{t \sim U[0, 1]} \bbE_{\bz \sim p(\bz)} \bbE_{\bx \sim p_t(\bx | \bz)}\left\| \bff(\bx, \bz, t) - \bff_{\btheta}(\bx, t) \right\|^2 \rightarrow \min_{\btheta}
 		\]
 		\vspace{-0.3cm}
 	\end{block}
@@ -423,18 +432,30 @@
 \end{frame}
 %=======
 \begin{frame}{Flow Matching}
+	\begin{block}{Conditional Flow Matching (CFM)}
+		\vspace{-0.3cm}
+		\[
+			\bbE_{t \sim U[0, 1]} \bbE_{\bz \sim p(\bz)} \bbE_{\bx \sim p_t(\bx | \bz)}\left\| \bff(\bx, \bz, t) - \bff_{\btheta}(\bx, t) \right\|^2 \rightarrow \min_{\btheta}
+		\]
+		\vspace{-0.4cm}
+	\end{block}
+	\begin{itemize}
+		\item We do not want to model $p_t(\bx)$ because it is complex.
+		\item We showed that it is possible to solve CFM task instead of FM task.
+		\item Let parametrize $p_t(\bx | \bz)$ instead of $p_t(\bx)$.
+	\end{itemize}
 	\begin{block}{Gaussian conditional probability path}
 		\vspace{-0.3cm}
 		\[
 			p_t(\bx | \bz) = \cN\left(\bmu_t(\bz), \bsigma_t^2(\bz)\right)
 		\]
-		\vspace{-0.4cm}
+		\vspace{-0.5cm}
 	\end{block}
 	\begin{itemize}
 		\item There is an infinite number of vector fields that generate any particular probability path.
 		\item Let consider the following dynamics:
 		\[
-			\bx_t = \bmu_t(\bz) + \bsigma_t(\bz) \odot \bx_0
+			\bx_t = \bmu_t(\bz) + \bsigma_t(\bz) \odot \bx_0, \quad {\color{violet} \bx_0 \sim p_0(\bx) = \cN(0, \bI)}
 		\]
 	\end{itemize}
 	
@@ -445,7 +466,7 @@
 	\begin{block}{Theorem}
 		\vspace{-0.3cm}
 		\[
-			\bu(\bx, \bz, t) =  \bmu_t'(\bz) + \frac{\bsigma_t'(\bz)}{\bsigma_t(\bz)} \odot (\bx - \bmu_t(\bz))
+			\bff(\bx, \bz, t) =  \bmu_t'(\bz) + \frac{\bsigma_t'(\bz)}{\bsigma_t(\bz)} \odot (\bx - \bmu_t(\bz))
 		\]
 		\vspace{-0.3cm}
 	\end{block}
@@ -455,7 +476,7 @@
 		\bx_t = \bmu_t(\bz) + \bsigma_t(\bz) \odot \bx_0 \quad \Rightarrow \quad \bx_0 = \frac{1}{\bsigma_t(\bz)} \odot (\bx_t - \bmu_t(\bz))
 	\]
 	\[
-		 \frac{d\bx}{dt} = \bu(\bx, \bz, t)
+		 \frac{d\bx}{dt} = \bff(\bx, \bz, t)
 	\]
 	\[
 		\frac{d\bx}{dt} = \bmu_t'(\bz) + \bsigma_t'(\bz) \odot \bx_0 =  \bmu_t'(\bz) + \frac{\bsigma_t'(\bz)}{\bsigma_t(\bz)} \odot (\bx - \bmu_t(\bz))
@@ -470,7 +491,7 @@
 	\begin{block}{Conditional Flow Matching}
 		\vspace{-0.3cm}
 		\[
-			\bbE_{t \sim U[0, 1]} \bbE_{\bz \sim p(\bz)} \bbE_{\bx \sim p_t(\bx | \bz)}\left\| \bu(\bx, \bz, t) - \bu_{\btheta}(\bx, t) \right\|^2 \rightarrow \min_{\btheta}
+			\bbE_{t \sim U[0, 1]} \bbE_{\bz \sim p(\bz)} \bbE_{\bx \sim p_t(\bx | \bz)}\left\| \bff(\bx, \bz, t) - \bff_{\btheta}(\bx, t) \right\|^2 \rightarrow \min_{\btheta}
 		\]
 		\vspace{-0.3cm}
 	\end{block}
@@ -544,10 +565,10 @@
 		 \end{cases}
 	\]
 	\[
-		\bu(\bx, \bx_1, t) =  \bmu_t'(\bx_1) + \frac{\bsigma_t'(\bx_1)}{\bsigma_t(\bx_1)} \odot (\bx - \bmu_t(\bx_1))
+		\bff(\bx, \bx_1, t) =  \bmu_t'(\bx_1) + \frac{\bsigma_t'(\bx_1)}{\bsigma_t(\bx_1)} \odot (\bx - \bmu_t(\bx_1))
 	\]
 	\[
-		 \frac{d\bx}{dt} = \bu(\bx, \bz, t); \quad \bu(\bx, \bx_1, t) = \frac{\bx_1  - \bx}{1-t}; \quad \frac{d\bx}{dt} = \bx_1 - \bx_0.
+		 \frac{d\bx}{dt} = \bff(\bx, \bz, t); \quad \bff(\bx, \bx_1, t) = \frac{\bx_1  - \bx}{1-t}; \quad \frac{d\bx}{dt} = \bx_1 - \bx_0.
 	\]
 	\myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
 \end{frame}
@@ -556,8 +577,8 @@
 	\begin{block}{Conditional Flow Matching}
 		\vspace{-0.3cm}
 		\begin{multline*}
-			\bbE_{t \sim U[0, 1]} \bbE_{\bz \sim p(\bz)} \bbE_{\bx \sim p_t(\bx | \bz)}\left\| \bu(\bx, \bz, t) - \bu_{\btheta}(\bx, t) \right\|^2 = \\
-			 \bbE_{t \sim U[0, 1]} \bbE_{\bx_1 \sim \pi(\bx)} \bbE_{\bx_0 \sim p(\bx)}\left\| (\bx_1 - \bx_0) - \bu_{\btheta}(\bx, t) \right\|^2  \rightarrow \min_{\btheta}
+			\bbE_{t \sim U[0, 1]} \bbE_{\bz \sim p(\bz)} \bbE_{\bx \sim p_t(\bx | \bz)}\left\| \bff(\bx, \bz, t) - \bff_{\btheta}(\bx, t) \right\|^2 = \\
+			 \bbE_{t \sim U[0, 1]} \bbE_{\bx_1 \sim \pi(\bx)} \bbE_{\bx_0 \sim p(\bx)}\left\| (\bx_1 - \bx_0) - \bff_{\btheta}(\bx, t) \right\|^2  \rightarrow \min_{\btheta}
 		\end{multline*}
 		We fit straight lines between noise distribution $p(\bx)$ and the data distribution $\pi(\bx)$.
 		\vspace{-0.3cm}
@@ -589,7 +610,7 @@
 	\begin{block}{Flow matching probability path}
 		\vspace{-0.3cm}
 		\[
-			p_t(\bx | \bx_1) = \cN\left(t \bx_1, (1-t)^2\right); \quad \bu(\bx, \bx_1, t) = \frac{\bx_1  - \bx}{1-t}
+			p_t(\bx | \bx_1) = \cN\left(t \bx_1, (1-t)^2\right); \quad \bff(\bx, \bx_1, t) = \frac{\bx_1  - \bx}{1-t}
 		\]
 		\vspace{-0.3cm}
 	\end{block}
@@ -600,7 +621,7 @@
 			\quad \Rightarrow \quad
 			\begin{cases}
 				p_t(\bx | \bx_1) = \cN\left(\bx_1, \sigma^2_{1-t}  \bI\right) \\
-				\bu(\bx, \bx_1, t) = - \frac{\sigma'_{1-t}}{\sigma_{1-t}} \cdot (\bx - \bx_1)
+				\bff(\bx, \bx_1, t) = - \frac{\sigma'_{1-t}}{\sigma_{1-t}} \cdot (\bx - \bx_1)
 			\end{cases}
 		\]
 		\vspace{-0.3cm}
@@ -613,7 +634,7 @@
 			\, \Rightarrow \,
 			\begin{cases}
 				p_t(\bx | \bx_1) = \cN\left(\alpha_{1-t}  \bx_1, (1 - \alpha^2_{1-t}  \bI \right) \\
-				\bu(\bx, \bx_1, t) = \frac{\alpha'_{1-t}}{1 - \alpha^2_{1-t}}\cdot \left(\alpha_{1-t}  \bx - \bx_1\right)
+				\bff(\bx, \bx_1, t) = \frac{\alpha'_{1-t}}{1 - \alpha^2_{1-t}}\cdot \left(\alpha_{1-t}  \bx - \bx_1\right)
 			\end{cases}
 		\]
 		}
@@ -656,7 +677,7 @@
 	\begin{block}{Conditional Flow Matching}
 		\vspace{-0.3cm}
 		\[
-			\bbE_{t \sim U[0, 1]} \bbE_{\bz \sim p(\bz)} \bbE_{\bx \sim p_t(\bx | \bz)}\left\| \bu(\bx, \bz, t) - \bu_{\btheta}(\bx, t) \right\|^2 \rightarrow \min_{\btheta}
+			\bbE_{t \sim U[0, 1]} \bbE_{\bz \sim p(\bz)} \bbE_{\bx \sim p_t(\bx | \bz)}\left\| \bff(\bx, \bz, t) - \bff_{\btheta}(\bx, t) \right\|^2 \rightarrow \min_{\btheta}
 		\]
 		\vspace{-0.3cm}
 	\end{block}
