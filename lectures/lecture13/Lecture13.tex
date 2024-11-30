@@ -359,6 +359,8 @@
 	\myfootnotewithlink{https://mlg.eng.cam.ac.uk/blog/2024/01/20/flow-matching.html}{image credit: https://mlg.eng.cam.ac.uk/blog/2024/01/20/flow-matching.html}
 \end{frame}
 %=======
+\section{Conditional Flow Matching}
+%=======
 \begin{frame}{Flow Matching}
 	\vspace{-0.5cm}
 	\begin{block}{Latent variable model}
@@ -431,19 +433,35 @@
 	\myfootnotewithlink{https://arxiv.org/abs/2302.00482}{Tong A., et al. Improving and Generalizing Flow-Based Generative Models with Minibatch Optimal Transport, 2023}
 \end{frame}
 %=======
-\begin{frame}{Flow Matching}
-	\begin{block}{Conditional Flow Matching (CFM)}
-		\vspace{-0.3cm}
-		\[
-			\bbE_{t \sim U[0, 1]} \bbE_{\bz \sim p(\bz)} \bbE_{\bx \sim p_t(\bx | \bz)}\left\| \bff(\bx, \bz, t) - \bff_{\btheta}(\bx, t) \right\|^2 \rightarrow \min_{\btheta}
-		\]
-		\vspace{-0.4cm}
+\begin{frame}{Conditional Flow Matching}
+	\vspace{-0.2cm}
+	\[
+		\bbE_{t \sim U[0, 1]} \bbE_{\bz \sim p(\bz)} \bbE_{\bx \sim p_t(\bx | \bz)}\left\| \bff(\bx, \bz, t) - \bff_{\btheta}(\bx, t) \right\|^2 \rightarrow \min_{\btheta}
+	\]
+	\vspace{-0.3cm}
+	\begin{block}{Idea of CFM}
+		\begin{itemize}
+			\item We do not want to model $p_t(\bx)$ because it is complex.
+			\item We showed that it is possible to solve CFM task instead of FM task.
+			\item Let choose the convenient conditioning latent variable $\bz$.
+			\item Let parametrize $p_t(\bx | \bz)$ instead of $p_t(\bx)$. It must satisfy the following constraints
+			\vspace{-0.2cm}
+			\[
+				p(\bx) = \bbE_{p(\bz)} p_0(\bx | \bz); \quad \pi(\bx) = \bbE_{p(\bz)} p_1(\bx | \bz)
+			\]
+		\end{itemize}
+		\vspace{-0.7cm}
 	\end{block}
-	\begin{itemize}
-		\item We do not want to model $p_t(\bx)$ because it is complex.
-		\item We showed that it is possible to solve CFM task instead of FM task.
-		\item Let parametrize $p_t(\bx | \bz)$ instead of $p_t(\bx)$.
-	\end{itemize}
+	\begin{block}{What is left?}
+		\begin{itemize}
+			\item How to choose the conditioning latent variable $\bz$?
+			\item How to define $p_t(\bx | \bz)$ which follows the constraints?
+		\end{itemize}
+	\end{block}
+	\myfootnotewithlink{https://arxiv.org/abs/2302.00482}{Tong A., et al. Improving and Generalizing Flow-Based Generative Models with Minibatch Optimal Transport, 2023}
+\end{frame}
+%=======
+\begin{frame}{Flow Matching}
 	\begin{block}{Gaussian conditional probability path}
 		\vspace{-0.3cm}
 		\[
@@ -458,11 +476,6 @@
 			\bx_t = \bmu_t(\bz) + \bsigma_t(\bz) \odot \bx_0, \quad {\color{violet} \bx_0 \sim p_0(\bx) = \cN(0, \bI)}
 		\]
 	\end{itemize}
-	
-	\myfootnotewithlink{https://arxiv.org/abs/2302.00482}{Tong A., et al. Improving and Generalizing Flow-Based Generative Models with Minibatch Optimal Transport, 2023}
-\end{frame}
-%=======
-\begin{frame}{Flow Matching}
 	\begin{block}{Theorem}
 		\vspace{-0.3cm}
 		\[
@@ -473,10 +486,7 @@
 	\begin{block}{Proof}
 	\vspace{-0.5cm}
 	\[
-		\bx_t = \bmu_t(\bz) + \bsigma_t(\bz) \odot \bx_0 \quad \Rightarrow \quad \bx_0 = \frac{1}{\bsigma_t(\bz)} \odot (\bx_t - \bmu_t(\bz))
-	\]
-	\[
-		 \frac{d\bx}{dt} = \bff(\bx, \bz, t)
+		\frac{d\bx}{dt} = \bff(\bx, \bz, t) \quad \bx_0 = \frac{1}{\bsigma_t(\bz)} \odot (\bx_t - \bmu_t(\bz))
 	\]
 	\[
 		\frac{d\bx}{dt} = \bmu_t'(\bz) + \bsigma_t'(\bz) \odot \bx_0 =  \bmu_t'(\bz) + \frac{\bsigma_t'(\bz)}{\bsigma_t(\bz)} \odot (\bx - \bmu_t(\bz))
@@ -485,7 +495,7 @@
 	\myfootnotewithlink{https://arxiv.org/abs/2302.00482}{Tong A., et al. Improving and Generalizing Flow-Based Generative Models with Minibatch Optimal Transport, 2023}
 \end{frame}
 %=======
-\subsection{Endpoint conditioning}
+\subsection{Conical gaussian paths}
 %=======
 \begin{frame}{Flow Matching}
 	\begin{block}{Conditional Flow Matching}
@@ -671,7 +681,7 @@
 	\myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
 \end{frame}
 %=======
-\subsection{Pair conditioning}
+\subsection{Linear interpolation}
 %=======
 \begin{frame}{Flow Matching}
 	\begin{block}{Conditional Flow Matching}
@@ -745,7 +755,7 @@
 	\myfootnotewithlink{https://arxiv.org/pdf/2302.00482}{Tong A., et al. Improving and Generalizing Flow-Based Generative Models with Minibatch Optimal Transport, 2023}
 \end{frame}
 %=======
-\subsection{Rectified flows}
+\section{Rectified flows}
 %=======
 \begin{frame}{Flow Matching}
 	\begin{figure}
