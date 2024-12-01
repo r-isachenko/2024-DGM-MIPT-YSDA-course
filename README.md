@@ -48,10 +48,10 @@ The course is accompanied by practical tasks that allow you to understand the pr
 | 11 | November, 19 | <b>Lecture 11:</b> Continuous-in-time NF and neural ODE. Continuity equation for NF log-likelihood. FFJORD and Hutchinson's trace estimator. Adjoint method for continuous-in-time NF.  | [slides](lectures/lecture11/Lecture11.pdf) |
 |  |  | <b>Seminar 11:</b> Guidance. CLIP, GLIDE, DALL-E 2, Imagen, Latent Diffusion Model. | [slides](seminars/seminar11/seminar11.ipynb) |
 | 12 | November, 26 | <b>Lecture 12:</b> SDE basics. Kolmogorov-Fokker-Planck equation. Probability flow ODE. Reverse SDE. Variance Preserving and Variance Exploding SDEs. | [slides](lectures/lecture12/Lecture12.pdf) |
-<!---
-|  |  | <b>Seminar 12:</b>  | [slides](seminars/seminar11/seminar11.ipynb) |
-| 13 | December, 3 | <b>Lecture 13:</b> Score-based generative models through SDE. | [slides](lectures/lecture13/Lecture13.pdf) |
+|  |  | <b>Seminar 12:</b>  | [slides](seminars/seminar12/seminar12.ipynb) |
+| 13 | December, 3 | <b>Lecture 13:</b> Score-based generative models through SDE. Flow matching. Conditional flow matching. Link with diffusion and score matching. | [slides](lectures/lecture13/Lecture13.pdf) |
 |  |  | <b>Seminar 13:</b>  | [slides](seminars/seminar13/seminar13.ipynb) |
+<!---
 | 13 | December, 10 | <b>Lecture 14:</b>  | [slides](lectures/lecture14/Lecture14.pdf) |
 |  |  | <b>Seminar 14:</b>  | [slides](seminars/seminar14/seminar14.ipynb) |
 -->

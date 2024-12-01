@@ -16,7 +16,83 @@
 	\tableofcontents
 \end{frame}
 %=======
-\section{Rectified flows}
+\section{Conditional flow matching}
+%=======
+\subsection{Linear interpolation}
+%=======
+\begin{frame}{Flow Matching}
+	\begin{block}{Conditional Flow Matching}
+		\vspace{-0.3cm}
+		\[
+			\bbE_{t \sim U[0, 1]} \bbE_{\bz \sim p(\bz)} \bbE_{\bx \sim p_t(\bx | \bz)}\left\| \bff(\bx, \bz, t) - \bff_{\btheta}(\bx, t) \right\|^2 \rightarrow \min_{\btheta}
+		\]
+		\vspace{-0.3cm}
+	\end{block}
+	Let choose $\bz = (\bx_0, \bx_1)$. Then $p(\bz) = p_0(\bx_0) p_1(\bx_1)$.
+	\[
+		p_t(\bx) = \int p_t(\bx | \bx_0, \bx_1) p_0(\bx_0) p_1(\bx_1) d \bx_0 d \bx_1
+	\]
+	We need to ensure boundary conditions:
+	\[
+		\begin{cases}
+			p_0(\bx) = p(\bx)= \cN(0, \bI); \\
+			p_1(\bx) = \pi(\bx).
+		\end{cases}
+		\quad \Rightarrow \quad 
+		\begin{cases}
+			p_0(\bx | \bx_0, \bx_1) = \delta(\bx - \bx_0); \\
+			p_1(\bx | \bx_0, \bx_1) = \delta(\bx - \bx_1).
+		\end{cases}
+	\]
+	\vspace{-0.3cm}
+	\begin{block}{Gaussian conditional probability path}
+		\vspace{-0.4cm}
+		\[
+			p_t(\bx | \bx_0, \bx_1) = \cN\left(\bmu_t(\bx_0, \bx_1), \bsigma_t^2(\bx_0, \bx_1)\right); \, \bx_t = \bmu_t(\bx_0, \bx_1) +  \bsigma_t^2(\bx_0, \bx_1) \odot \bx_0.
+		\]
+		\vspace{-0.6cm}
+	\end{block}
+\end{frame}
+%=======
+\begin{frame}{Flow Matching}
+	\[
+		\begin{cases}
+			p_0(\bx | \bx_0, \bx_1) = \delta(\bx - \bx_0); \\
+			p_1(\bx | \bx_0, \bx_1) = \delta(\bx - \bx_1).
+		\end{cases}
+		\quad \Rightarrow \quad
+		\begin{cases}
+			\bmu_0(\bx_0, \bx_1) = \bx_0, \quad \bsigma_0(\bx_0, \bx_1) = 0; \\
+			\bmu_1(\bx_0, \bx_1) = \bx_1, \quad \bsigma_1(\bx_0, \bx_1) = 0.
+		\end{cases}
+	\]
+	Let consider straight conditional paths	
+	\[
+		\begin{cases}
+			\bmu_t(\bx_0, \bx_1) = t \bx_1 + (1 - t) \bx_0; \\
+			\bsigma_t(\bx_0, \bx_1) = 0.
+		\end{cases}
+		\, \Rightarrow \, 
+		\begin{cases}
+			p_t(\bx | \bx_0, \bx_1) = \cN\left(t \bx_1 + (1-t) \bx_0, 0\right); \\
+		 	\bx_t = t \bx_1 + (1 - t) \bx_0. \\
+		 \end{cases}
+	\]
+	\[
+		 \frac{d\bx}{dt} = \bx_1 - \bx_0.
+	\]
+	\myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
+\end{frame}
+%=======
+\begin{frame}{Flow Matching}
+	\begin{figure}
+		\centering
+		\includegraphics[width=\linewidth]{figs/compare_conditionings}
+	\end{figure}
+	\myfootnotewithlink{https://arxiv.org/pdf/2302.00482}{Tong A., et al. Improving and Generalizing Flow-Based Generative Models with Minibatch Optimal Transport, 2023}
+\end{frame}
+%=======
+\subsection{Rectified flows}
 %=======
 \begin{frame}{Rectified flows}
 	\begin{figure}
