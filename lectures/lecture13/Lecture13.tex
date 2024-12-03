@@ -23,7 +23,7 @@
 		\]
 	\end{block}
 	\vspace{-0.3cm}
-	\begin{block}{Discretization of SDE (Euler method)}
+	\begin{block}{Discretization of SDE (Euler method) - SDESolve}
 		\vspace{-0.3cm}
 		\[
 			\bx(t + dt) = \bx(t) + \bff(\bx(t), t) \cdot dt + g(t) \cdot \bepsilon \cdot \sqrt{dt}
@@ -271,7 +271,7 @@
 %=======
 \begin{frame}{Score-based generative models through SDEs}
 	\begin{block}{Sampling}
-		Solve reverse SDE using numerical solvers (ODESolve).
+		Solve reverse SDE using numerical solvers (SDESolve).
 		\begin{figure}
 			\includegraphics[width=0.8\linewidth]{figs/sbgm}
 		\end{figure}
@@ -560,154 +560,6 @@
 	\myfootnotewithlink{https://dl.heeere.com/conditional-flow-matching/blog/conditional-flow-matching}{image credit: A Visual Dive into Conditional Flow Matching}
 \end{frame}
 %=======
-\begin{frame}{Conical gaussian paths}
-	\vspace{-0.3cm}
-	\[
-		p_t(\bx | \bx_1) = \cN\left(t \bx_1, (1-t)^2 \bI\right); \quad {\color{teal}\bx_t = t \bx_1 + (1 - t) \bx_0}. 
-	\]
-	\vspace{-0.5cm}
-	\begin{block}{Conditional vector field}
-		\vspace{-0.3cm}
-		\[
-			 \frac{d\bx}{dt} = \bff(\bx, \bx_1, t) =  \bmu_t'(\bx_1) + \frac{\bsigma_t'(\bx_1)}{\bsigma_t(\bx_1)} \odot (\bx - \bmu_t(\bx_1))
-		\]
-		\vspace{-0.5cm}
-		\begin{multline*}
-			\bff(\bx, \bx_1, t) = \bx_1 - \frac{1}{1-t} \cdot (\bx - t \bx_1) = \frac{\bx_1 - {\color{teal}\bx}}{1-t} = \\
-			= \frac{\bx_1 - {\color{teal}t \bx_1 + (1 - t) \bx_0}}{1-t} = \bx_1 - \bx_0
-		\end{multline*}
-		\vspace{-0.7cm}
-	\end{block}
-	\begin{block}{Conditional Flow Matching}
-		\vspace{-0.7cm}
-		\begin{multline*}
-			\bbE_{t \sim U[0, 1]} \bbE_{\bz \sim p(\bz)} \bbE_{\bx \sim p_t(\bx | \bz)}\left\| \bff(\bx, \bz, t) - \bff_{\btheta}(\bx, t) \right\|^2 = \\
-		 \bbE_{t \sim U[0, 1]} \bbE_{\bx_1 \sim \pi(\bx)} \bbE_{\bx \sim p_t(\bx | \bx_1)}\left\| \left(\frac{\bx_1 - \bx}{1-t}\right) - \bff_{\btheta}(\bx, t) \right\|^2 = \\
-		 \bbE_{t \sim U[0, 1]} \bbE_{\bx_1 \sim \pi(\bx)} \bbE_{\bx_0 \sim \cN(0, \bI)}\left\| (\bx_1 - \bx_0) - \bff_{\btheta}\left(t \bx_1 + (1 - t) \bx_0, t\right) \right\|^2
-		\end{multline*}
-		\vspace{-0.5cm}
-	\end{block}	
-	\myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
-\end{frame}
-%=======
-\begin{frame}{Conditional Flow Matching}
-	\vspace{-0.3cm}
-	\[
-	 \bbE_{t \sim U[0, 1]} \bbE_{\bx_1 \sim \pi(\bx)} \bbE_{\bx_0 \sim \cN(0, \bI)}\left\| (\bx_1 - \bx_0) - \bff_{\btheta}(\bx, t) \right\|^2  \rightarrow \min_{\btheta}
-	\]
-	We fit straight lines between noise distribution $p(\bx)$ and the data distribution $\pi(\bx)$.
-	\begin{block}{Training}
-		\begin{enumerate}
-			\item Get the sample $\bx_1 \sim \pi(\bx)$.
-			\item Sample timestamp $t \sim U\{1, T\}$ and $\bx_0 \sim \cN(0, \bI)$.
-			\item Get noisy image $\bx_t = \sqrt{\bar{\alpha}_t} \cdot \bx_0 + \sqrt{1 - \bar{\alpha}_t} \cdot \bepsilon$.
-			\item Compute loss $ \cL = \left\| (\bx_1 - \bx_0) - \bff_{\btheta}(\bx, t) \right\|^2 $.
-		\end{enumerate}
-	\end{block}
-	\vspace{-0.3cm}
-	\begin{block}{Sampling}
-		\begin{enumerate}
-			\item Sample $\bx_0 \sim \cN(0, \bI)$.
-			\item Solve the ODE to get $\bx_1$:
-			\[
-				\bx_1 = \text{ODESolve}_f(\bx_0, \btheta, t_0=0, t_1=1).
-			\]
-		\end{enumerate}
-	\end{block}
-	\myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
-\end{frame}
-%=======
-\begin{frame}{Flow Matching}
-	\[
-		\bx_t = t \bx_1 + (1 - t) \bx_0
-	\]
-	\vspace{-0.3cm}
-	\begin{itemize}
-		\item The conditional probability path $p_t(\bx|\bz)$ is an \textbf{optimal transport path} from $p_0(\bx|\bz)$ to $p_1(\bx|\bz)$ (in terms of the conditional trajectories straightness).
-		\item The marginal path $p_t(\bx)$ is not in general an optimal transport path from the standard normal $p_0(\bx)$ to the data distribution $p_1(\bx)$.
-	\end{itemize}
-	\begin{minipage}[t]{0.5\columnwidth}
-			\begin{figure}
-				\centering
-				\includegraphics[width=\linewidth]{figs/g2g-vector-field-samples-cond}
-			\end{figure}
-		\end{minipage}%
-		\begin{minipage}[t]{0.5\columnwidth}
-			\begin{figure}
-				\centering
-				\includegraphics[width=\linewidth]{figs/g2g-forward_samples}
-			\end{figure}
-	\end{minipage}
-	\myfootnotewithlink{https://mlg.eng.cam.ac.uk/blog/2024/01/20/flow-matching.html}{image credit: https://mlg.eng.cam.ac.uk/blog/2024/01/20/flow-matching.html}
-\end{frame}
-%=======
-\subsection{Link with score-based models}
-%=======
-\begin{frame}{Flow matching vs score-based SDE models}
-	\begin{block}{Flow matching probability path}
-		\vspace{-0.3cm}
-		\[
-			p_t(\bx | \bx_1) = \cN\left(t \bx_1, (1-t)^2 \bI\right); \quad \bff(\bx, \bx_1, t) = \frac{\bx_1  - \bx}{1-t}
-		\]
-		\vspace{-0.3cm}
-	\end{block}
-	\begin{block}{Variance Exploding SDE probability path}
-		\vspace{-0.3cm}
-		\[
-			d \bx = \sqrt{\frac{ d [\sigma^2(t)]}{dt}} \cdot d \bw;
-			\quad \Rightarrow \quad
-			\begin{cases}
-				p_t(\bx | \bx_1) = \cN\left(\bx_1, \sigma^2_{1-t}  \bI\right) \\
-				\bff(\bx, \bx_1, t) = - \frac{\sigma'_{1-t}}{\sigma_{1-t}} \cdot (\bx - \bx_1)
-			\end{cases}
-		\]
-		\vspace{-0.3cm}
-	\end{block}
-	\begin{block}{Variance Preserving SDE probability path}
-		\vspace{-0.3cm}
-		{\small
-		\[
-			d \bx = - \frac{1}{2} \beta(t) \bx(t) dt + \sqrt{\beta(t)} d \bw;
-			\, \Rightarrow \,
-			\begin{cases}
-				p_t(\bx | \bx_1) = \cN\left(\alpha_{1-t}  \bx_1, (1 - \alpha^2_{1-t})  \bI \right) \\
-				\bff(\bx, \bx_1, t) = \frac{\alpha'_{1-t}}{1 - \alpha^2_{1-t}}\cdot \left(\alpha_{1-t}  \bx - \bx_1\right)
-			\end{cases}
-		\]
-		}
-		Here $\alpha_t = \exp\left({-\frac{1}{2} \int_0^t \beta(s) ds} \right)$.
-	\end{block}
-	\myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
-\end{frame}
-%=======
-\begin{frame}{Flow matching vs score-based SDE models}
-	\begin{block}{Diffusion vector field}
-		\begin{figure}
-			\centering
-			\includegraphics[width=\linewidth]{figs/diff_cond_path}
-		\end{figure}
-	\end{block}
-	\begin{block}{Flow matching vector field}
-		\begin{figure}
-			\raggedleft
-			\includegraphics[width=0.77\linewidth]{figs/ot_cond_path}
-		\end{figure}
-	\end{block}
-	\myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
-\end{frame}
-%=======
-\begin{frame}{Flow matching vs score-based SDE models}
-	\begin{figure}
-		\centering
-		\includegraphics[width=0.7\linewidth]{figs/trajectories}
-	\end{figure}
-	\begin{figure}
-		\centering
-		\includegraphics[width=\linewidth]{figs/2d-generation}
-	\end{figure}
-	\myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
-\end{frame}
-%=======
 \begin{frame}{Summary}
 	\begin{itemize}
 		\item It is possible to train the continuous-in-time score-based generative models through forward and reverse SDEs.
@@ -717,8 +569,6 @@
 		\item Flow matching suggests to fit the vector field directly.
 		\vfill
 		\item Conditional flow matching allows to make the FM objective tractable.
-		\vfill
-		\item Conical gaussian paths is the example of the effective FM technique.
 	\end{itemize}
 \end{frame}
 \end{document} 
