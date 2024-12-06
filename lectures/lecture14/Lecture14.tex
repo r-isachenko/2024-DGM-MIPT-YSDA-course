@@ -327,6 +327,41 @@
 %=======
 \subsection{Link with score-based models}
 %=======
+\begin{frame}{Score-based generative models through SDEs}
+	\vspace{-0.3cm}
+	\begin{block}{Training}
+		\vspace{-0.7cm}
+		\[
+			\bbE_{\pi(\bx(0))} \bbE_{t \sim U[0, 1]} \bbE_{q(\bx(t) | \bx(0))}\bigl\| \bs_{\btheta}(\bx(t), t) - {\color{teal}\nabla_{\bx(t)} \log q(\bx(t) | \bx(0))} \bigr\|^2_2 
+		\]
+		\vspace{-0.5cm}
+	\end{block}
+	\begin{block}{Variance Exploding SDE (NCSN)}
+		\vspace{-0.3cm}
+		\[
+			q(\bx(t) | \bx(0)) = \cN\left(\bx(0), \left[\sigma^2(t) - \sigma^2(0)\right] \cdot \bI\right), \quad \sigma(0) =0.
+		\]
+		\vspace{-0.5cm}
+	\end{block}
+	\begin{block}{Variance Preserving SDE (DDPM)}
+		\vspace{-0.5cm}
+		\[
+			q(\bx(t) | \bx(0)) = \cN\left(\bx(0) \alpha(t), \left(1 - \alpha(t)^2\right) \cdot \bI\right); \quad \alpha(t) = e^{-\frac{1}{2} \int_0^t \beta(s) ds}
+		\]
+		\vspace{-0.5cm}
+	\end{block}
+	Flow matching uses the reverse time direction.
+	\[
+		\textbf{NCSN: } p(\bx | \bx_1) = \cN\left(\bx_1, \sigma^2_{1-t} \cdot \bI\right)
+	\]
+	\vspace{-0.5cm}
+	\[
+		\textbf{DDPM: } p(\bx | \bx_1) = \cN\left(\alpha_{1-t} \bx_1, \left(1 - \alpha_{1-t}^2\right) \cdot \bI\right)
+	\]
+	\vspace{-0.5cm}
+	\myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
+\end{frame}
+%=======
 \begin{frame}{Flow matching vs score-based SDE models}
 	\begin{block}{Flow matching probability path}
 		\vspace{-0.3cm}
@@ -334,16 +369,15 @@
 			p_t(\bx | \bx_1) = \cN\left(t \bx_1, (1-t)^2 \bI\right); \quad \bff(\bx, \bx_1, t) = \frac{\bx_1  - \bx}{1-t}
 		\]
 		\vspace{-0.3cm}
+		\[
+	 		\frac{d\bx}{dt} = \bff(\bx, \bx_1, t) =  \bmu_t'(\bx_1) + \frac{\bsigma_t'(\bx_1)}{\bsigma_t(\bx_1)} \odot (\bx - \bmu_t(\bx_1))
+		\]
 	\end{block}
 	\begin{block}{Variance Exploding SDE probability path}
 		\vspace{-0.3cm}
 		\[
-			d \bx = \sqrt{\frac{ d [\sigma^2(t)]}{dt}} \cdot d \bw;
-			\quad \Rightarrow \quad
-			\begin{cases}
-				p_t(\bx | \bx_1) = \cN\left(\bx_1, \sigma^2_{1-t}  \bI\right) \\
+				p_t(\bx | \bx_1) = \cN\left(\bx_1, \sigma^2_{1-t}  \bI\right) \quad \Rightarrow \quad 
 				\bff(\bx, \bx_1, t) = - \frac{\sigma'_{1-t}}{\sigma_{1-t}} \cdot (\bx - \bx_1)
-			\end{cases}
 		\]
 		\vspace{-0.3cm}
 	\end{block}
@@ -351,40 +385,50 @@
 		\vspace{-0.3cm}
 		{\small
 		\[
-			d \bx = - \frac{1}{2} \beta(t) \bx(t) dt + \sqrt{\beta(t)} d \bw;
-			\, \Rightarrow \,
-			\begin{cases}
-				p_t(\bx | \bx_1) = \cN\left(\alpha_{1-t}  \bx_1, (1 - \alpha^2_{1-t})  \bI \right) \\
-				\bff(\bx, \bx_1, t) = \frac{\alpha'_{1-t}}{1 - \alpha^2_{1-t}}\cdot \left(\alpha_{1-t}  \bx - \bx_1\right)
-			\end{cases}
+			p_t(\bx | \bx_1) = \cN\left(\alpha_{1-t}  \bx_1, (1 - \alpha^2_{1-t})  \bI \right)  \, \Rightarrow \, 
+		\bff(\bx, \bx_1, t) = \frac{\alpha'_{1-t}}{1 - \alpha^2_{1-t}}\cdot \left(\alpha_{1-t}  \bx - \bx_1\right)
 		\]
 		}
-		Here $\alpha_t = \exp\left({-\frac{1}{2} \int_0^t \beta(s) ds} \right)$.
 	\end{block}
 	\myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
 \end{frame}
 %=======
 \begin{frame}{Flow matching vs score-based SDE models}
-	\begin{block}{Diffusion vector field}
-		\begin{figure}
-			\centering
-			\includegraphics[width=\linewidth]{figs/diff_cond_path}
-		\end{figure}
-	\end{block}
-	\begin{block}{Flow matching vector field}
+	\begin{block}{SDE vector field}
+		\vspace{-0.3cm}
+		\[
+			\bff(\bx, \bx_1, t) = \frac{\alpha'_{1-t}}{1 - \alpha^2_{1-t}}\cdot \left(\alpha_{1-t}  \bx - \bx_1\right)
+		\]
+		\vspace{-0.5cm}
 		\begin{figure}
 			\raggedleft
-			\includegraphics[width=0.77\linewidth]{figs/ot_cond_path}
+			\includegraphics[width=0.8\linewidth]{figs/diff_cond_path}
+		\end{figure}
+		\vspace{-0.5cm}
+	\end{block}
+	\begin{block}{FM vector field}
+		\vspace{-0.5cm}
+		\[
+			\bff(\bx, \bx_1, t) = - \frac{\sigma'_{1-t}}{\sigma_{1-t}} \cdot (\bx - \bx_1)
+		\]
+		\vspace{-0.5cm}
+		\begin{figure}
+			\raggedleft
+			\includegraphics[width=0.6\linewidth]{figs/ot_cond_path}
 		\end{figure}
 	\end{block}
 	\myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
 \end{frame}
 %=======
 \begin{frame}{Flow matching vs score-based SDE models}
-	\begin{figure}
-		\centering
-		\includegraphics[width=0.7\linewidth]{figs/trajectories}
-	\end{figure}
+	\begin{block}{Trajectories}
+		\vspace{-0.3cm}
+		\begin{figure}
+			\centering
+			\includegraphics[width=0.6\linewidth]{figs/trajectories}
+		\end{figure}
+		\vspace{-0.3cm}
+	\end{block}
 	\begin{figure}
 		\centering
 		\includegraphics[width=\linewidth]{figs/2d-generation}
@@ -394,7 +438,7 @@
 %=======
 \subsection{Linear interpolation}
 %=======
-\begin{frame}{Flow Matching}
+\begin{frame}{Pair conditioning}
 	\begin{block}{Conditional Flow Matching}
 		\vspace{-0.3cm}
 		\[
@@ -402,15 +446,47 @@
 		\]
 		\vspace{-0.3cm}
 	\end{block}
-	Let choose $\bz = (\bx_0, \bx_1)$. Then $p(\bz) = p_0(\bx_0) p_1(\bx_1)$.
-	\[
-		p_t(\bx) = \int p_t(\bx | \bx_0, \bx_1) p_0(\bx_0) p_1(\bx_1) d \bx_0 d \bx_1
-	\]
-	We need to ensure boundary conditions:
+	\begin{block}{Conditioning latent variable}
+		Let choose $\bz = (\bx_0, \bx_1)$. Then $p(\bz) = p_0(\bx_0) p_1(\bx_1)$.
+		\[
+			p_t(\bx) = \int p_t(\bx | \bx_0, \bx_1) p_0(\bx_0) p_1(\bx_1) d \bx_0 d \bx_1
+		\]
+	\end{block}
+	We need to ensure boundary constraints:
 	\[
 		\begin{cases}
-			p_0(\bx) = p(\bx)= \cN(0, \bI); \\
-			p_1(\bx) = \pi(\bx).
+			p(\bx) = \bbE_{p(\bz)} p_0(\bx | \bz); {\color{gray}(= \cN(0, \bI))} \\
+			\pi(\bx) = \bbE_{p(\bz)} p_1(\bx | \bz).
+		\end{cases}
+		\, \Rightarrow \, 
+		\begin{cases}
+			p_0(\bx | \bx_0, \bx_1) = \delta(\bx - \bx_0); \\
+			p_1(\bx | \bx_0, \bx_1) = \delta(\bx - \bx_1).
+		\end{cases}
+	\]
+	\vspace{-0.3cm}
+	\myfootnotewithlink{https://arxiv.org/abs/2210.02747}{Lipman Y., et al. Flow Matching for Generative Modeling, 2022}
+\end{frame}
+%=======
+\begin{frame}{Linear interpolation}
+	\[
+		p_0(\bx | \bx_0, \bx_1) = \delta(\bx - \bx_0); \quad p_1(\bx | \bx_0, \bx_1) = \delta(\bx - \bx_1).
+	\]
+	
+	\begin{block}{Gaussian conditional probability path}
+		\vspace{-0.5cm}
+		{\small
+		\[
+			p_t(\bx | \bx_0, \bx_1) = \cN\left(\bmu_t(\bx_0, \bx_1), \bsigma_t^2(\bx_0, \bx_1)\right); \quad \bx_t = \bmu_t(\bx_0, \bx_1) +  \bsigma_t^2(\bx_0, \bx_1) \odot \bx_0.
+		\]
+		}
+		\vspace{-0.6cm}
+	\end{block}
+	Let consider straight conditional paths	
+	\[
+		\begin{cases}
+			\bmu_t(\bx_1) = t \bx_1 + (1 - t) \bx_0; \\
+			\bsigma_t(\bx_1) = 0.
 		\end{cases}
 		\quad \Rightarrow \quad 
 		\begin{cases}
@@ -419,27 +495,14 @@
 		\end{cases}
 	\]
 	\vspace{-0.3cm}
-	\begin{block}{Gaussian conditional probability path}
-		\vspace{-0.4cm}
-		\[
-			p_t(\bx | \bx_0, \bx_1) = \cN\left(\bmu_t(\bx_0, \bx_1), \bsigma_t^2(\bx_0, \bx_1)\right); \, \bx_t = \bmu_t(\bx_0, \bx_1) +  \bsigma_t^2(\bx_0, \bx_1) \odot \bx_0.
-		\]
-		\vspace{-0.6cm}
-	\end{block}
+	\begin{figure}
+		\centering
+		\includegraphics[width=\linewidth]{figs/linear_paths}
+	\end{figure}
+	\myfootnotewithlink{https://dl.heeere.com/conditional-flow-matching/blog/conditional-flow-matching}{image credit: A Visual Dive into Conditional Flow Matching}
 \end{frame}
 %=======
 \begin{frame}{Flow Matching}
-	\[
-		\begin{cases}
-			p_0(\bx | \bx_0, \bx_1) = \delta(\bx - \bx_0); \\
-			p_1(\bx | \bx_0, \bx_1) = \delta(\bx - \bx_1).
-		\end{cases}
-		\quad \Rightarrow \quad
-		\begin{cases}
-			\bmu_0(\bx_0, \bx_1) = \bx_0, \quad \bsigma_0(\bx_0, \bx_1) = 0; \\
-			\bmu_1(\bx_0, \bx_1) = \bx_1, \quad \bsigma_1(\bx_0, \bx_1) = 0.
-		\end{cases}
-	\]
 	Let consider straight conditional paths	
 	\[
 		\begin{cases}
@@ -488,7 +551,7 @@
 	\myfootnotewithlink{https://arxiv.org/abs/2209.03003}{Liu X., et al. Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow, 2022}
 \end{frame}
 %=======
-\begin{frame}{Rectified flows}
+\begin{frame}{Rectified flows: Stable Diffusion 3}
 	\begin{figure}
 		\centering
 		\includegraphics[width=\linewidth]{figs/sd3}
