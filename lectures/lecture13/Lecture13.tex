@@ -536,7 +536,7 @@
 	\begin{block}{Gaussian conditional probability path}
 		\vspace{-0.5cm}
 		\[
-			p_t(\bx | \bx_1) = \cN\left(\bmu_t(\bx_1), \bsigma_t^2(\bx_1)\right); \quad \bx_t = \bmu_t(\bx_1) +  \bsigma_t^2(\bx_1) \odot \bx_0.
+			p_t(\bx | \bx_1) = \cN\left(\bmu_t(\bx_1), \bsigma_t^2(\bx_1)\right); \quad \bx_t = \bmu_t(\bx_1) +  \bsigma_t(\bx_1) \odot \bx_0.
 		\]
 		\vspace{-0.6cm}
 	\end{block}
@@ -544,11 +544,11 @@
 	\[
 		\begin{cases}
 			\bmu_t(\bx_1) = t \bx_1; \\
-			\bsigma_t(\bx_1) = (1 - t).
+			\bsigma_t(\bx_1) = 1 - t.
 		\end{cases}
 		\quad \Rightarrow \quad 
 		\begin{cases}
-			p_t(\bx | \bx_1) = \cN\left(t \bx_1, (1-t)^2 \bI\right); \\
+			p_t(\bx | \bx_1) = \cN\left(t \bx_1, (1-t)^2 \cdot \bI\right); \\
 		 	\bx_t = t \bx_1 + (1 - t) \bx_0. 
 	 \end{cases}
 	\]
