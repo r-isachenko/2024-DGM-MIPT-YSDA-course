@@ -52,7 +52,7 @@ The course is accompanied by practical tasks that allow you to understand the pr
 | 13 | December, 3 | <b>Lecture 13:</b> Score-based generative models through SDE. Flow matching. Conditional flow matching. Conical gaussian paths. | [slides](lectures/lecture13/Lecture13.pdf) |
 |  |  | <b>Seminar 13:</b> Latent Diffusion Models. Code. | [slides](seminars/seminar13/seminar13_SD.ipynb) <a href="https://colab.research.google.com/github/r-isachenko/2024-DGM-MIPT-YSDA-course/blob/main/seminars/seminar13/seminar13_SD.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a> |
 | 13 | December, 10 | <b>Lecture 14:</b> Conical gaussian paths (continued). Linear interpolation. Link with diffusion and score matching. Latent space models. Course overview. | [slides](lectures/lecture14/Lecture14.pdf) |
-|  |  | <b>Seminar 14:</b>  | [slides](seminars/seminar14/seminar14.ipynb) |
+|  |  | <b>Seminar 14:</b>  The Final Recap| [slides](seminars/seminar14/seminar14.ipynb) |
 <!---
 -->
 
