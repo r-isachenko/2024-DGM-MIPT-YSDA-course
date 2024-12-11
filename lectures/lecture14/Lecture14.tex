@@ -247,7 +247,7 @@
 \begin{frame}{Conical gaussian paths}
 	\vspace{-0.3cm}
 	\[
-		p_t(\bx | \bx_1) = \cN\left(t \bx_1, (1-t)^2 \bI\right); \quad {\color{teal}\bx_t = t \bx_1 + (1 - t) \bx_0}. 
+		p_t(\bx | \bx_1) = \cN\left(t \bx_1, (1-t)^2 \bI\right); \quad {\color{teal}\bx = t \bx_1 + (1 - t) \bx_0}. 
 	\]
 	\vspace{-0.5cm}
 	\begin{block}{Conditional vector field}
@@ -258,7 +258,7 @@
 		\vspace{-0.5cm}
 		\begin{multline*}
 			\bff(\bx, \bx_1, t) = \bx_1 - \frac{1}{1-t} \cdot (\bx - t \bx_1) = \frac{\bx_1 - {\color{teal}\bx}}{1-t} = \\
-			= \frac{\bx_1 - {\color{teal}t \bx_1 + (1 - t) \bx_0}}{1-t} = \bx_1 - \bx_0
+			= \frac{\bx_1 - {\color{teal}t \bx_1 - (1 - t) \bx_0}}{1-t} = \bx_1 - \bx_0
 		\end{multline*}
 		\vspace{-0.7cm}
 	\end{block}
@@ -283,8 +283,8 @@
 	\begin{block}{Training}
 		\begin{enumerate}
 			\item Get the sample $\bx_1 \sim \pi(\bx)$.
-			\item Sample timestamp $t \sim U\{1, T\}$ and $\bx_0 \sim \cN(0, \bI)$.
-			\item Get noisy image $\bx_t = \sqrt{\bar{\alpha}_t} \cdot \bx_0 + \sqrt{1 - \bar{\alpha}_t} \cdot \bepsilon$.
+			\item Sample timestamp $t \sim U[0, 1]$ and $\bx_0 \sim \cN(0, \bI)$.
+			\item Get noisy image $\bx_t = t \bx_1 + (1 - t) \bx_0$.
 			\item Compute loss $ \cL = \left\| (\bx_1 - \bx_0) - \bff_{\btheta}(\bx, t) \right\|^2 $.
 		\end{enumerate}
 	\end{block}
@@ -453,8 +453,8 @@
 	\begin{block}{Training}
 		\begin{enumerate}
 			\item Get the sample $(\bx_0, \bx_1) \sim p(\bx_0, \bx_1)$.
-			\item Sample timestamp $t \sim U\{1, T\}$.
-			\item Get noisy image $\bx_t = \sqrt{\bar{\alpha}_t} \cdot \bx_0 + \sqrt{1 - \bar{\alpha}_t} \cdot \bepsilon$.
+						\item Sample timestamp $t \sim U[0, 1]$.
+						\item Get noisy image $\bx_t = t \bx_1 + (1 - t) \bx_0$.
 			\item Compute loss $ \cL = \left\| (\bx_1 - \bx_0) - \bff_{\btheta}(\bx, t) \right\|^2 $.
 		\end{enumerate}
 	\end{block}
@@ -561,9 +561,9 @@
 		\vspace{-0.5cm}
 	\end{block}
 	\begin{block}{FM vector field}
-		\vspace{-0.5cm}
+		\vspace{-0.3cm}
 		\[
-			\bff(\bx, \bx_1, t) = - \frac{\sigma'_{1-t}}{\sigma_{1-t}} \cdot (\bx - \bx_1)
+			\bff(\bx, \bx_1, t) = \frac{\bx_1  - \bx}{1-t}
 		\]
 		\vspace{-0.5cm}
 		\begin{figure}
